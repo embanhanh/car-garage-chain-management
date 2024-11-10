@@ -1,7 +1,12 @@
+* {
+  box-sizing: inherit;
+}
+
 :root {
   font-weight: 400;
   font-family: 'Open Sans', sans-serif;
   --sidebar-width: 200px;
+  --primary-color: #5030e5;
 }
 
 #root {
@@ -17,10 +22,10 @@ body {
   line-height: 1.5;
   scroll-behavior: smooth;
   background-color: #fff;
+  box-sizing: border-box;
 }
 
 html {
-  box-sizing: border-box;
   scroll-behavior: smooth;
   font-size: 62.5%;
 }
@@ -44,4 +49,16 @@ a {
 
 input:focus {
   outline: none;
+}
+
+h1 {
+  font-size: 2.4rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+input {
+  border: none;
+  outline: none;
+  padding: 8px 4px;
 }
