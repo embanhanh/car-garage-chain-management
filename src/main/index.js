@@ -6,8 +6,8 @@ import icon from '../../resources/icon.png?asset'
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 600,
+    height: 400,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -33,6 +33,12 @@ function createWindow() {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  ipcMain.on('resize-window', () => {
+    mainWindow.setMinimumSize(400, 600)
+    mainWindow.setSize(900, 670)
+    mainWindow.center()
+  })
 }
 
 // This method will be called when Electron has finished

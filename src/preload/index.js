@@ -2,7 +2,14 @@ import { contextBridge } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
-const api = {}
+const api = {
+  send: (channel, ...args) => {
+    const validChannels = ['resize-window']
+    if (validChannels.includes(channel)) {
+      ipcRenderer.send(channel, ...args)
+    }
+  }
+}
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
