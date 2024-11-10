@@ -11,7 +11,7 @@ function Auth() {
           navigate('/home')
         }}
       >
-        Home
+        Đăng nhập
       </button>
     </>
   )
