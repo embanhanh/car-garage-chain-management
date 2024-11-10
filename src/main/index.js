@@ -10,9 +10,11 @@ try {
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 600,
-    height: 400,
+    width: 900,
+    height: 600,
     show: false,
+    // frame: false,
+    resizable: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
@@ -39,8 +41,7 @@ function createWindow() {
   }
 
   ipcMain.on('resize-window', () => {
-    mainWindow.setMinimumSize(400, 600)
-    mainWindow.setSize(900, 670)
+    mainWindow.setSize(1200, 700)
     mainWindow.center()
   })
 }
