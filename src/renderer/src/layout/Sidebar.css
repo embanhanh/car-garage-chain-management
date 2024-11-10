@@ -1,0 +1,9 @@
+.sidebar {
+  width: var(--sidebar-width);
+  height: 100vh;
+  background-color: #fff;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 100;
+}

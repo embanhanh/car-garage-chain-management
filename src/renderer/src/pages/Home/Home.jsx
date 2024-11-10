@@ -7,7 +7,7 @@ function Home() {
       <h1>Anh Trường go Home</h1>
       <button
         onClick={() => {
-          nav('/setting')
+          nav('/dashboard/setting')
         }}
       >
         go Setting

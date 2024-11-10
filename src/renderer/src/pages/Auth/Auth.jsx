@@ -8,7 +8,7 @@ function Auth() {
       <button
         onClick={() => {
           window.electron.ipcRenderer.send('resize-window')
-          navigate('/home')
+          navigate('/dashboard')
         }}
       >
         Đăng nhập
