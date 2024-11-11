@@ -163,4 +163,12 @@ input {
   padding: 4px 8px;
   border-radius: 8px;
   border: 1px solid #b9bdc7;
+  display: flex;
+  align-items: center;
+}
+
+.input-form__icon {
+  font-size: 1.6rem;
+  color: gray;
+  padding: 0px 5px;
 }

@@ -1,41 +1,41 @@
 .repair-page {
-  padding: 10px;
-  height: calc(100vh - var(--header-height));
-  display: flex;
-  flex-direction: column;
+    padding: 10px;
+    height: calc(100vh - var(--header-height));
+    display: flex;
+    flex-direction: column;
 }
 
 .repair-page__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .repair-page__header-filter {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .repair-page__header-button {
-  padding: 12px 15px;
-  border-radius: 8px;
-  background-color: var(--primary-color);
-  color: white;
-  font-weight: 600;
-  box-shadow: 2px 4px 4px 0 rgba(0, 0, 0, 0.3);
-  cursor: pointer;
+    padding: 12px 15px;
+    border-radius: 8px;
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    box-shadow: 2px 4px 4px 0 rgba(0, 0, 0, 0.3);
+    cursor: pointer;
 }
 
 .repair-page__header-button:hover {
-  opacity: 0.8;
+    opacity: 0.8;
 }
 
 .repair-page__content {
-  margin-top: 15px;
-  flex: 1;
-  min-height: 0;
-  margin-bottom: 15px;
+    margin-top: 15px;
+    flex: 1;
+    min-height: 0;
+    margin-bottom: 15px;
 }
 
 .repair-table td:nth-child(4),
@@ -46,29 +46,57 @@
 .repair-table th:nth-child(7),
 .repair-table td:nth-child(8),
 .repair-table th:nth-child(8) {
-  text-align: center;
+    text-align: center;
 }
 
 .repair-modal__title {
-  font-size: 2.4rem;
-  font-weight: 700;
-  margin-bottom: 15px;
+    font-size: 2.4rem;
+    font-weight: 700;
+    margin-bottom: 5px;
 }
 
 .repair-modal__client-info {
-  display: grid;
-  grid-template-columns: 3fr 4fr 5fr;
-  align-items: center;
-  gap: 15px;
+    display: grid;
+    grid-template-columns: 3fr 4fr 5fr;
+    align-items: center;
+    gap: 15px;
 }
 
 .repair-modal__client-info-item label {
-  font-weight: 500;
-  font-size: 1.4rem;
-  margin-bottom: 5px;
-  display: block;
+    font-weight: 500;
+    font-size: 1.4rem;
+    margin-bottom: 5px;
+    display: block;
 }
 
 .repair-modal {
-  padding: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.repair-modal__button-container {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+}
+
+.repair-modal__button {
+    padding: 12px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    min-width: 80px;
+}
+
+.repair-modal__button.confirm-button {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.repair-modal__button.cancel-button {
+    background-color: #fff;
+    border: 1px solid #b9bdc7;
+    color: gray;
 }
