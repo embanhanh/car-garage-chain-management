@@ -1,13 +1,12 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faArrowUpWideShort,
   faFilter,
   faSearch,
-  faChevronLeft,
-  faChevronRight,
   faEllipsisVertical
 } from '@fortawesome/free-solid-svg-icons'
+import Pagination from '../../components/Pagination'
 import './Car.css'
 
 const Car = () => {
@@ -31,45 +30,33 @@ const Car = () => {
     return mockData.slice(start, start + itemsPerPage)
   }, [currentPage, mockData])
 
-  const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page)
-    }
-  }
+  const handlePageChange = useCallback(
+    (page) => {
+      if (page >= 1 && page <= totalPages) {
+        setCurrentPage(page)
+      }
+    },
+    [totalPages]
+  )
 
-  const renderPaginationButtons = () => {
-    const buttons = []
-    for (let i = 1; i <= totalPages; i++) {
-      buttons.push(
-        <button
-          key={i}
-          className={`pagination-button ${currentPage === i ? 'active' : ''}`}
-          onClick={() => handlePageChange(i)}
-        >
-          {i}
-        </button>
-      )
-    }
-    return buttons
-  }
   return (
     <div className="car-page">
       <div className="car-page__header">
-        <button className="car-page__header-button">
-          <FontAwesomeIcon icon={faArrowUpWideShort} className="car-page__header-icon" />
+        <button className="page__header-button">
+          <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
           Sắp xếp
         </button>
-        <button className="car-page__header-button">
-          <FontAwesomeIcon icon={faFilter} className="car-page__header-icon" />
+        <button className="page__header-button">
+          <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
           Lọc
         </button>
-        <div className="car-page__header-search">
-          <FontAwesomeIcon icon={faSearch} className="car-page__header-icon" />
+        <div className="page__header-search">
+          <FontAwesomeIcon icon={faSearch} className="page__header-icon" />
           <input type="text" placeholder="Tìm kiếm" />
         </div>
       </div>
       <div className="car-page__content">
-        <table className="car-table">
+        <table className="page-table car-table">
           <thead>
             <tr>
               <th>Thứ tự</th>
@@ -93,14 +80,14 @@ const Car = () => {
                 <td>{car.owner}</td>
                 <td>
                   <div
-                    className={`car-table__status ${car.status === 'Đang sửa chữa' ? 'repairing' : ''}`}
+                    className={`table__status ${car.status === 'Đang sửa chữa' ? 'car-repairing' : 'car-normal'}`}
                   >
                     {car.status}
                   </div>
                 </td>
                 <td>
-                  <div className="car-table__actions">
-                    <FontAwesomeIcon icon={faEllipsisVertical} className="car-table__action-icon" />
+                  <div className="table__actions">
+                    <FontAwesomeIcon icon={faEllipsisVertical} className="table__action-icon" />
                   </div>
                 </td>
               </tr>
@@ -108,25 +95,11 @@ const Car = () => {
           </tbody>
         </table>
       </div>
-      <div className="car-page__pagination">
-        <button
-          className="pagination-button__nav"
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          <FontAwesomeIcon icon={faChevronLeft} style={{ marginRight: '10px' }} />
-          Trang Trước
-        </button>
-        <div className="pagination-buttons">{renderPaginationButtons()}</div>
-        <button
-          className="pagination-button__nav"
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          Trang Kế
-          <FontAwesomeIcon icon={faChevronRight} style={{ marginLeft: '10px' }} />
-        </button>
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </div>
   )
 }

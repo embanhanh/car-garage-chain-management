@@ -7,6 +7,7 @@ import Employee from './pages/Employee/Employee'
 import Customer from './pages/Customer/Customer'
 import Component from './pages/Component/Component'
 import Car from './pages/Car/Car'
+import Repair from './pages/Repair/Repair'
 function App() {
   const ipcHandle = () => window.electron.ipcRenderer.send('ping')
 
@@ -21,7 +22,7 @@ function App() {
             <Route path="employee" element={<Employee />} />
             <Route path="customer" element={<Customer />} />
             <Route path="car" element={<Car />} />
-            {/* <Route path="repair" element={<Repair />} /> */}
+            <Route path="repair" element={<Repair />} />
             <Route path="component" element={<Component />} />
             {/* <Route path="report" element={<Report />} />
             <Route path="regulation" element={<Regulation />} /> */}
