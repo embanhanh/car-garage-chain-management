@@ -1,0 +1,50 @@
+.header {
+  margin-left: var(--sidebar-width);
+  height: var(--header-height);
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: calc(100% - var(--sidebar-width));
+  display: flex;
+  align-items: center;
+  padding: 0 30px;
+}
+
+.header__time {
+  margin: 0 auto;
+  font-size: 1.6rem;
+}
+
+.header__time span {
+  margin-left: 10px;
+}
+
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header__action-icon {
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.header__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.header__user-avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.header__user-name {
+  font-size: 1.6rem;
+  font-weight: 600;
+}

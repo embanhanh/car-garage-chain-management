@@ -6,6 +6,8 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, Pagination, Navigation } from 'swiper/modules'
 import login1 from '../../assets/images/login/login_1.png'
 import login2 from '../../assets/images/login/login_2.png'
+import login3 from '../../assets/images/login/login_3.png'
+import login4 from '../../assets/images/login/login_4.png'
 import './Auth.css'
 import 'swiper/css'
 import 'swiper/css/pagination'
@@ -88,6 +90,12 @@ function Auth() {
           </SwiperSlide>
           <SwiperSlide>
             <img src={login2} alt="logo" />
+          </SwiperSlide>
+          <SwiperSlide>
+            <img src={login3} alt="logo" />
+          </SwiperSlide>
+          <SwiperSlide>
+            <img src={login4} alt="logo" />
           </SwiperSlide>
         </Swiper>
       </div>

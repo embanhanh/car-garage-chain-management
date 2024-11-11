@@ -7,6 +7,7 @@
   font-family: 'Open Sans', sans-serif;
   --sidebar-width: 200px;
   --primary-color: #5030e5;
+  --header-height: 60px;
 }
 
 #root {

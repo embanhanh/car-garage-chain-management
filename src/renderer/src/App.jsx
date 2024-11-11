@@ -6,7 +6,7 @@ import MainLayout from './layout/MainLayout'
 import Employee from './pages/Employee/Employee'
 import Customer from './pages/Customer/Customer'
 import Component from './pages/Component/Component'
-
+import Car from './pages/Car/Car'
 function App() {
   const ipcHandle = () => window.electron.ipcRenderer.send('ping')
 
@@ -20,7 +20,7 @@ function App() {
             <Route path="setting" element={<Setting />} />
             <Route path="employee" element={<Employee />} />
             <Route path="customer" element={<Customer />} />
-            {/* <Route path="car" element={<Car />} /> */}
+            <Route path="car" element={<Car />} />
             {/* <Route path="repair" element={<Repair />} /> */}
             <Route path="component" element={<Component />} />
             {/* <Route path="report" element={<Report />} />
