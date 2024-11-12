@@ -49,10 +49,17 @@
     text-align: center;
 }
 
+/* Repair Modal (CSS chung) */
+
 .repair-modal__title {
     font-size: 2.4rem;
     font-weight: 700;
     margin-bottom: 5px;
+}
+
+.repair-modal__table-title {
+    font-size: 1.4rem;
+    font-weight: 400;
 }
 
 .repair-modal__client-info {
@@ -62,7 +69,7 @@
     gap: 15px;
 }
 
-.repair-modal__client-info-item label {
+.repair-modal__input-item label {
     font-weight: 500;
     font-size: 1.4rem;
     margin-bottom: 5px;
@@ -99,4 +106,85 @@
     background-color: #fff;
     border: 1px solid #b9bdc7;
     color: gray;
+}
+
+.repair-modal__separate {
+    width: 2px;
+    background-color: #b9bdc7;
+}
+
+.repair-modal__table-content {
+    flex: 1;
+    min-height: 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.repair-modal__table-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+    min-height: 0;
+}
+
+.repair-modal__btn-container {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Detail Repair Modal */
+
+.detail-repair-modal {
+    padding: 10px;
+    display: flex;
+}
+
+.detail-repair-modal__repair-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.register-type-tab {
+    padding: 12px 15px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-weight: 600;
+    min-width: 120px;
+    background-color: #fff;
+    border: 1px solid var(--primary-color);
+    font-size: 1.4rem;
+}
+
+.register-type-tab.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.detail-repair-table td:nth-child(3),
+.detail-repair-table th:nth-child(3),
+.detail-repair-table td:nth-child(1),
+.detail-repair-table th:nth-child(1) {
+    text-align: center;
+}
+
+/* Staff In Charge Modal */
+
+.staff-in-charge-modal {
+    padding: 10px;
+    display: flex;
+    gap: 15px;
+}
+
+.staff-in-charge__actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.staff-in-charge-table td:nth-child(1),
+.staff-in-charge-table th:nth-child(1) {
+    text-align: center;
 }
