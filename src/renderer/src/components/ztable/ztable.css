@@ -1,0 +1,205 @@
+/* ZTable.css */
+* {
+  box-sizing: inherit;
+}
+
+:root {
+  font-weight: 400;
+  font-family: 'Open Sans', sans-serif;
+  --sidebar-width: 200px;
+  --primary-color: #5030e5;
+  --header-height: 60px;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  background-color: #fff;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+  scroll-behavior: smooth;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 62.5%;
+}
+
+button {
+  border: none;
+  outline: none;
+}
+
+p {
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  color: #333;
+  font-size: 1.4rem;
+  display: block;
+}
+
+input:focus {
+  outline: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+}
+
+h1 {
+  font-size: 2.4rem;
+  font-weight: 600;
+}
+
+input {
+  border: none;
+  outline: none;
+  padding: 8px 4px;
+}
+
+.z-page__header-button {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid #858d9d;
+  background-color: #fff;
+  font-size: 1.4rem;
+}
+
+.z-page__header-icon {
+  font-size: 1.8rem;
+}
+
+.z-page__header-search {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 300px;
+  border-radius: 8px;
+  border: 1px solid #858d9d;
+  overflow: hidden;
+  padding-left: 15px;
+}
+
+.z-page__header-search input {
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 1.6rem;
+}
+
+.z-page-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  table-layout: fixed; /* Added to ensure percentage widths are respected */
+}
+
+.z-page-table th,
+.z-page-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+  overflow: hidden; /* To handle content overflow */
+  text-overflow: ellipsis; /* To add ellipsis when content overflows */
+  white-space: nowrap; /* Prevent text from wrapping */
+}
+
+.z-page-table th {
+  background-color: #e7efff;
+  font-weight: 600;
+  font-size: 1.4rem;
+}
+
+.z-page-table td {
+  font-size: 1.4rem;
+}
+
+.z-table__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.z-table__action-icon {
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.z-table__status {
+  padding: 2px 4px;
+  border-radius: 16px;
+  text-align: center;
+  font-size: 1.2rem;
+}
+
+.z-table__status.z-car-normal {
+  background-color: #e7f8f0;
+  color: #41c588;
+}
+
+.z-table__status.z-car-completed {
+  background-color: #e8f1fd;
+  color: #448df2;
+}
+
+.z-table__status.z-car-repairing {
+  background-color: #feeceb;
+  color: #f36960;
+}
+
+.z-page-table.z-car-table td:nth-child(5),
+.z-page-table.z-car-table td:nth-child(1),
+.z-page-table.z-car-table th:nth-child(5),
+.z-page-table.z-car-table th:nth-child(1),
+.z-page-table.z-car-table td:nth-child(7),
+.z-page-table.z-car-table th:nth-child(7),
+.z-page-table.z-car-table td:nth-child(8),
+.z-page-table.z-car-table th:nth-child(8) {
+  text-align: center;
+}
+
+.z-w-100 {
+  width: 100%;
+}
+
+.z-h-100 {
+  height: 100%;
+}
+
+.z-input-form {
+  width: 100%;
+  min-width: 100px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid #b9bdc7;
+  display: flex;
+  align-items: center;
+}
+
+.z-input-form__icon {
+  font-size: 1.6rem;
+  color: gray;
+  padding: 0px 5px;
+}
