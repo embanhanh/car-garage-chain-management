@@ -212,6 +212,17 @@ input[disabled] {
     padding-left: 1.5rem;
 }
 
+.row {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.col-6 {
+    width: calc(50% - 7.5px);
+    flex: 0 0 calc(50% - 7.5px);
+}
+
 .page__header-button {
     display: flex;
     align-items: center;

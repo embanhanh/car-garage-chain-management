@@ -188,3 +188,16 @@
 .staff-in-charge-table th:nth-child(1) {
     text-align: center;
 }
+
+/* Component Used Modal */
+
+.component-used-modal {
+    padding: 10px;
+    display: flex;
+    gap: 15px;
+}
+
+.component-used-table td:nth-child(3),
+.component-used-table th:nth-child(3) {
+    text-align: center;
+}

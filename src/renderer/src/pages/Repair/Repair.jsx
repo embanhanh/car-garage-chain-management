@@ -12,10 +12,13 @@ import './Repair.css'
 import Modal from '../../components/Modal'
 import ReceiveRepairModal from '../../components/ReceiveRepairModal'
 import DetailRepairModal from '../../components/DetailRepairModal'
+import ComponentUsedModal from '../../components/ComponentUsedModal'
+
 const Repair = () => {
     const [currentPage, setCurrentPage] = useState(1)
     const [openReceiveRepairModal, setOpenReceiveRepairModal] = useState(false)
     const [openDetailRepairModal, setOpenDetailRepairModal] = useState(false)
+    const [openComponentUsedModal, setOpenComponentUsedModal] = useState(false)
     const itemsPerPage = 9
 
     const mockData = [...Array(20)].map((_, index) => ({
@@ -55,7 +58,10 @@ const Repair = () => {
                     <p>Tiếp nhận sửa chữa</p>
                 </button>
                 <div className="repair-page__header-filter">
-                    <button className="page__header-button">
+                    <button
+                        className="page__header-button"
+                        onClick={() => setOpenComponentUsedModal(true)}
+                    >
                         <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
                         Sắp xếp
                     </button>
@@ -135,6 +141,14 @@ const Repair = () => {
                 width="650px"
             >
                 <DetailRepairModal onClose={() => setOpenDetailRepairModal(false)} />
+            </Modal>
+            <Modal
+                isOpen={openComponentUsedModal}
+                onClose={() => setOpenComponentUsedModal(false)}
+                showHeader={false}
+                width="900px"
+            >
+                <ComponentUsedModal onClose={() => setOpenComponentUsedModal(false)} />
             </Modal>
         </div>
     )
