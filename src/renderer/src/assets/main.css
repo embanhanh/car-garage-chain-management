@@ -282,6 +282,13 @@ input[disabled] {
     font-size: 1.4rem;
 }
 
+.page-table tbody td {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .table__actions {
     display: flex;
     gap: 10px;

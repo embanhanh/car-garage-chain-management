@@ -1,39 +1,39 @@
 .car-page {
-  padding: 10px;
-  height: calc(100vh - var(--header-height));
-  display: flex;
-  flex-direction: column;
+    padding: 10px;
+    height: calc(100vh - var(--header-height));
+    display: flex;
+    flex-direction: column;
 }
 
 .car-page__header {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
 }
 
 /* Thêm vào file CSS hiện tại */
 
 .car-page__content {
-  margin-top: 15px;
-  flex: 1;
-  min-height: 0;
-  margin-bottom: 15px;
+    margin-top: 15px;
+    flex: 1;
+    min-height: 0;
+    margin-bottom: 15px;
 }
 
 .table__status.car-normal {
-  background-color: #e7f8f0;
-  color: #41c588;
+    background-color: #e7f8f0;
+    color: #41c588;
 }
 
 .table__status.car-completed {
-  background-color: #e8f1fd;
-  color: #448df2;
+    background-color: #e8f1fd;
+    color: #448df2;
 }
 
 .table__status.car-repairing {
-  background-color: #feeceb;
-  color: #f36960;
+    background-color: #feeceb;
+    color: #f36960;
 }
 
 .page-table.car-table td:nth-child(5),
@@ -44,5 +44,5 @@
 .page-table.car-table th:nth-child(7),
 .page-table.car-table td:nth-child(8),
 .page-table.car-table th:nth-child(8) {
-  text-align: center;
+    text-align: center;
 }
