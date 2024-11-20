@@ -10,15 +10,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Pagination from '../../components/Pagination'
 import './Repair.css'
 import Modal from '../../components/Modal'
-import ReceiveRepairModal from '../../components/ReceiveRepairModal'
-import DetailRepairModal from '../../components/DetailRepairModal'
-import ComponentUsedModal from '../../components/ComponentUsedModal'
+import ReceiveRepairModal from '../../components/Repair/ReceiveRepairModal'
+import DetailRepairModal from '../../components/Repair/DetailRepairModal'
+import ComponentUsedModal from '../../components/Repair/ComponentUsedModal'
+import DetailInvoiceModal from '../../components/Repair/DetailInvoice'
 
 const Repair = () => {
     const [currentPage, setCurrentPage] = useState(1)
     const [openReceiveRepairModal, setOpenReceiveRepairModal] = useState(false)
     const [openDetailRepairModal, setOpenDetailRepairModal] = useState(false)
     const [openComponentUsedModal, setOpenComponentUsedModal] = useState(false)
+    const [openInvoiceModal, setOpenInvoiceModal] = useState(false)
     const itemsPerPage = 9
 
     const mockData = [...Array(20)].map((_, index) => ({
@@ -65,7 +67,10 @@ const Repair = () => {
                         <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
                         Sắp xếp
                     </button>
-                    <button className="page__header-button">
+                    <button
+                        className="page__header-button"
+                        onClick={() => setOpenInvoiceModal(true)}
+                    >
                         <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
                         Lọc
                     </button>
@@ -149,6 +154,14 @@ const Repair = () => {
                 width="900px"
             >
                 <ComponentUsedModal onClose={() => setOpenComponentUsedModal(false)} />
+            </Modal>
+            <Modal
+                isOpen={openInvoiceModal}
+                onClose={() => setOpenInvoiceModal(false)}
+                showHeader={false}
+                width="550px"
+            >
+                <DetailInvoiceModal onClose={() => setOpenDetailRepairModal(false)} />
             </Modal>
         </div>
     )

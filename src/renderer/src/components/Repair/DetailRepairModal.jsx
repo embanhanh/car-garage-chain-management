@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCalendar } from '@fortawesome/free-regular-svg-icons'
 import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons'
-import Modal from './Modal'
+import Modal from '../Modal'
 import StaffInChargeModal from './StaffInChargeModal'
 
 function DetailRepairModal({ onClose }) {

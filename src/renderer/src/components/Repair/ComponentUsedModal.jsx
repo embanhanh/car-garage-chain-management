@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons'
 import UpdateComponent from './UpdateComponent'
-import Modal from './Modal'
+import Modal from '../Modal'
 
 const ComponentUsedModal = ({ onClose }) => {
     const [openUpdateComponentModal, setOpenUpdateComponentModal] = useState(false)

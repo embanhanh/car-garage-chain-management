@@ -201,3 +201,60 @@
 .component-used-table th:nth-child(3) {
     text-align: center;
 }
+
+/* Detail Invoice Modal */
+
+.detail-invoice-modal {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.detail-invoice-modal__info {
+    display: flex;
+    gap: 15px;
+}
+
+.detail-invoice-modal__info-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 15px 0;
+}
+
+.detail-invoice-modal__label {
+    font-size: 1.5rem;
+    color: #5d6679;
+    line-height: 1.5;
+    font-weight: 400;
+}
+
+.detail-invoice-modal__title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: #06421b;
+    text-align: center;
+}
+
+.detail-invoice-modal__table {
+    margin: 15px 0;
+}
+
+.detail-invoice-modal__separate {
+    width: 100%;
+    height: 1px;
+    background-color: #656d77;
+}
+
+.detail-invoice-modal__total {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 15px;
+}
+
+.detail-invoice-modal__total .detail-invoice-modal__label {
+    font-weight: 600;
+}
