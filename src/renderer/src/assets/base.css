@@ -84,6 +84,10 @@ input[disabled] {
     height: 100%;
 }
 
+.m-auto {
+    margin: auto;
+}
+
 .m-0 {
     margin: 0;
 }
@@ -284,4 +288,12 @@ input[disabled] {
 
 .shadow-none {
     box-shadow: none !important;
+}
+
+.overflow-visible {
+    overflow: visible !important;
+}
+
+.text-center {
+    text-align: center !important;
 }

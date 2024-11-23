@@ -13,10 +13,8 @@
 }
 
 .car-page__content {
-    margin-top: 15px;
     flex: 1;
     min-height: 0;
-    margin-bottom: 15px;
 }
 
 .table__status.car-normal {

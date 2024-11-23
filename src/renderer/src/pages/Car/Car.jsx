@@ -7,11 +7,18 @@ import {
     faEllipsisVertical
 } from '@fortawesome/free-solid-svg-icons'
 import Pagination from '../../components/Pagination'
+import Modal from '../../components/Modal'
+import UpDetailCarModal from '../../components/Car/UpDetailCarModal'
 import './Car.css'
 
 const Car = () => {
     const [currentPage, setCurrentPage] = useState(1)
-    const itemsPerPage = 9
+    const [carDetail, setCarDetail] = useState({
+        show: false,
+        data: null,
+        type: 'detail'
+    })
+    const itemsPerPage = 8
 
     const mockData = [...Array(57)].map((_, index) => ({
         id: index + 1,
@@ -40,7 +47,7 @@ const Car = () => {
     )
 
     return (
-        <div className="car-page">
+        <div className="car-page d-flex flex-column gap-3 pb-3">
             <div className="car-page__header">
                 <button className="page__header-button">
                     <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
@@ -85,12 +92,43 @@ const Car = () => {
                                         {car.status}
                                     </div>
                                 </td>
-                                <td>
+                                <td className="overflow-visible">
                                     <div className="table__actions">
                                         <FontAwesomeIcon
                                             icon={faEllipsisVertical}
                                             className="table__action-icon"
                                         />
+                                        <div
+                                            className={`table__action-menu ${
+                                                (index + 1) % itemsPerPage === 0 ? 'show-top' : ''
+                                            }`}
+                                        >
+                                            <div
+                                                className="table__action-item"
+                                                onClick={() =>
+                                                    setCarDetail({
+                                                        show: true,
+                                                        data: car,
+                                                        type: 'detail'
+                                                    })
+                                                }
+                                            >
+                                                Chi tiết
+                                            </div>
+                                            <div
+                                                className="table__action-item"
+                                                onClick={() => {
+                                                    setCarDetail({
+                                                        show: true,
+                                                        data: car,
+                                                        type: 'update'
+                                                    })
+                                                }}
+                                            >
+                                                Cập nhật
+                                            </div>
+                                            <div className="table__action-item">Xóa</div>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -103,6 +141,19 @@ const Car = () => {
                 totalPages={totalPages}
                 onPageChange={handlePageChange}
             />
+            <Modal
+                isOpen={carDetail.show}
+                onClose={() => setCarDetail({ show: false, data: null })}
+                showHeader={false}
+                width="520px"
+            >
+                <UpDetailCarModal
+                    onClose={() => setCarDetail({ show: false, data: null })}
+                    data={carDetail.data}
+                    onSave={() => {}}
+                    type={carDetail.type}
+                />
+            </Modal>
         </div>
     )
 }
