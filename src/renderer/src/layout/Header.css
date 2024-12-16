@@ -84,3 +84,20 @@
     height: 1px;
     background-color: black;
 }
+
+.header__garage-name {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    align-items: center;
+}
+
+.header__garage-name-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.header__garage-name-text {
+    font-size: 1.6rem;
+    font-weight: 600;
+}

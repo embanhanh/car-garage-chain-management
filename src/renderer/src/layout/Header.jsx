@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCalendar, faBell } from '@fortawesome/free-regular-svg-icons'
+import garageIcon from '../assets/images/icon/private-garage.png'
 import './Header.css'
 
 export default function Header() {
@@ -28,6 +29,10 @@ export default function Header() {
     }
     return (
         <div className="header">
+            <div className="header__garage-name">
+                <img src={garageIcon} alt="Garage Icon" className="header__garage-name-icon" />
+                <p className="header__garage-name-text"> Gagare Bình Dương</p>
+            </div>
             <div className="header__time">
                 <FontAwesomeIcon icon={faCalendar} />
                 <span>{formatTime(currentTime)}</span>

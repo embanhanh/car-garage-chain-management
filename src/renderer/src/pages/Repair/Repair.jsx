@@ -21,7 +21,7 @@ const Repair = () => {
     const [openDetailRepairModal, setOpenDetailRepairModal] = useState(false)
     const [openComponentUsedModal, setOpenComponentUsedModal] = useState(false)
     const [openInvoiceModal, setOpenInvoiceModal] = useState(false)
-    const itemsPerPage = 9
+    const itemsPerPage = 8
 
     const mockData = [...Array(20)].map((_, index) => ({
         id: index + 1,
@@ -111,14 +111,25 @@ const Repair = () => {
                                     </div>
                                 </td>
                                 <td>
-                                    <div
-                                        className="table__actions"
-                                        onClick={() => setOpenDetailRepairModal(true)}
-                                    >
+                                    <div className="table__actions">
                                         <FontAwesomeIcon
                                             icon={faEllipsisVertical}
                                             className="table__action-icon"
                                         />
+                                        <div
+                                            className={`table__action-menu ${
+                                                (index + 1) % itemsPerPage === 0 ? 'show-top' : ''
+                                            }`}
+                                        >
+                                            <div
+                                                className="table__action-item"
+                                                onClick={() => setOpenDetailRepairModal(true)}
+                                            >
+                                                Chi tiết
+                                            </div>
+
+                                            <div className="table__action-item">Xóa</div>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>

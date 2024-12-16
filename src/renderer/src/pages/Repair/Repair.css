@@ -1,5 +1,5 @@
 .repair-page {
-    padding: 10px;
+    padding: 15px 10px;
     height: calc(100vh - var(--header-height));
     display: flex;
     flex-direction: column;
@@ -47,6 +47,10 @@
 .repair-table td:nth-child(8),
 .repair-table th:nth-child(8) {
     text-align: center;
+}
+
+.repair-table td:nth-child(8) {
+    overflow: visible;
 }
 
 /* Repair Modal (CSS chung) */
