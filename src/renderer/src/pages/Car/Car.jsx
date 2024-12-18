@@ -15,7 +15,7 @@ const Car = () => {
 
   const mockData = [...Array(20)].map((_, index) => ({
     id: index + 1,
-    licensePlate: `51G-${String(12345 + index).padStart(5, '0')}`,
+    licensePlate: `51Ghdhhdhdhdhdhdhdhdhdhhfhfhfhfhfhhfhfhfhfhfhfhfhdhdhdhdhd-${String(12345 + index).padStart(5, '0')}`,
     model: index % 2 === 0 ? 'Camry' : 'Civic',
     brand: index % 2 === 0 ? 'Toyota' : 'Honda',
     year: 2020 + (index % 5),
