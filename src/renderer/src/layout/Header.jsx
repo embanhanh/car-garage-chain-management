@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCalendar, faBell } from '@fortawesome/free-regular-svg-icons'
+import { useNavigate } from 'react-router-dom'
 import garageIcon from '../assets/images/icon/private-garage.png'
 import './Header.css'
 
 export default function Header() {
+    const navigate = useNavigate()
     const [currentTime, setCurrentTime] = useState(new Date())
 
     useEffect(() => {
@@ -14,6 +16,12 @@ export default function Header() {
 
         return () => clearInterval(timer)
     }, [])
+
+    const handleLogout = () => {
+        localStorage.removeItem('currentUser')
+        window.api.send('resize-window-login')
+        navigate('/')
+    }
 
     const formatTime = (date) => {
         const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy']
@@ -61,7 +69,9 @@ export default function Header() {
                     <p>Thời gian làm việc</p>
                     <p>08:00 - 17:30</p>
                     <div className="page-btns center p-2">
-                        <button className="primary-button">Đăng xuất</button>
+                        <button className="primary-button" onClick={handleLogout}>
+                            Đăng xuất
+                        </button>
                         <button className="primary-button">Đổi mật khẩu</button>
                     </div>
                 </div>

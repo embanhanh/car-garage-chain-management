@@ -5,6 +5,8 @@ import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, Pagination, Navigation } from 'swiper/modules'
 import { db } from '../../firebase.config'
+import { dbService } from '../../services/DatabaseService'
+import { authService } from '../../services/AuthService'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import login1 from '../../assets/images/login/login_1.png'
 import login2 from '../../assets/images/login/login_2.png'
@@ -20,6 +22,7 @@ function Auth() {
     const [showPassword, setShowPassword] = useState(false)
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
+    const [loading, setLoading] = useState(false)
 
     const handleShowPassword = () => {
         setShowPassword(!showPassword)
@@ -27,29 +30,26 @@ function Auth() {
 
     const handleLogin = async () => {
         try {
-            // Tạo query để kiểm tra user
-            const usersRef = collection(db, 'users')
-            const q = query(
-                usersRef,
-                where('userName', '==', username),
-                where('password', '==', password)
-            )
+            setLoading(true)
+            if (!username || !password) {
+                alert('Vui lòng nhập đầy đủ thông tin đăng nhập')
+                return
+            }
+            const user = await authService.login(username, password)
 
-            // Thực hiện query
-            const querySnapshot = await getDocs(q)
+            if (user) {
+                localStorage.setItem('currentUser', JSON.stringify(user))
 
-            if (!querySnapshot.empty) {
-                // Đăng nhập thành công
-                console.log('Đăng nhập thành công')
-                window.electron.ipcRenderer.send('resize-window')
+                window.api.send('resize-window')
                 navigate('/dashboard')
             } else {
-                // Đăng nhập thất bại
                 alert('Tên đăng nhập hoặc mật khẩu không đúng')
             }
         } catch (error) {
             console.error('Lỗi đăng nhập:', error.message)
             alert('Có lỗi xảy ra khi đăng nhập')
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -89,7 +89,7 @@ function Auth() {
                         </div>
                     </div>
                 </div>
-                <button className="auth__button" onClick={handleLogin}>
+                <button className="auth__button" onClick={handleLogin} disabled={loading}>
                     <p>Đăng nhập</p>
                 </button>
             </div>

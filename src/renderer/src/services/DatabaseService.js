@@ -152,19 +152,92 @@ class DatabaseService {
         }
     }
 
-    // async findBy(collectionName, field, value) {
-    //     try {
-    //         const q = query(collection(db, collectionName), where(field, '==', value))
-    //         const querySnapshot = await getDocs(q)
-    //         return querySnapshot.docs.map((doc) => ({
-    //             id: doc.id,
-    //             ...doc.data()
-    //         }))
-    //     } catch (error) {
-    //         console.error(`Lỗi khi tìm kiếm ${collectionName}:`, error)
-    //         throw error
-    //     }
-    // }
+    async findBy(collectionName, conditions = [], options = {}) {
+        try {
+            const ModelClass = this.collections[collectionName].model
+            let q = collection(db, this.collections[collectionName].name)
+
+            // Tạo mảng các điều kiện query
+            const queryConstraints = []
+
+            // Thêm các điều kiện tìm kiếm
+            conditions.forEach((condition) => {
+                switch (condition.operator) {
+                    case '==':
+                    case '!=':
+                    case '<':
+                    case '<=':
+                    case '>':
+                    case '>=':
+                    case 'array-contains':
+                    case 'array-contains-any':
+                    case 'in':
+                    case 'not-in':
+                        queryConstraints.push(
+                            where(condition.field, condition.operator, condition.value)
+                        )
+                        break
+                    case 'between':
+                        // Xử lý trường hợp between
+                        if (Array.isArray(condition.value) && condition.value.length === 2) {
+                            queryConstraints.push(
+                                where(condition.field, '>=', condition.value[0]),
+                                where(condition.field, '<=', condition.value[1])
+                            )
+                        }
+                        break
+                    default:
+                        console.warn(`Toán tử không được hỗ trợ: ${condition.operator}`)
+                }
+            })
+
+            // Thêm sắp xếp
+            if (options.orderBy) {
+                options.orderBy.forEach((order) => {
+                    queryConstraints.push(orderBy(order.field, order.direction || 'asc'))
+                })
+            }
+
+            // Thêm phân trang
+            if (options.limit) {
+                queryConstraints.push(limit(options.limit))
+            }
+
+            if (options.startAfter) {
+                queryConstraints.push(startAfter(options.startAfter))
+            }
+
+            if (options.endBefore) {
+                queryConstraints.push(endBefore(options.endBefore))
+            }
+
+            // Tạo query với tất cả các điều kiện
+            q = query(q, ...queryConstraints)
+
+            // Thực hiện query
+            const querySnapshot = await getDocs(q)
+
+            console.log(querySnapshot.docs)
+
+            // Chuyển đổi kết quả thành instances của model
+            const docs = querySnapshot.docs.map((doc) =>
+                ModelClass.fromFirestore({
+                    id: doc.id,
+                    ...doc.data()
+                })
+            )
+
+            // Populate relations nếu cần
+            if (ModelClass.relations && ModelClass.relations.length > 0) {
+                return Promise.all(docs.map((doc) => this.populate(doc, ModelClass.relations)))
+            }
+
+            return docs
+        } catch (error) {
+            console.error(`Lỗi khi tìm kiếm ${collectionName}:`, error)
+            throw error
+        }
+    }
 }
 
 export const dbService = new DatabaseService()

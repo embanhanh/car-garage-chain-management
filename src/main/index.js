@@ -21,7 +21,7 @@ function createWindow() {
             nodeIntegration: true,
             preload: join(__dirname, '../preload/index.js'),
             sandbox: false,
-            contextIsolation: false,
+            contextIsolation: true,
             webSecurity: true
         }
     })
@@ -46,6 +46,14 @@ function createWindow() {
     ipcMain.on('resize-window', () => {
         mainWindow.setSize(1200, 700)
         mainWindow.center()
+    })
+
+    ipcMain.on('resize-window-login', () => {
+        mainWindow.setResizable(true)
+        mainWindow.setSize(900, 600)
+        mainWindow.center()
+
+        mainWindow.setResizable(false)
     })
 }
 
