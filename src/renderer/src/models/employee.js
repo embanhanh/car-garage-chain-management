@@ -12,7 +12,7 @@ export class Employee {
         salary = '',
         workHours = '',
         garageId = '',
-        garage = null
+        createdAt = new Date()
     } = {}) {
         this.id = id
         this.name = name
@@ -26,7 +26,7 @@ export class Employee {
         this.salary = salary
         this.workHours = workHours
         this.garageId = garageId
-        this.garage = garage
+        this.createdAt = createdAt
     }
 
     toFirestore() {
@@ -41,7 +41,8 @@ export class Employee {
             gender: this.gender,
             salary: this.salary,
             workHours: this.workHours,
-            garageId: this.garageId
+            garageId: this.garageId,
+            createdAt: this.createdAt
         }
     }
 

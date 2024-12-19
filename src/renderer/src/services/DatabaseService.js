@@ -13,6 +13,18 @@ import {
 import { User } from '../models/user'
 import { Customer } from '../models/customer'
 import { Employee } from '../models/employee'
+import { Car } from '../models/car'
+import { RepairRegister } from '../models/repairregister'
+import { Component } from '../models/component'
+import { Bill } from '../models/bill'
+import { Service } from '../models/service'
+import { InputComponentRegister } from '../models/inputcomponentregister'
+import { Garage } from '../models/garage'
+import { Category } from '../models/category'
+import { Supplier } from '../models/supplier'
+import { ServiceRegister } from '../models/serviceregister'
+import { ServiceType } from '../models/servicetype'
+import { TrackingRegister } from '../models/trackingregister'
 
 class DatabaseService {
     static instance = null
@@ -33,22 +45,58 @@ class DatabaseService {
                 name: 'customers',
                 model: Customer
             },
-            cars: 'cars',
+            cars: {
+                name: 'cars',
+                model: Car
+            },
             employees: {
                 name: 'employees',
                 model: Employee
             },
-            repairregisters: 'repairregisters',
-            components: 'components',
-            bills: 'bills',
-            services: 'services',
-            inputcomponentregisters: 'inputcomponentregisters',
-            garages: 'garages',
-            categories: 'categories',
-            suppliers: 'suppliers',
-            serviceregisters: 'serviceregisters',
-            trackingregisters: 'trackingregisters',
-            servicetypes: 'servicetypes'
+            repairregisters: {
+                name: 'repairregisters',
+                model: RepairRegister
+            },
+            components: {
+                name: 'components',
+                model: Component
+            },
+            bills: {
+                name: 'bills',
+                model: Bill
+            },
+            services: {
+                name: 'services',
+                model: Service
+            },
+            inputcomponentregisters: {
+                name: 'inputcomponentregisters',
+                model: InputComponentRegister
+            },
+            garages: {
+                name: 'garages',
+                model: Garage
+            },
+            categories: {
+                name: 'categories',
+                model: Category
+            },
+            suppliers: {
+                name: 'suppliers',
+                model: Supplier
+            },
+            serviceregisters: {
+                name: 'serviceregisters',
+                model: ServiceRegister
+            },
+            servicetypes: {
+                name: 'servicetypes',
+                model: ServiceType
+            },
+            trackingregisters: {
+                name: 'trackingregisters',
+                model: TrackingRegister
+            }
         }
     }
 
@@ -58,10 +106,20 @@ class DatabaseService {
             const docSnap = await getDoc(docRef)
 
             if (docSnap.exists()) {
-                return this.collections[collectionName].model.fromFirestore({
+                const data = this.collections[collectionName].model.fromFirestore({
                     id: docSnap.id,
                     ...docSnap.data()
                 })
+                if (
+                    this.collections[collectionName].model.relations &&
+                    this.collections[collectionName].model.relations.length > 0
+                ) {
+                    return await this.populate(
+                        data,
+                        this.collections[collectionName].model.relations
+                    )
+                }
+                return data
             }
             return null
         } catch (error) {
@@ -75,7 +133,43 @@ class DatabaseService {
             const populatedData = { ...data }
 
             for (const field of relations) {
-                if (data[field.foreignKey]) {
+                if (field.isArray && field.arrayPath) {
+                    if (Array.isArray(data[field.arrayPath]) && data[field.arrayPath].length > 0) {
+                        const ids = data[field.arrayPath].map((item) => item[field.idField])
+
+                        const relatedDocs = await this.findBy(field.collection, [
+                            {
+                                field: 'id',
+                                operator: 'in',
+                                value: ids
+                            }
+                        ])
+
+                        populatedData[field.arrayPath] = data[field.arrayPath].map((item) => {
+                            const relatedDoc = relatedDocs.find(
+                                (doc) => doc.id === item[field.idField]
+                            )
+                            return {
+                                ...item,
+                                [field.as || field.collection]: relatedDoc
+                            }
+                        })
+                    }
+                } else if (field.isArray) {
+                    if (
+                        Array.isArray(data[field.foreignKey]) &&
+                        data[field.foreignKey].length > 0
+                    ) {
+                        const relatedDocs = await this.findBy(field.collection, [
+                            {
+                                field: 'id',
+                                operator: 'in',
+                                value: data[field.foreignKey]
+                            }
+                        ])
+                        populatedData[field.as || field.collection] = relatedDocs
+                    }
+                } else if (data[field.foreignKey]) {
                     const relatedDoc = await this.getById(field.collection, data[field.foreignKey])
                     populatedData[field.as || field.collection] = relatedDoc
                 }
@@ -216,8 +310,6 @@ class DatabaseService {
 
             // Thực hiện query
             const querySnapshot = await getDocs(q)
-
-            console.log(querySnapshot.docs)
 
             // Chuyển đổi kết quả thành instances của model
             const docs = querySnapshot.docs.map((doc) =>
