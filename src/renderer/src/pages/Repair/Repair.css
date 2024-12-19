@@ -106,10 +106,18 @@
     color: white;
 }
 
+.repair-modal__button.confirm-button:hover {
+    opacity: 0.8;
+}
+
 .repair-modal__button.cancel-button {
     background-color: #fff;
     border: 1px solid #b9bdc7;
     color: gray;
+}
+.repair-modal__button.cancel-button:hover {
+    background-color: red;
+    color: white;
 }
 
 .repair-modal__separate {
