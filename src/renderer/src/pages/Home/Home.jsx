@@ -46,7 +46,8 @@ function Home() {
                                     style={{
                                         fontSize: '2.6rem',
                                         color: '#5030E5',
-                                        fontWeight: '600'
+                                        fontWeight: '600',
+                                        lineHeight: 1
                                     }}
                                 >
                                     100
