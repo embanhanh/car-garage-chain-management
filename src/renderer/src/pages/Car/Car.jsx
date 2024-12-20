@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
     faArrowUpWideShort,
@@ -6,6 +6,7 @@ import {
     faSearch,
     faEllipsisVertical
 } from '@fortawesome/free-solid-svg-icons'
+import { dbService } from '../../services/DatabaseService'
 import Pagination from '../../components/Pagination'
 import Modal from '../../components/Modal'
 import UpDetailCarModal from '../../components/Car/UpDetailCarModal'
@@ -18,24 +19,51 @@ const Car = () => {
         data: null,
         type: 'detail'
     })
+    const [carData, setCarData] = useState([])
     const itemsPerPage = 8
 
-    const mockData = [...Array(57)].map((_, index) => ({
-        id: index + 1,
-        licensePlate: `51G-${String(12345 + index).padStart(5, '0')}`,
-        model: index % 2 === 0 ? 'Camry' : 'Civic',
-        brand: index % 2 === 0 ? 'Toyota' : 'Honda',
-        year: 2020 + (index % 5),
-        owner: `Nguyễn Văn ${String.fromCharCode(65 + index)}`,
-        status: index % 2 === 0 ? 'Đang sửa chữa' : 'Hoàn thành'
-    }))
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await dbService.getAll('cars')
+            setCarData(data)
+        }
+        fetchData()
+    }, [])
 
-    const totalPages = Math.ceil(mockData.length / itemsPerPage)
+    // const mockData = [...Array(57)].map((_, index) => ({
+    //     id: index + 1,
+    //     licensePlate: `51G-${String(12345 + index).padStart(5, '0')}`,
+    //     model: index % 2 === 0 ? 'Camry' : 'Civic',
+    //     brand: index % 2 === 0 ? 'Toyota' : 'Honda',
+    //     year: 2020 + (index % 5),
+    //     owner: `Nguyễn Văn ${String.fromCharCode(65 + index)}`,
+    //     status: index % 2 === 0 ? 'Đang sửa chữa' : 'Hoàn thành'
+    // }))
+
+    const totalPages = Math.ceil(carData.length / itemsPerPage)
 
     const currentData = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage
-        return mockData.slice(start, start + itemsPerPage)
-    }, [currentPage, mockData])
+        return carData.slice(start, start + itemsPerPage)
+    }, [currentPage, carData])
+
+    const onSave = async (carData) => {
+        try {
+            const data = { ...carData }
+            const newData = await dbService.update('cars', data.id, data)
+            setCarData((pre) => {
+                index = pre.findIndex((car) => car.id === newData.id)
+                if (index !== -1) {
+                    pre[index] = newData
+                    return pre
+                }
+                return pre
+            })
+            alert('Cập nhật thành công')
+        } catch (e) {
+            alert(`có lỗi xảy ra: ${e.message}`)
+        }
+    }
 
     const handlePageChange = useCallback(
         (page) => {
@@ -80,11 +108,11 @@ const Car = () => {
                         {currentData.map((car, index) => (
                             <tr key={car.id}>
                                 <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                                <td>{car.licensePlate}</td>
+                                <td>{car.id}</td>
                                 <td>{car.model}</td>
                                 <td>{car.brand}</td>
-                                <td>{car.year}</td>
-                                <td>{car.owner}</td>
+                                <td>{car.manufacturingYear}</td>
+                                <td>{car.customer?.name}</td>
                                 <td>
                                     <div
                                         className={`table__status ${car.status === 'Đang sửa chữa' ? 'car-repairing' : 'car-normal'}`}
@@ -150,7 +178,7 @@ const Car = () => {
                 <UpDetailCarModal
                     onClose={() => setCarDetail({ show: false, data: null })}
                     data={carDetail.data}
-                    onSave={() => {}}
+                    onSave={onSave}
                     type={carDetail.type}
                 />
             </Modal>

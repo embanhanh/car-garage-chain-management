@@ -5,7 +5,8 @@ import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons'
 import Modal from '../Modal'
 import StaffInChargeModal from './StaffInChargeModal'
 
-function DetailRepairModal({ onClose }) {
+function DetailRepairModal({ onClose, data }) {
+    const [repairData, setRepairData] = useState(data)
     const [openStaffInChargeModal, setOpenStaffInChargeModal] = useState(false)
     return (
         <>
@@ -20,6 +21,7 @@ function DetailRepairModal({ onClose }) {
                                 id="carNumber"
                                 placeholder="51A-12345"
                                 disabled
+                                value={repairData?.car?.licensePlate}
                             />
                         </div>
                     </div>
@@ -32,6 +34,7 @@ function DetailRepairModal({ onClose }) {
                                 id="customerName"
                                 placeholder="Trần Văn A"
                                 disabled
+                                value={repairData?.car?.customer?.name}
                             />
                         </div>
                     </div>
@@ -44,6 +47,7 @@ function DetailRepairModal({ onClose }) {
                                 id="carModel"
                                 placeholder="Toyota Vios"
                                 disabled
+                                value={repairData?.car?.model}
                             />
                         </div>
                     </div>
@@ -56,6 +60,7 @@ function DetailRepairModal({ onClose }) {
                                 id="carBrand"
                                 placeholder="Toyota"
                                 disabled
+                                value={repairData?.car?.brand}
                             />
                         </div>
                     </div>
@@ -68,6 +73,7 @@ function DetailRepairModal({ onClose }) {
                                 id="expectedCompletionDate"
                                 placeholder="12/12/2024"
                                 disabled
+                                value={repairData?.expectedCompletionDate}
                             />
                             <FontAwesomeIcon icon={faCalendar} className="input-form__icon" />
                         </div>

@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import {
     faArrowUpWideShort,
     faFilter,
@@ -7,6 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { faCalendar } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { dbService } from '../../services/DatabaseService'
 import Pagination from '../../components/Pagination'
 import './Repair.css'
 import Modal from '../../components/Modal'
@@ -17,29 +18,41 @@ import DetailInvoiceModal from '../../components/Repair/DetailInvoice'
 
 const Repair = () => {
     const [currentPage, setCurrentPage] = useState(1)
+    const [openDetailRepairModal, setOpenDetailRepairModal] = useState({
+        show: false,
+        data: null
+    })
     const [openReceiveRepairModal, setOpenReceiveRepairModal] = useState(false)
-    const [openDetailRepairModal, setOpenDetailRepairModal] = useState(false)
     const [openComponentUsedModal, setOpenComponentUsedModal] = useState(false)
     const [openInvoiceModal, setOpenInvoiceModal] = useState(false)
+    const [repairRegisterData, setRepairRegisterData] = useState([])
     const itemsPerPage = 8
 
-    const mockData = [...Array(20)].map((_, index) => ({
-        id: index + 1,
-        repairId: `PCS${String(index + 1).padStart(5, '0')}`,
-        staff: `Nguyễn Văn ${String.fromCharCode(65 + index)}`,
-        customer: `Trần Thị ${String.fromCharCode(65 + index)}`,
-        createDate: new Date(2024, 0, index + 1).toLocaleDateString('vi-VN'),
-        licensePlate: `51G-${String(12345 + index).padStart(5, '0')}`,
-        completionDate: new Date(2024, 0, index + 5).toLocaleDateString('vi-VN'),
-        status: index % 3 === 0 ? 'Đang sửa chữa' : 'Hoàn thành'
-    }))
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await dbService.getAll('serviceregisters')
+            setRepairRegisterData(data)
+        }
+        fetchData()
+    }, [])
 
-    const totalPages = Math.ceil(mockData.length / itemsPerPage)
+    // const mockData = [...Array(20)].map((_, index) => ({
+    //     id: index + 1,
+    //     repairId: `PCS${String(index + 1).padStart(5, '0')}`,
+    //     staff: `Nguyễn Văn ${String.fromCharCode(65 + index)}`,
+    //     customer: `Trần Thị ${String.fromCharCode(65 + index)}`,
+    //     createDate: new Date(2024, 0, index + 1).toLocaleDateString('vi-VN'),
+    //     licensePlate: `51G-${String(12345 + index).padStart(5, '0')}`,
+    //     completionDate: new Date(2024, 0, index + 5).toLocaleDateString('vi-VN'),
+    //     status: index % 3 === 0 ? 'Đang sửa chữa' : 'Hoàn thành'
+    // }))
+
+    const totalPages = Math.ceil(repairRegisterData.length / itemsPerPage)
 
     const currentData = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage
-        return mockData.slice(start, start + itemsPerPage)
-    }, [currentPage, mockData])
+        return repairRegisterData.slice(start, start + itemsPerPage)
+    }, [currentPage, repairRegisterData])
 
     const handlePageChange = useCallback(
         (page) => {
@@ -97,12 +110,12 @@ const Repair = () => {
                     <tbody>
                         {currentData.map((repair, index) => (
                             <tr key={repair.id}>
-                                <td>{repair.repairId}</td>
-                                <td>{repair.staff}</td>
-                                <td>{repair.customer}</td>
-                                <td>{repair.createDate}</td>
-                                <td>{repair.licensePlate}</td>
-                                <td>{repair.completionDate}</td>
+                                <td>{repair.id}</td>
+                                <td>{repair.employee?.name}</td>
+                                <td>{repair.car?.customer?.name}</td>
+                                <td>{repair.createdAt}</td>
+                                <td>{repair.car?.licensePlate}</td>
+                                <td>{repair.expectedCompletionDate}</td>
                                 <td>
                                     <div
                                         className={`table__status ${repair.status === 'Đang sửa chữa' ? 'car-completed' : 'car-normal'}`}
@@ -123,7 +136,12 @@ const Repair = () => {
                                         >
                                             <div
                                                 className="table__action-item"
-                                                onClick={() => setOpenDetailRepairModal(true)}
+                                                onClick={() =>
+                                                    setOpenDetailRepairModal({
+                                                        show: true,
+                                                        data: repair
+                                                    })
+                                                }
                                             >
                                                 Chi tiết
                                             </div>
@@ -152,11 +170,24 @@ const Repair = () => {
             </Modal>
             <Modal
                 isOpen={openDetailRepairModal}
-                onClose={() => setOpenDetailRepairModal(false)}
+                onClose={() =>
+                    setOpenDetailRepairModal({
+                        show: false,
+                        data: null
+                    })
+                }
                 showHeader={false}
                 width="650px"
             >
-                <DetailRepairModal onClose={() => setOpenDetailRepairModal(false)} />
+                <DetailRepairModal
+                    onClose={() =>
+                        setOpenDetailRepairModal({
+                            show: false,
+                            data: null
+                        })
+                    }
+                    data={openDetailRepairModal.data}
+                />
             </Modal>
             <Modal
                 isOpen={openComponentUsedModal}
