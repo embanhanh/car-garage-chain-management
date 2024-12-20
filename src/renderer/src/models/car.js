@@ -8,24 +8,26 @@ export class Car {
     ]
 
     constructor({
+        id = '',
         licensePlate = '',
         brand = '',
         model = '',
         engine = '',
         chassis = '',
         manufacturingYear = '',
-        state = '',
+        status = '',
         customerId = '',
         customer = null,
         createdAt = new Date()
     } = {}) {
+        this.id = id
         this.licensePlate = licensePlate
         this.brand = brand
         this.model = model
         this.engine = engine
         this.chassis = chassis
         this.manufacturingYear = manufacturingYear
-        this.state = state
+        this.status = status
         this.customerId = customerId
         this.customer = customer
         this.createdAt = createdAt
@@ -33,13 +35,14 @@ export class Car {
 
     toFirestore() {
         return {
+            id: this.id,
             licensePlate: this.licensePlate,
             brand: this.brand,
             model: this.model,
             engine: this.engine,
             chassis: this.chassis,
             manufacturingYear: this.manufacturingYear,
-            state: this.state,
+            status: this.status,
             customerId: this.customerId,
             createdAt: this.createdAt
         }
