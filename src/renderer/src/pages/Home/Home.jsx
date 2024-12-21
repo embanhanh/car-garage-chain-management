@@ -1,8 +1,18 @@
 import { useNavigate } from 'react-router-dom'
 import './Home.css'
+import { useEffect } from 'react'
+import { dbService } from '../../services/DatabaseService'
 
 function Home() {
     const nav = useNavigate()
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const users = await dbService.getAll('users')
+        }
+        fetchData()
+    }, [])
+
     return (
         <>
             <div className="home-page d-flex flex-column gap-3 p-3  h-100">
@@ -10,7 +20,7 @@ function Home() {
                     <h1 className="home-page__title">Tổng quan</h1>
                     <div className="row " style={{ justifyContent: 'space-between' }}>
                         {Array.from({ length: 5 }).map((_, index) => (
-                            <div className="home-page__overview-item">
+                            <div className="home-page__overview-item" key={index}>
                                 <div className="home-page__overview-item-label">
                                     <p
                                         style={{
@@ -62,7 +72,7 @@ function Home() {
                                 </thead>
                                 <tbody>
                                     {Array.from({ length: 5 }).map((_, index) => (
-                                        <tr>
+                                        <tr key={index}>
                                             <td>{index + 1}</td>
                                             <td>Khách hàng {index + 1}</td>
                                             <td>Dịch vụ {index + 1}</td>

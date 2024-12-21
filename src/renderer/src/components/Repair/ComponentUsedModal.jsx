@@ -12,14 +12,20 @@ const ComponentUsedModal = ({ onClose }) => {
                 <div className="component-used-modal__add-component">
                     <div className="repair-modal__input-item mb-3">
                         <label htmlFor="componentCode">Mã phụ tùng</label>
-                        <div className="input-form">
+                        {/* <div className="input-form">
                             <input
                                 className="w-100"
                                 type="text"
                                 id="componentCode"
                                 placeholder="PCS001"
                             />
-                        </div>
+                        </div> */}
+                        <select id="province" value={''} className={`combo-box`}>
+                            <option value="" disabled hidden>
+                                Chọn
+                            </option>
+                            <option>test</option>
+                        </select>
                     </div>
                     <div className="repair-modal__input-item mb-3">
                         <label htmlFor="componentType">Loại phụ tùng</label>

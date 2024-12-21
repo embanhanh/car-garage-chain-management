@@ -12,11 +12,9 @@ export default function UpDetailCarModal({ onClose, data, onSave, type }) {
                             <input
                                 className="w-100"
                                 type="text"
-                                value={carDetail?.licensePlate || ''}
+                                value={carDetail?.id || ''}
                                 disabled={type === 'detail'}
-                                onChange={(e) =>
-                                    setCarDetail({ ...carDetail, licensePlate: e.target.value })
-                                }
+                                onChange={(e) => setCarDetail({ ...carDetail, id: e.target.value })}
                             />
                         </div>
                     </div>
@@ -54,10 +52,13 @@ export default function UpDetailCarModal({ onClose, data, onSave, type }) {
                             <input
                                 className="w-100"
                                 type="text"
-                                value={carDetail?.year || ''}
+                                value={carDetail?.manufacturingYear || ''}
                                 disabled={type === 'detail'}
                                 onChange={(e) =>
-                                    setCarDetail({ ...carDetail, year: e.target.value })
+                                    setCarDetail({
+                                        ...carDetail,
+                                        manufacturingYear: e.target.value
+                                    })
                                 }
                             />
                         </div>
@@ -68,11 +69,11 @@ export default function UpDetailCarModal({ onClose, data, onSave, type }) {
                             <input
                                 className="w-100"
                                 type="text"
-                                value={carDetail?.owner || ''}
-                                disabled={type === 'detail'}
-                                onChange={(e) =>
-                                    setCarDetail({ ...carDetail, owner: e.target.value })
-                                }
+                                value={carDetail?.customer?.name || ''}
+                                disabled={true}
+                                // onChange={(e) =>
+                                //     setCarDetail({ ...carDetail, owner: e.target.value })
+                                // }
                             />
                         </div>
                     </div>
@@ -96,10 +97,10 @@ export default function UpDetailCarModal({ onClose, data, onSave, type }) {
                             <input
                                 className="w-100"
                                 type="text"
-                                value={carDetail?.chassisNumber || ''}
+                                value={carDetail?.chassis || ''}
                                 disabled={type === 'detail'}
                                 onChange={(e) =>
-                                    setCarDetail({ ...carDetail, chassisNumber: e.target.value })
+                                    setCarDetail({ ...carDetail, chassis: e.target.value })
                                 }
                             />
                         </div>
@@ -110,10 +111,10 @@ export default function UpDetailCarModal({ onClose, data, onSave, type }) {
                             <input
                                 className="w-100"
                                 type="text"
-                                value={carDetail?.engineNumber || ''}
+                                value={carDetail?.engine || ''}
                                 disabled={type === 'detail'}
                                 onChange={(e) =>
-                                    setCarDetail({ ...carDetail, engineNumber: e.target.value })
+                                    setCarDetail({ ...carDetail, engine: e.target.value })
                                 }
                             />
                         </div>
@@ -124,7 +125,7 @@ export default function UpDetailCarModal({ onClose, data, onSave, type }) {
                         {type == 'detail' ? 'Đóng' : 'Hủy'}
                     </button>
                     {type !== 'detail' && (
-                        <button className="primary-button" onClick={() => onSave()}>
+                        <button className="primary-button" onClick={() => onSave(carDetail)}>
                             Lưu
                         </button>
                     )}
