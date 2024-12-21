@@ -23,7 +23,7 @@ export class ServiceRegister {
         car = null,
         employeeId = '',
         employee = null,
-        status = '',
+        status = 'Đang sửa chữa',
         repairRegisterIds = [],
         repairRegisters = [],
         expectedCompletionDate = null,

@@ -73,7 +73,9 @@ function DetailRepairModal({ onClose, data }) {
                                 id="expectedCompletionDate"
                                 placeholder="12/12/2024"
                                 disabled
-                                value={repairData?.expectedCompletionDate}
+                                value={new Date(
+                                    repairData?.expectedCompletionDate
+                                ).toLocaleDateString('en-GB')}
                             />
                             <FontAwesomeIcon icon={faCalendar} className="input-form__icon" />
                         </div>

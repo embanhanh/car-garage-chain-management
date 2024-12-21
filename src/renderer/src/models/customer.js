@@ -6,7 +6,7 @@ export class Customer {
         email = '',
         address = '',
         indentifyCard = '',
-        birthday = '',
+        birthday = new Date(),
         createdAt = new Date()
     } = {}) {
         this.id = id
