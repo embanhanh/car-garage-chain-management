@@ -8,6 +8,7 @@ import {
 import { faCalendar } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { dbService } from '../../services/DatabaseService'
+import { doc, onSnapshot } from 'firebase/firestore'
 import Pagination from '../../components/Pagination'
 import './Repair.css'
 import Modal from '../../components/Modal'
@@ -15,6 +16,7 @@ import ReceiveRepairModal from '../../components/Repair/ReceiveRepairModal'
 import DetailRepairModal from '../../components/Repair/DetailRepairModal'
 import ComponentUsedModal from '../../components/Repair/ComponentUsedModal'
 import DetailInvoiceModal from '../../components/Repair/DetailInvoice'
+import { db } from '../../firebase.config'
 
 const Repair = () => {
     const [currentPage, setCurrentPage] = useState(1)
@@ -62,6 +64,10 @@ const Repair = () => {
         },
         [totalPages]
     )
+
+    useEffect(() => {
+        console.log(repairRegisterData)
+    }, [repairRegisterData])
 
     return (
         <div className="repair-page">
@@ -113,9 +119,9 @@ const Repair = () => {
                                 <td>{repair.id}</td>
                                 <td>{repair.employee?.name}</td>
                                 <td>{repair.car?.customer?.name}</td>
-                                <td>{repair.createdAt}</td>
+                                <td>{new Date(repair.createdAt).toDateString()}</td>
                                 <td>{repair.car?.licensePlate}</td>
-                                <td>{repair.expectedCompletionDate}</td>
+                                <td>{repair.expectedCompletionDate + ''}</td>
                                 <td>
                                     <div
                                         className={`table__status ${repair.status === 'Đang sửa chữa' ? 'car-completed' : 'car-normal'}`}
@@ -169,7 +175,7 @@ const Repair = () => {
                 <ReceiveRepairModal onClose={() => setOpenReceiveRepairModal(false)} />
             </Modal>
             <Modal
-                isOpen={openDetailRepairModal}
+                isOpen={openDetailRepairModal.show}
                 onClose={() =>
                     setOpenDetailRepairModal({
                         show: false,
@@ -177,7 +183,7 @@ const Repair = () => {
                     })
                 }
                 showHeader={false}
-                width="650px"
+                width="680px"
             >
                 <DetailRepairModal
                     onClose={() =>

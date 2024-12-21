@@ -211,7 +211,10 @@ class DatabaseService {
 
     async add(collectionName, data) {
         try {
-            const docRef = await addDoc(collection(db, this.collections[collectionName].name), data)
+            const docRef = await addDoc(collection(db, this.collections[collectionName].name), {
+                ...data,
+                createdAt: new Date().toISOString()
+            })
             return {
                 id: docRef.id,
                 ...data

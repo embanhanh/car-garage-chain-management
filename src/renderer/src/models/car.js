@@ -15,7 +15,6 @@ export class Car {
         engine = '',
         chassis = '',
         manufacturingYear = '',
-        status = '',
         customerId = '',
         customer = null,
         createdAt = new Date()
@@ -27,7 +26,6 @@ export class Car {
         this.engine = engine
         this.chassis = chassis
         this.manufacturingYear = manufacturingYear
-        this.status = status
         this.customerId = customerId
         this.customer = customer
         this.createdAt = createdAt
@@ -42,7 +40,6 @@ export class Car {
             engine: this.engine,
             chassis: this.chassis,
             manufacturingYear: this.manufacturingYear,
-            status: this.status,
             customerId: this.customerId,
             createdAt: this.createdAt
         }
