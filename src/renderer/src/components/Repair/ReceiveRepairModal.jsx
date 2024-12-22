@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import DetailRepairModal from './DetailRepairModal'
+import Dropdown from '../Dropdown'
+import { debounce } from 'lodash'
 import { dbService } from '../../services/DatabaseService'
 
 export default function ReceiveRepairModal({ onClose }) {
@@ -27,6 +29,70 @@ export default function ReceiveRepairModal({ onClose }) {
     })
     const [showDetailService, setShowDetailService] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
+    const [searchResults, setSearchResults] = useState({
+        cars: [],
+        customers: []
+    })
+    const [isSearching, setIsSearching] = useState({
+        cars: false,
+        customers: false
+    })
+
+    const searchCars = debounce(async (searchText) => {
+        if (!searchText) {
+            setSearchResults((prev) => ({ ...prev, cars: [] }))
+            return
+        }
+
+        setIsSearching((prev) => ({ ...prev, cars: true }))
+        try {
+            const cars = await dbService.findBy('cars', [
+                {
+                    field: 'licensePlate',
+                    operator: '>=',
+                    value: searchText.toUpperCase()
+                },
+                {
+                    field: 'licensePlate',
+                    operator: '<=',
+                    value: searchText.toUpperCase() + '\uf8ff'
+                }
+            ])
+            setSearchResults((prev) => ({ ...prev, cars }))
+        } catch (error) {
+            console.error('Lỗi khi tìm xe:', error)
+        } finally {
+            setIsSearching((prev) => ({ ...prev, cars: false }))
+        }
+    }, 300)
+
+    const searchCustomers = debounce(async (searchText) => {
+        if (!searchText) {
+            setSearchResults((prev) => ({ ...prev, customers: [] }))
+            return
+        }
+        setIsSearching((prev) => ({ ...prev, customers: true }))
+        try {
+            const customers = await dbService.findBy('customers', [
+                {
+                    field: 'indentifyCard',
+                    operator: '>=',
+                    value: searchText
+                },
+                {
+                    field: 'indentifyCard',
+                    operator: '<=',
+                    value: searchText + '\uf8ff'
+                }
+            ])
+            setSearchResults((prev) => ({ ...prev, customers }))
+        } catch (error) {
+            console.error('Lỗi khi tìm khách hàng:', error)
+        } finally {
+            setIsSearching((prev) => ({ ...prev, customers: false }))
+        }
+    }, 300)
 
     const createServiceRegister = async () => {
         try {
@@ -35,11 +101,25 @@ export default function ReceiveRepairModal({ onClose }) {
                 employeeId: serviceRegisterData.employeeId,
                 carId: serviceRegisterData.car.id || null,
                 status: serviceRegisterData.status,
-                expectedCompletionDate: serviceRegisterData.expectedCompletionDate,
+                expectedCompletionDate: new Date(
+                    serviceRegisterData.expectedCompletionDate
+                ).toISOString(),
                 repairRegisterIds: []
             }
 
             if (serviceRegisterData.repairRegisters.length > 0) {
+                serviceRegisterData.repairRegisters.map(async (item) => {
+                    const newData = await dbService.add('repairregisters', {
+                        status: 'Đang sửa chữa',
+                        serviceId: item.service?.id,
+                        employeeIds: item.employees?.map((emp) => emp.id),
+                        repairRegisterComponents: item.repairRegisterComponents.map((comp) => ({
+                            componentId: comp.component.id,
+                            quantity: item.quantity
+                        }))
+                    })
+                    data.repairRegisterIds.push(newData.id)
+                })
             }
 
             const customers = await dbService.findBy('customers', [
@@ -69,7 +149,6 @@ export default function ReceiveRepairModal({ onClose }) {
             if (!cars || cars.length === 0) {
                 const carData = { ...serviceRegisterData.car }
                 delete carData.customer
-                console.log(customerId)
                 const car = await dbService.add('cars', { ...carData, customerId: customerId })
                 data.carId = car.id
             }
@@ -83,11 +162,113 @@ export default function ReceiveRepairModal({ onClose }) {
         }
     }
 
+    const validateCarCustomerInfo = () => {
+        return (
+            serviceRegisterData.car.customer.name &&
+            serviceRegisterData.car.customer.phone &&
+            serviceRegisterData.car.customer.email &&
+            serviceRegisterData.car.customer.address &&
+            serviceRegisterData.car.customer.indentifyCard &&
+            serviceRegisterData.car.customer.birthday &&
+            serviceRegisterData.car.licensePlate &&
+            serviceRegisterData.car.model &&
+            serviceRegisterData.car.chassis &&
+            serviceRegisterData.car.manufacturingYear &&
+            serviceRegisterData.car.brand &&
+            serviceRegisterData.car.engine
+        )
+    }
+
+    const onAddService = (service) => {
+        if (!serviceRegisterData.repairRegisters.find((item) => item.service.id === service.id)) {
+            setServiceRegisterData((pre) => ({
+                ...pre,
+                repairRegisters: [
+                    ...pre.repairRegisters,
+                    {
+                        service,
+                        status: 'Đang sửa chữa',
+                        employees: [],
+                        repairRegisterComponents: []
+                    }
+                ]
+            }))
+        }
+    }
+
+    const onDeleteService = (serviceId) => {
+        if (serviceId) {
+            setServiceRegisterData((pre) => ({
+                ...pre,
+                repairRegisters: pre.repairRegisters.filter((item) => item.service.id !== serviceId)
+            }))
+        }
+    }
+
+    const onAddStaffInCharge = (staffs, serviceId) => {
+        if (staffs && serviceId) {
+            setServiceRegisterData((pre) => {
+                const newData = { ...pre }
+                const foundRegister = newData.repairRegisters?.find(
+                    (item) => item.service.id === serviceId
+                )
+                if (foundRegister?.employees) {
+                    foundRegister.employees = [...staffs]
+                }
+                return newData
+            })
+        }
+    }
+
+    const onAddComponentUsed = (components, serviceId) => {
+        if (components && serviceId) {
+            setServiceRegisterData((pre) => {
+                const newData = { ...pre }
+                const foundRegister = newData.repairRegisters?.find(
+                    (item) => item.service.id === serviceId
+                )
+                if (foundRegister?.repairRegisterComponents) {
+                    foundRegister.repairRegisterComponents = [...components]
+                }
+                return newData
+            })
+        }
+    }
+
+    useEffect(() => {
+        if (errorMessage) {
+            setErrorMessage('')
+        }
+    }, [serviceRegisterData])
+
+    useEffect(() => {
+        if (serviceRegisterData.repairRegisters.length > 0) {
+            const totalHours = serviceRegisterData.repairRegisters.reduce(
+                (sum, item) => sum + item.service.duration,
+                0
+            )
+            const totalDays = totalHours / 24 // Chuyển giờ thành ngày
+
+            const currentDate = new Date()
+            currentDate.setDate(currentDate.getDate() + totalDays)
+            setServiceRegisterData((pre) => ({
+                ...pre,
+                expectedCompletionDate: currentDate
+            }))
+        }
+    }, [serviceRegisterData.repairRegisters])
+
     return (
         <>
             {showDetailService ? (
                 <div className="">
-                    <DetailRepairModal data={serviceRegisterData} />
+                    <DetailRepairModal
+                        data={serviceRegisterData}
+                        onAddService={onAddService}
+                        onDeleteService={onDeleteService}
+                        onAddStaffInCharge={onAddStaffInCharge}
+                        onAddComponentUsed={onAddComponentUsed}
+                    />
                     <div className="page-btns center">
                         <button
                             className="repair-modal__button cancel-button"
@@ -112,25 +293,38 @@ export default function ReceiveRepairModal({ onClose }) {
                         <h2 className="repair-modal__title">Thông tin xe</h2>
                         <div className="repair-modal__client-info">
                             <div className="repair-modal__input-item">
-                                <label htmlFor="licensePlate">Biển số xe</label>
-                                <div className="input-form">
-                                    <input
-                                        className="w-100"
-                                        type="text"
-                                        id="licensePlate"
-                                        placeholder="51G-12345"
-                                        value={serviceRegisterData?.car?.licensePlate}
-                                        onChange={(e) =>
-                                            setServiceRegisterData((pre) => ({
-                                                ...pre,
-                                                car: {
-                                                    ...pre.car,
-                                                    licensePlate: e.target.value
-                                                }
-                                            }))
-                                        }
-                                    />
-                                </div>
+                                <label>Biển số xe</label>
+                                <Dropdown
+                                    value={serviceRegisterData.car.licensePlate}
+                                    items={searchResults.cars}
+                                    loading={isSearching.cars}
+                                    onChange={(e) => {
+                                        const value = e.target.value
+                                        setServiceRegisterData((pre) => ({
+                                            ...pre,
+                                            car: {
+                                                ...pre.car,
+                                                licensePlate: value
+                                            }
+                                        }))
+                                        searchCars(value)
+                                    }}
+                                    onSelect={(car) => {
+                                        setServiceRegisterData((pre) => ({
+                                            ...pre,
+                                            car: {
+                                                ...car,
+                                                customer: car.customer || pre.car.customer
+                                            }
+                                        }))
+                                    }}
+                                    renderItem={(car) => (
+                                        <div>
+                                            <p>{car.licensePlate}</p>
+                                        </div>
+                                    )}
+                                    placeholder="51G-12345"
+                                />
                             </div>
                             <div className="repair-modal__input-item">
                                 <label htmlFor="carModel">Mẫu xe</label>
@@ -243,29 +437,49 @@ export default function ReceiveRepairModal({ onClose }) {
                         <h2 className="repair-modal__title">Thông tin khách hàng</h2>
                         <div className="repair-modal__client-info">
                             <div className="repair-modal__input-item">
-                                <label htmlFor="phoneNumber">Số điện thoại</label>
-                                <div className="input-form">
-                                    <input
-                                        className="w-100"
-                                        type="text"
-                                        id="phoneNumber"
-                                        placeholder="0913123123"
-                                        value={serviceRegisterData?.car?.customer?.phone}
-                                        onChange={(e) =>
-                                            setServiceRegisterData((pre) => ({
-                                                ...pre,
-                                                car: {
-                                                    ...pre.car,
-                                                    customer: {
-                                                        ...pre.car.customer,
-                                                        phone: e.target.value
-                                                    }
+                                <label htmlFor="cccd">CCCD</label>
+                                <Dropdown
+                                    value={serviceRegisterData.car.customer.indentifyCard}
+                                    items={searchResults.customers}
+                                    loading={isSearching.customers}
+                                    onChange={(e) => {
+                                        const value = e.target.value
+                                        setServiceRegisterData((pre) => ({
+                                            ...pre,
+                                            car: {
+                                                ...pre.car,
+                                                customer: {
+                                                    ...pre.car.customer,
+                                                    indentifyCard: value
                                                 }
-                                            }))
-                                        }
-                                    />
-                                </div>
+                                            }
+                                        }))
+                                        searchCustomers(value)
+                                    }}
+                                    onSelect={(customer) => {
+                                        setServiceRegisterData((pre) => ({
+                                            ...pre,
+                                            car: {
+                                                ...pre.car,
+                                                customer: customer
+                                            }
+                                        }))
+                                    }}
+                                    renderItem={(customer) => (
+                                        <div>
+                                            <div>{customer.indentifyCard}</div>
+                                            <div
+                                                className="text-muted"
+                                                style={{ fontSize: '1.2rem' }}
+                                            >
+                                                {customer.name}
+                                            </div>
+                                        </div>
+                                    )}
+                                    placeholder="123456789012"
+                                />
                             </div>
+
                             <div className="repair-modal__input-item">
                                 <label htmlFor="customerName">Tên khách hàng</label>
                                 <div className="input-form">
@@ -342,14 +556,14 @@ export default function ReceiveRepairModal({ onClose }) {
                                 </div>
                             </div>
                             <div className="repair-modal__input-item">
-                                <label htmlFor="cccd">CCCD</label>
+                                <label htmlFor="phoneNumber">Số điện thoại</label>
                                 <div className="input-form">
                                     <input
                                         className="w-100"
                                         type="text"
-                                        id="cccd"
-                                        placeholder="123456789012"
-                                        value={serviceRegisterData?.car?.customer?.indentifyCard}
+                                        id="phoneNumber"
+                                        placeholder="0913123123"
+                                        value={serviceRegisterData?.car?.customer?.phone}
                                         onChange={(e) =>
                                             setServiceRegisterData((pre) => ({
                                                 ...pre,
@@ -357,7 +571,7 @@ export default function ReceiveRepairModal({ onClose }) {
                                                     ...pre.car,
                                                     customer: {
                                                         ...pre.car.customer,
-                                                        indentifyCard: e.target.value
+                                                        phone: e.target.value
                                                     }
                                                 }
                                             }))
@@ -392,6 +606,7 @@ export default function ReceiveRepairModal({ onClose }) {
                         </div>
 
                         <div className="repair-modal__button-container mt-2">
+                            {errorMessage && <p className="error-message">{errorMessage}</p>}
                             <button
                                 className="repair-modal__button cancel-button"
                                 onClick={onClose}
@@ -401,7 +616,13 @@ export default function ReceiveRepairModal({ onClose }) {
                             <button
                                 className="repair-modal__button confirm-button"
                                 onClick={() => {
-                                    setShowDetailService(true)
+                                    if (validateCarCustomerInfo()) {
+                                        setShowDetailService(true)
+                                    } else {
+                                        setErrorMessage(
+                                            'Vui lòng nhập đầy đủ thông tin xe và khách hàng'
+                                        )
+                                    }
                                 }}
                             >
                                 Xác nhận

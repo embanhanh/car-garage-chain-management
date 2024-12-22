@@ -1,4 +1,11 @@
 export class Employee {
+    static relations = [
+        {
+            collection: 'garages',
+            foreignKey: 'garageId',
+            as: 'garage'
+        }
+    ]
     constructor({
         id = '',
         name = '',
@@ -12,6 +19,7 @@ export class Employee {
         salary = '',
         workHours = '',
         garageId = '',
+        garage = null,
         createdAt = new Date()
     } = {}) {
         this.id = id
@@ -27,6 +35,7 @@ export class Employee {
         this.workHours = workHours
         this.garageId = garageId
         this.createdAt = createdAt
+        this.garage = garage
     }
 
     toFirestore() {
