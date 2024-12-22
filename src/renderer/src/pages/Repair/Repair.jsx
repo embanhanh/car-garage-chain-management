@@ -38,17 +38,6 @@ const Repair = () => {
         fetchData()
     }, [])
 
-    // const mockData = [...Array(20)].map((_, index) => ({
-    //     id: index + 1,
-    //     repairId: `PCS${String(index + 1).padStart(5, '0')}`,
-    //     staff: `Nguyễn Văn ${String.fromCharCode(65 + index)}`,
-    //     customer: `Trần Thị ${String.fromCharCode(65 + index)}`,
-    //     createDate: new Date(2024, 0, index + 1).toLocaleDateString('vi-VN'),
-    //     licensePlate: `51G-${String(12345 + index).padStart(5, '0')}`,
-    //     completionDate: new Date(2024, 0, index + 5).toLocaleDateString('vi-VN'),
-    //     status: index % 3 === 0 ? 'Đang sửa chữa' : 'Hoàn thành'
-    // }))
-
     const totalPages = Math.ceil(repairRegisterData.length / itemsPerPage)
 
     const currentData = useMemo(() => {
@@ -64,6 +53,14 @@ const Repair = () => {
         },
         [totalPages]
     )
+
+    const onAddService = async (selectedService) => {}
+
+    const onDeleteService = async (serviceId) => {}
+
+    const onAddComponentUsed = async (repairComponents, serviceId) => {}
+
+    const onAddStaffInCharge = async (employees, serviceId) => {}
 
     useEffect(() => {
         console.log(repairRegisterData)
@@ -119,9 +116,13 @@ const Repair = () => {
                                 <td>{repair.id}</td>
                                 <td>{repair.employee?.name}</td>
                                 <td>{repair.car?.customer?.name}</td>
-                                <td>{new Date(repair.createdAt).toDateString()}</td>
+                                <td>{new Date(repair.createdAt).toLocaleDateString('vi-VN')}</td>
                                 <td>{repair.car?.licensePlate}</td>
-                                <td>{repair.expectedCompletionDate + ''}</td>
+                                <td>
+                                    {new Date(repair.expectedCompletionDate).toLocaleDateString(
+                                        'vi-VN'
+                                    )}
+                                </td>
                                 <td>
                                     <div
                                         className={`table__status ${repair.status === 'Đang sửa chữa' ? 'car-completed' : 'car-normal'}`}
@@ -170,7 +171,7 @@ const Repair = () => {
                 isOpen={openReceiveRepairModal}
                 onClose={() => setOpenReceiveRepairModal(false)}
                 showHeader={false}
-                width="680px"
+                width="800px"
             >
                 <ReceiveRepairModal onClose={() => setOpenReceiveRepairModal(false)} />
             </Modal>
@@ -183,7 +184,7 @@ const Repair = () => {
                     })
                 }
                 showHeader={false}
-                width="680px"
+                width="800px"
             >
                 <DetailRepairModal
                     onClose={() =>
@@ -193,6 +194,10 @@ const Repair = () => {
                         })
                     }
                     data={openDetailRepairModal.data}
+                    onAddComponentUsed={onAddComponentUsed}
+                    onAddService={onAddService}
+                    onDeleteService={onDeleteService}
+                    onAddStaffInCharge={onAddStaffInCharge}
                 />
             </Modal>
             <Modal

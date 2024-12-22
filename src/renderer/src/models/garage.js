@@ -1,19 +1,19 @@
 export class Garage {
-    static relations = [
-        {
-            collection: 'employees',
-            foreignKey: 'managerId',
-            as: 'manager'
-        }
-    ]
+    // static relations = [
+    //     {
+    //         collection: 'employees',
+    //         foreignKey: 'managerId',
+    //         as: 'manager'
+    //     }
+    // ]
     constructor({
         id = '',
         name = '',
         address = '',
         phone = '',
         createdAt = new Date(),
-        managerId = '',
-        manager = null
+        managerId = ''
+        // manager = null
     } = {}) {
         this.id = id
         this.name = name
@@ -21,7 +21,7 @@ export class Garage {
         this.phone = phone
         this.createdAt = createdAt
         this.managerId = managerId
-        this.manager = manager
+        // this.manager = manager
     }
 
     toFirestore() {
