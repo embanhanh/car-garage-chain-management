@@ -115,7 +115,7 @@ export default function ReceiveRepairModal({ onClose }) {
                         employeeIds: item.employees?.map((emp) => emp.id),
                         repairRegisterComponents: item.repairRegisterComponents.map((comp) => ({
                             componentId: comp.component.id,
-                            quantity: item.quantity
+                            quantity: comp.quantity
                         }))
                     })
                     data.repairRegisterIds.push(newData.id)
@@ -205,6 +205,21 @@ export default function ReceiveRepairModal({ onClose }) {
         }
     }
 
+    const onCompleteService = async (serviceId) => {
+        if (serviceId) {
+            setServiceRegisterData((pre) => {
+                const newData = { ...pre }
+                const foundRegister = newData.repairRegisters?.find(
+                    (item) => item.service.id === serviceId
+                )
+                if (foundRegister) {
+                    foundRegister.status = 'Đã hoàn thành'
+                }
+                return newData
+            })
+        }
+    }
+
     const onAddStaffInCharge = (staffs, serviceId) => {
         if (staffs && serviceId) {
             setServiceRegisterData((pre) => {
@@ -268,6 +283,7 @@ export default function ReceiveRepairModal({ onClose }) {
                         onDeleteService={onDeleteService}
                         onAddStaffInCharge={onAddStaffInCharge}
                         onAddComponentUsed={onAddComponentUsed}
+                        onCompleteService={onCompleteService}
                     />
                     <div className="page-btns center">
                         <button

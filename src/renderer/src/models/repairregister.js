@@ -27,7 +27,7 @@ export class RepairRegister {
         service = null,
         employeeIds = [],
         employees = [],
-        repairRegisterComponents: [],
+        repairRegisterComponents = [],
         createdAt = new Date()
     } = {}) {
         this.id = id

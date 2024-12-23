@@ -8,7 +8,10 @@ import { dbService } from '../../services/DatabaseService'
 import Dropdown from '../Dropdown'
 
 const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
-    const [openUpdateComponentModal, setOpenUpdateComponentModal] = useState(false)
+    const [openUpdateComponentModal, setOpenUpdateComponentModal] = useState({
+        show: false,
+        data: null
+    })
     const [componentUsedData, setComponentUsedData] = useState(data?.repairRegisterComponents || [])
     const [componentName, setComponentName] = useState('')
     const [searchResults, setSearchResults] = useState([])
@@ -51,6 +54,22 @@ const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
             setIsSearching(false)
         }
     }, 300)
+
+    const handleConfirmUpdateComponent = (quantity) => {
+        if (openUpdateComponentModal.data) {
+            setComponentUsedData((pre) => {
+                const index = pre.findIndex(
+                    (item) => item.component.id === openUpdateComponentModal.data.component.id
+                )
+                pre[index].quantity = quantity
+                return pre
+            })
+            setOpenUpdateComponentModal({
+                show: false,
+                data: null
+            })
+        }
+    }
 
     return (
         <>
@@ -178,7 +197,10 @@ const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
                                                     <div
                                                         className="table__action-item"
                                                         onClick={() => {
-                                                            setOpenUpdateComponentModal(true)
+                                                            setOpenUpdateComponentModal({
+                                                                show: true,
+                                                                data: item
+                                                            })
                                                         }}
                                                     >
                                                         Cập nhật
@@ -232,12 +254,26 @@ const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
                 </div>
             </div>
             <Modal
-                isOpen={openUpdateComponentModal}
-                onClose={() => setOpenUpdateComponentModal(false)}
+                isOpen={openUpdateComponentModal.show}
+                onClose={() =>
+                    setOpenUpdateComponentModal({
+                        show: false,
+                        data: null
+                    })
+                }
                 showHeader={false}
                 width="500px"
             >
-                <UpdateComponent onClose={() => setOpenUpdateComponentModal(false)} />
+                <UpdateComponent
+                    onClose={() =>
+                        setOpenUpdateComponentModal({
+                            show: false,
+                            data: null
+                        })
+                    }
+                    data={openUpdateComponentModal.data}
+                    onConfirm={handleConfirmUpdateComponent}
+                />
             </Modal>
         </>
     )
