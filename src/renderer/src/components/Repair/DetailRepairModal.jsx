@@ -13,7 +13,8 @@ function DetailRepairModal({
     onAddService,
     onDeleteService,
     onAddStaffInCharge,
-    onAddComponentUsed
+    onAddComponentUsed,
+    onCompleteService
 }) {
     const [repairData, setRepairData] = useState(data)
     const [openStaffInChargeModal, setOpenStaffInChargeModal] = useState({
@@ -163,7 +164,18 @@ function DetailRepairModal({
                                                         >
                                                             Chi tiết phụ tùng
                                                         </div>
-
+                                                        {register.status === 'Đang sửa chữa' && (
+                                                            <div
+                                                                className="table__action-item"
+                                                                onClick={async () =>
+                                                                    await onCompleteService(
+                                                                        register.service.id
+                                                                    )
+                                                                }
+                                                            >
+                                                                Hoàn thành
+                                                            </div>
+                                                        )}
                                                         <div
                                                             className="table__action-item"
                                                             onClick={async () =>

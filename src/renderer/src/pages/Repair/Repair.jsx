@@ -8,13 +8,12 @@ import {
 import { faCalendar } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { dbService } from '../../services/DatabaseService'
-import { doc, onSnapshot } from 'firebase/firestore'
+import { doc, onSnapshot, collection } from 'firebase/firestore'
 import Pagination from '../../components/Pagination'
 import './Repair.css'
 import Modal from '../../components/Modal'
 import ReceiveRepairModal from '../../components/Repair/ReceiveRepairModal'
 import DetailRepairModal from '../../components/Repair/DetailRepairModal'
-import ComponentUsedModal from '../../components/Repair/ComponentUsedModal'
 import DetailInvoiceModal from '../../components/Repair/DetailInvoice'
 import { db } from '../../firebase.config'
 
@@ -25,17 +24,20 @@ const Repair = () => {
         data: null
     })
     const [openReceiveRepairModal, setOpenReceiveRepairModal] = useState(false)
-    const [openComponentUsedModal, setOpenComponentUsedModal] = useState(false)
     const [openInvoiceModal, setOpenInvoiceModal] = useState(false)
     const [repairRegisterData, setRepairRegisterData] = useState([])
     const itemsPerPage = 8
 
+    const fetchData = async () => {
+        const data = await dbService.getAll('serviceregisters')
+        setRepairRegisterData(data)
+    }
+
     useEffect(() => {
-        const fetchData = async () => {
-            const data = await dbService.getAll('serviceregisters')
-            setRepairRegisterData(data)
-        }
-        fetchData()
+        const unsubscribe = onSnapshot(collection(db, 'serviceregisters'), async (snapshot) => {
+            await fetchData()
+        })
+        return () => unsubscribe()
     }, [])
 
     const totalPages = Math.ceil(repairRegisterData.length / itemsPerPage)
@@ -54,16 +56,103 @@ const Repair = () => {
         [totalPages]
     )
 
-    const onAddService = async (selectedService) => {}
+    const onAddService = async (selectedService) => {
+        if (
+            selectedService !== null &&
+            !openDetailRepairModal.data.repairRegisters.some(
+                (item) => item.service.id === selectedService.id
+            )
+        ) {
+            const newData = {
+                status: 'Đang sửa chữa',
+                serviceId: selectedService.id,
+                employeeIds: [],
+                repairRegisterComponents: []
+            }
+            const newRepairRegister = await dbService.add('repairregisters', newData)
+            await dbService.updateFields('serviceregisters', openDetailRepairModal.data.id, {
+                repairRegisterIds: [
+                    ...openDetailRepairModal.data.repairRegisterIds,
+                    newRepairRegister.id
+                ]
+            })
+        }
+    }
 
-    const onDeleteService = async (serviceId) => {}
+    const onDeleteService = async (serviceId) => {
+        // Xóa một repairRegister mới và thêm vào registerService
+        if (serviceId) {
+            const repairRegister = openDetailRepairModal.data?.repairRegisters?.find(
+                (item) => item.service.id === serviceId
+            )
+            await dbService.delete('repairregisters', repairRegister.id)
+            // Cập nhật registerService
+            await dbService.updateFields('serviceregisters', openDetailRepairModal.data.id, {
+                repairRegisterIds: openDetailRepairModal.data.repairRegisterIds.filter(
+                    (id) => id !== repairRegister.id
+                )
+            })
+        }
+    }
 
-    const onAddComponentUsed = async (repairComponents, serviceId) => {}
+    const onCompleteService = async (serviceId) => {
+        if (serviceId) {
+            await dbService.updateFields(
+                'repairregisters',
+                openDetailRepairModal.data?.repairRegisters?.find(
+                    (item) => item.service.id === serviceId
+                ).id,
+                {
+                    status: 'Đã hoàn thành'
+                }
+            )
+            await fetchData()
+        }
+    }
 
-    const onAddStaffInCharge = async (employees, serviceId) => {}
+    const onAddComponentUsed = async (repairComponents, serviceId) => {
+        if (repairComponents && serviceId) {
+            await dbService.updateFields(
+                'repairregisters',
+                openDetailRepairModal.data.repairRegisters.find(
+                    (item) => item.service.id === serviceId
+                ).id,
+                {
+                    repairRegisterComponents: [
+                        ...repairComponents.map((item) => ({
+                            componentId: item.component.id,
+                            quantity: item.quantity
+                        }))
+                    ]
+                }
+            )
+            await fetchData()
+        }
+    }
+
+    const onAddStaffInCharge = async (employees, serviceId) => {
+        if (employees && serviceId) {
+            await dbService.updateFields(
+                'repairregisters',
+                openDetailRepairModal.data.repairRegisters.find(
+                    (item) => item.service.id === serviceId
+                ).id,
+                {
+                    employeeIds: [...employees.map((item) => item.id)]
+                }
+            )
+            await fetchData()
+        }
+    }
 
     useEffect(() => {
         console.log(repairRegisterData)
+        if (openDetailRepairModal.data && openDetailRepairModal.show) {
+            setOpenDetailRepairModal((pre) => ({
+                ...pre,
+                data: repairRegisterData.find((item) => item.id === pre.data.id)
+            }))
+        }
     }, [repairRegisterData])
 
     return (
@@ -76,10 +165,7 @@ const Repair = () => {
                     <p>Tiếp nhận sửa chữa</p>
                 </button>
                 <div className="repair-page__header-filter">
-                    <button
-                        className="page__header-button"
-                        onClick={() => setOpenComponentUsedModal(true)}
-                    >
+                    <button className="page__header-button">
                         <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
                         Sắp xếp
                     </button>
@@ -153,7 +239,17 @@ const Repair = () => {
                                                 Chi tiết
                                             </div>
 
-                                            <div className="table__action-item">Xóa</div>
+                                            <div
+                                                className="table__action-item"
+                                                onClick={async () => {
+                                                    await dbService.softDelete(
+                                                        'serviceregisters',
+                                                        repair.id
+                                                    )
+                                                }}
+                                            >
+                                                Xóa
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
@@ -198,15 +294,8 @@ const Repair = () => {
                     onAddService={onAddService}
                     onDeleteService={onDeleteService}
                     onAddStaffInCharge={onAddStaffInCharge}
+                    onCompleteService={onCompleteService}
                 />
-            </Modal>
-            <Modal
-                isOpen={openComponentUsedModal}
-                onClose={() => setOpenComponentUsedModal(false)}
-                showHeader={false}
-                width="900px"
-            >
-                <ComponentUsedModal onClose={() => setOpenComponentUsedModal(false)} />
             </Modal>
             <Modal
                 isOpen={openInvoiceModal}
