@@ -9,7 +9,8 @@ export default function SearchDropdown({
     className = '',
     placeholder = '',
     onChange,
-    loading = false
+    loading = false,
+    disabled = false
 }) {
     const [isOpen, setIsOpen] = useState(false)
     const dropdownRef = useRef(null)
@@ -34,6 +35,7 @@ export default function SearchDropdown({
                 onFocus={() => setIsOpen(true)}
                 placeholder={placeholder}
                 className="w-100"
+                disabled={disabled}
             />
             {isOpen && (items.length > 0 || loading) && (
                 <div className="dropdown-list">

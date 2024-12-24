@@ -6,10 +6,12 @@ import {
     faSearch,
     faEllipsisVertical
 } from '@fortawesome/free-solid-svg-icons'
+import { onSnapshot, collection } from 'firebase/firestore'
 import { dbService } from '../../services/DatabaseService'
 import Pagination from '../../components/Pagination'
 import Modal from '../../components/Modal'
 import UpDetailCarModal from '../../components/Car/UpDetailCarModal'
+import { db } from '../../firebase.config'
 import './Car.css'
 
 const Car = () => {
@@ -22,23 +24,16 @@ const Car = () => {
     const [carData, setCarData] = useState([])
     const itemsPerPage = 8
 
+    const fetchData = async () => {
+        const data = await dbService.getAll('cars')
+        setCarData(data)
+    }
     useEffect(() => {
-        const fetchData = async () => {
-            const data = await dbService.getAll('cars')
-            setCarData(data)
-        }
-        fetchData()
+        const unsub = onSnapshot(collection(db, 'cars'), async (snapshot) => {
+            await fetchData()
+        })
+        return () => unsub()
     }, [])
-
-    // const mockData = [...Array(57)].map((_, index) => ({
-    //     id: index + 1,
-    //     licensePlate: `51G-${String(12345 + index).padStart(5, '0')}`,
-    //     model: index % 2 === 0 ? 'Camry' : 'Civic',
-    //     brand: index % 2 === 0 ? 'Toyota' : 'Honda',
-    //     year: 2020 + (index % 5),
-    //     owner: `Nguyễn Văn ${String.fromCharCode(65 + index)}`,
-    //     status: index % 2 === 0 ? 'Đang sửa chữa' : 'Hoàn thành'
-    // }))
 
     const totalPages = Math.ceil(carData.length / itemsPerPage)
 
@@ -46,24 +41,6 @@ const Car = () => {
         const start = (currentPage - 1) * itemsPerPage
         return carData.slice(start, start + itemsPerPage)
     }, [currentPage, carData])
-
-    const onSave = async (carData) => {
-        try {
-            const data = { ...carData }
-            const newData = await dbService.update('cars', data.id, data)
-            setCarData((pre) => {
-                index = pre.findIndex((car) => car.id === newData.id)
-                if (index !== -1) {
-                    pre[index] = newData
-                    return pre
-                }
-                return pre
-            })
-            alert('Cập nhật thành công')
-        } catch (e) {
-            alert(`có lỗi xảy ra: ${e.message}`)
-        }
-    }
 
     const handlePageChange = useCallback(
         (page) => {
@@ -100,7 +77,7 @@ const Car = () => {
                             <th>Hãng xe</th>
                             <th>Năm sản xuất</th>
                             <th>Tên chủ xe</th>
-                            <th>Trạng thái</th>
+                            {/* <th>Trạng thái</th> */}
                             <th>Thao tác</th>
                         </tr>
                     </thead>
@@ -108,18 +85,18 @@ const Car = () => {
                         {currentData.map((car, index) => (
                             <tr key={car.id}>
                                 <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                                <td>{car.id}</td>
+                                <td>{car.licensePlate}</td>
                                 <td>{car.model}</td>
                                 <td>{car.brand}</td>
                                 <td>{car.manufacturingYear}</td>
                                 <td>{car.customer?.name}</td>
-                                <td>
+                                {/* <td>
                                     <div
                                         className={`table__status ${car.status === 'Đang sửa chữa' ? 'car-repairing' : 'car-normal'}`}
                                     >
                                         {car.status}
                                     </div>
-                                </td>
+                                </td> */}
                                 <td className="overflow-visible">
                                     <div className="table__actions">
                                         <FontAwesomeIcon
@@ -155,7 +132,14 @@ const Car = () => {
                                             >
                                                 Cập nhật
                                             </div>
-                                            <div className="table__action-item">Xóa</div>
+                                            <div
+                                                className="table__action-item"
+                                                onClick={async () => {
+                                                    await dbService.softDelete('cars', car.id)
+                                                }}
+                                            >
+                                                Xóa
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
@@ -178,7 +162,6 @@ const Car = () => {
                 <UpDetailCarModal
                     onClose={() => setCarDetail({ show: false, data: null })}
                     data={carDetail.data}
-                    onSave={onSave}
                     type={carDetail.type}
                 />
             </Modal>
