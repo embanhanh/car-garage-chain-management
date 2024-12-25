@@ -12,7 +12,7 @@ export class Employee {
         phone = '',
         email = '',
         address = '',
-        indentifyCard = '',
+        identifyCard = '',
         birthday = '',
         position = '',
         gender = '',
@@ -27,7 +27,7 @@ export class Employee {
         this.phone = phone
         this.email = email
         this.address = address
-        this.indentifyCard = indentifyCard
+        this.identifyCard = identifyCard
         this.birthday = birthday
         this.position = position
         this.gender = gender
@@ -44,7 +44,7 @@ export class Employee {
             phone: this.phone,
             email: this.email,
             address: this.address,
-            indentifyCard: this.indentifyCard,
+            identifyCard: this.identifyCard,
             birthday: this.birthday,
             position: this.position,
             gender: this.gender,

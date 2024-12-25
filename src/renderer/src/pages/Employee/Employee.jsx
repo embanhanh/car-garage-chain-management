@@ -7,7 +7,7 @@ import {
     faEllipsisVertical
 } from '@fortawesome/free-solid-svg-icons'
 import Pagination from '../../components/Pagination'
-import { useState, useEffect , useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import ZTable from '../../components/ztable/ztable'
 import Modal from '../../components/Modal'
 import AddEmployee from './add_employee'
@@ -15,7 +15,7 @@ import { dbService } from '../../services/DatabaseService.js'
 import { doc, onSnapshot, collection } from 'firebase/firestore'
 import { db } from '../../firebase.config'
 
-function Employee() { 
+function Employee() {
     const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 9
     const columns = [
@@ -28,8 +28,6 @@ function Employee() {
         { name: 'Lương', field: 'salary', width: '15%' },
         { name: '', field: 'actions', width: '5%' }
     ]
-
-
 
     // const data = [
     //   {
@@ -69,7 +67,7 @@ function Employee() {
     const fetchData = async () => {
         const data = await dbService.getAll('employees')
         setListEmployees(data)
-        console.log("check data employees:", data)
+        console.log('check data employees:', data)
     }
 
     useEffect(() => {

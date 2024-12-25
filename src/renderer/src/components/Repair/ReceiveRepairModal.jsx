@@ -18,7 +18,7 @@ export default function ReceiveRepairModal({ onClose }) {
                 phone: '',
                 email: '',
                 address: '',
-                indentifyCard: '',
+                identifyCard: '',
                 birthday: new Date()
             }
         },
@@ -76,12 +76,12 @@ export default function ReceiveRepairModal({ onClose }) {
         try {
             const customers = await dbService.findBy('customers', [
                 {
-                    field: 'indentifyCard',
+                    field: 'identifyCard',
                     operator: '>=',
                     value: searchText
                 },
                 {
-                    field: 'indentifyCard',
+                    field: 'identifyCard',
                     operator: '<=',
                     value: searchText + '\uf8ff'
                 }
@@ -124,9 +124,9 @@ export default function ReceiveRepairModal({ onClose }) {
 
             const customers = await dbService.findBy('customers', [
                 {
-                    field: 'indentifyCard',
+                    field: 'identifyCard',
                     operator: '==',
-                    value: serviceRegisterData.car.customer.indentifyCard
+                    value: serviceRegisterData.car.customer.identifyCard
                 }
             ])
 
@@ -168,7 +168,7 @@ export default function ReceiveRepairModal({ onClose }) {
             serviceRegisterData.car.customer.phone &&
             serviceRegisterData.car.customer.email &&
             serviceRegisterData.car.customer.address &&
-            serviceRegisterData.car.customer.indentifyCard &&
+            serviceRegisterData.car.customer.identifyCard &&
             serviceRegisterData.car.customer.birthday &&
             serviceRegisterData.car.licensePlate &&
             serviceRegisterData.car.model &&
@@ -455,7 +455,7 @@ export default function ReceiveRepairModal({ onClose }) {
                             <div className="repair-modal__input-item">
                                 <label htmlFor="cccd">CCCD</label>
                                 <Dropdown
-                                    value={serviceRegisterData.car.customer.indentifyCard}
+                                    value={serviceRegisterData.car.customer.identifyCard}
                                     items={searchResults.customers}
                                     loading={isSearching.customers}
                                     onChange={(e) => {
@@ -466,7 +466,7 @@ export default function ReceiveRepairModal({ onClose }) {
                                                 ...pre.car,
                                                 customer: {
                                                     ...pre.car.customer,
-                                                    indentifyCard: value
+                                                    identifyCard: value
                                                 }
                                             }
                                         }))
@@ -483,7 +483,7 @@ export default function ReceiveRepairModal({ onClose }) {
                                     }}
                                     renderItem={(customer) => (
                                         <div>
-                                            <div>{customer.indentifyCard}</div>
+                                            <div>{customer.identifyCard}</div>
                                             <div
                                                 className="text-muted"
                                                 style={{ fontSize: '1.2rem' }}
