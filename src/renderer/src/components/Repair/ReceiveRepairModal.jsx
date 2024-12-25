@@ -3,6 +3,7 @@ import DetailRepairModal from './DetailRepairModal'
 import Dropdown from '../Dropdown'
 import { debounce } from 'lodash'
 import { dbService } from '../../services/DatabaseService'
+import { format } from 'date-fns'
 
 export default function ReceiveRepairModal({ onClose }) {
     const [serviceRegisterData, setServiceRegisterData] = useState({
@@ -554,7 +555,10 @@ export default function ReceiveRepairModal({ onClose }) {
                                         type="date"
                                         id="birthday"
                                         placeholder="01/01/1990"
-                                        value={serviceRegisterData?.car?.customer?.birthday}
+                                        value={format(
+                                            new Date(serviceRegisterData?.car?.customer?.birthday),
+                                            'yyyy-MM-dd'
+                                        )}
                                         onChange={(e) =>
                                             setServiceRegisterData((pre) => ({
                                                 ...pre,
