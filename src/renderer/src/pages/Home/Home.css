@@ -19,6 +19,10 @@
     align-items: center;
 }
 
+.home-page__overview-item-value {
+    align-self: flex-end;
+}
+
 .home-page__content-client {
     background-color: #fff;
     border-radius: 8px;

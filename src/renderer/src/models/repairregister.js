@@ -7,11 +7,6 @@ export class RepairRegister {
             isArray: true
         },
         {
-            collection: 'serviceregisters',
-            foreignKey: 'serviceRegisterId',
-            as: 'serviceRegister'
-        },
-        {
             collection: 'services',
             foreignKey: 'serviceId',
             as: 'service'
@@ -28,19 +23,15 @@ export class RepairRegister {
     constructor({
         id = '',
         status = '',
-        serviceRegisterId = '',
-        serviceRegister = null,
         serviceId = '',
         service = null,
         employeeIds = [],
         employees = [],
-        repairRegisterComponents: [],
+        repairRegisterComponents = [],
         createdAt = new Date()
     } = {}) {
         this.id = id
         this.status = status
-        this.serviceRegisterId = serviceRegisterId
-        this.serviceRegister = serviceRegister
         this.serviceId = serviceId
         this.service = service
         this.employeeIds = employeeIds
@@ -53,7 +44,6 @@ export class RepairRegister {
         return {
             id: this.id,
             status: this.status,
-            serviceRegisterId: this.serviceRegisterId,
             serviceId: this.serviceId,
             employeeIds: this.employeeIds,
             createdAt: this.createdAt,

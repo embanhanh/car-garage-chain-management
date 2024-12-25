@@ -142,10 +142,8 @@ class AuthService {
             const hashedPassword = await this.hashPassword(newPassword)
 
             // Cập nhật mật khẩu
-            await dbService.update('users', userId, {
-                ...user,
+            await dbService.updateFields('users', userId, {
                 password: hashedPassword
-                // updatedAt: new Date()
             })
 
             return true

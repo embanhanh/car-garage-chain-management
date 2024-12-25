@@ -91,6 +91,7 @@
     display: flex;
     gap: 15px;
     justify-content: flex-end;
+    align-items: center;
 }
 
 .repair-modal__button {
@@ -106,10 +107,18 @@
     color: white;
 }
 
+.repair-modal__button.confirm-button:hover {
+    opacity: 0.8;
+}
+
 .repair-modal__button.cancel-button {
     background-color: #fff;
     border: 1px solid #b9bdc7;
     color: gray;
+}
+.repair-modal__button.cancel-button:hover {
+    background-color: red;
+    color: white;
 }
 
 .repair-modal__separate {
@@ -173,6 +182,15 @@
     text-align: center;
 }
 
+.detail-repair-table td:nth-child(4) {
+    overflow: visible;
+}
+
+.detail-repair-table td:nth-child(2),
+.detail-repair-table th:nth-child(2) {
+    width: 150px;
+}
+
 /* Staff In Charge Modal */
 
 .staff-in-charge-modal {
@@ -193,6 +211,10 @@
     text-align: center;
 }
 
+.staff-in-charge-table td:nth-child(4) {
+    overflow: visible;
+}
+
 /* Component Used Modal */
 
 .component-used-modal {
@@ -204,6 +226,10 @@
 .component-used-table td:nth-child(3),
 .component-used-table th:nth-child(3) {
     text-align: center;
+}
+
+.component-used-table td:nth-child(6) {
+    overflow: visible;
 }
 
 /* Detail Invoice Modal */
