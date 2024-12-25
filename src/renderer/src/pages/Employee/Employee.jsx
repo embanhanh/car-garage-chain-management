@@ -7,46 +7,29 @@ import {
     faEllipsisVertical
 } from '@fortawesome/free-solid-svg-icons'
 import Pagination from '../../components/Pagination'
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useEffect , useMemo, useCallback } from 'react'
 import ZTable from '../../components/ztable/ztable'
 import Modal from '../../components/Modal'
 import AddEmployee from './add_employee'
+import { dbService } from '../../services/DatabaseService.js'
+import { doc, onSnapshot, collection } from 'firebase/firestore'
+import { db } from '../../firebase.config'
 
-function Employee() {
+function Employee() { 
     const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 9
-
-    function generateRandomIDNumber() {
-        const regionCode = Math.floor(10 + Math.random() * 90) // Random 2-digit region code (10 to 99)
-        const randomDigits = Math.floor(1000000000 + Math.random() * 9000000000) // Random 10-digit number
-        return `${regionCode}${randomDigits}`
-    }
-    function generateRandomIDNumber() {
-        const regionCode = Math.floor(10 + Math.random() * 90) // Random 2-digit region code (10 to 99)
-        const randomDigits = Math.floor(1000000000 + Math.random() * 9000000000) // Random 10-digit number
-        return `${regionCode}${randomDigits}`
-    }
-
-    const mockData = [...Array(20)].map((_, index) => ({
-        id: 'NV' + (index + 1).toString(),
-        name: `Phạm Ngọc ${String(12345 + index).padStart(5, '0')}`,
-        email: `phamngoc${String(12345 + index).padStart(5, '0')}@gmail.com`,
-        passport: generateRandomIDNumber(),
-        sex: Math.random() % 2 ? 'Nam' : 'Nữ',
-        position:
-            Math.random() % 3 == 0 ? (Math.random() % 2 ? 'Quản lý' : 'Thu ngân') : 'Kỹ thuật',
-        salary: generateRandomIDNumber()
-    }))
     const columns = [
         { name: 'Mã NV', field: 'id', width: '8%' },
         { name: 'Họ tên', field: 'name', width: '20%' },
         { name: 'Email', field: 'email', width: '25%' },
-        { name: 'CCCD', field: 'passport', width: '15%' },
-        { name: 'Giới tính', field: 'sex', width: '10%' },
+        { name: 'CCCD', field: 'identifyCard', width: '15%' },
+        { name: 'Giới tính', field: 'gender', width: '10%' },
         { name: 'Vị trí', field: 'position', width: '10%' },
         { name: 'Lương', field: 'salary', width: '15%' },
         { name: '', field: 'actions', width: '5%' }
     ]
+
+
 
     // const data = [
     //   {
@@ -62,13 +45,14 @@ function Employee() {
     // ];
 
     const [isOpenAddDialog, setIsOpenAddDialog] = useState(false)
+    const [listEmployees, setListEmployees] = useState([])
 
-    const totalPages = Math.ceil(mockData.length / itemsPerPage)
+    const totalPages = Math.ceil(listEmployees.length / itemsPerPage)
 
     const currentData = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage
-        return mockData.slice(start, start + itemsPerPage)
-    }, [currentPage, mockData])
+        return listEmployees.slice(start, start + itemsPerPage)
+    }, [currentPage, listEmployees])
 
     const handlePageChange = useCallback(
         (page) => {
@@ -82,6 +66,18 @@ function Employee() {
     const addEmployee = () => {
         setIsOpenAddDialog(true)
     }
+    const fetchData = async () => {
+        const data = await dbService.getAll('employees')
+        setListEmployees(data)
+        console.log("check data employees:", data)
+    }
+
+    useEffect(() => {
+        const unsubscribe = onSnapshot(collection(db, 'employees'), async (snapshot) => {
+            await fetchData()
+        })
+        return () => unsubscribe()
+    }, [])
 
     return (
         <div className="main-container">
