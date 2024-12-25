@@ -1,39 +1,62 @@
-import { useState } from 'react';
-import '../components/Modal.css';
+import { useEffect, useState, useRef } from 'react'
+import './Dropdown.css'
 
-function DropdownForm({ name, onChange, className, options = [], hintText }) {
-    const [selectedValue, setSelectedValue] = useState('');
-
-    const handleChange = (event) => {
-        const value = event.target.value;
-        setSelectedValue(value);
-        if (onChange) {
-            onChange(value); // Truyền giá trị ra ngoài nếu có callback
+export default function SearchDropdown({
+    value,
+    items = [],
+    onSelect,
+    renderItem,
+    className = '',
+    placeholder = '',
+    onChange,
+    loading = false,
+    disabled = false
+}) {
+    const [isOpen, setIsOpen] = useState(false)
+    const dropdownRef = useRef(null)
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false)
+            }
         }
-    };
-
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
     return (
-        <div className={`repair-modal__input-item mb-3 ${className}`}>
-            <label htmlFor="dropdown">{name}</label>
-            <div className="input-form">
-                <select
-                    className="w-100"
-                    id="dropdown"
-                    value={selectedValue}
-                    onChange={handleChange}
-                >
-                    <option value="" disabled>
-                        {hintText}
-                    </option>
-                    {options.map((option, index) => (
-                        <option key={index} value={option.value}>
-                            {option.label}
-                        </option>
-                    ))}
-                </select>
-            </div>
+        <div className={`dropdown-container ${className}`} ref={dropdownRef}>
+            <input
+                type="text"
+                value={value}
+                onChange={(e) => {
+                    onChange(e)
+                    setIsOpen(true)
+                }}
+                onFocus={() => setIsOpen(true)}
+                placeholder={placeholder}
+                className="w-100"
+                disabled={disabled}
+            />
+            {isOpen && (items.length > 0 || loading) && (
+                <div className="dropdown-list">
+                    {loading ? (
+                        <div className="dropdown-item text-center">Đang tải...</div>
+                    ) : (
+                        items.map((item, index) => (
+                            <div
+                                key={index}
+                                className="dropdown-item"
+                                onClick={() => {
+                                    onSelect(item)
+                                    setIsOpen(false)
+                                }}
+                            >
+                                {renderItem ? renderItem(item) : item}
+                            </div>
+                        ))
+                    )}
+                </div>
+            )}
         </div>
-    );
+    )
 }
-
-export default DropdownForm;
