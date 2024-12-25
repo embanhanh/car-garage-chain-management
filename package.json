@@ -26,9 +26,11 @@
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "bcryptjs": "^2.4.3",
+    "chart.js": "^4.4.7",
     "date-fns": "^4.1.0",
     "electron-updater": "^6.1.7",
     "firebase": "^11.0.1",
+    "react-chartjs-2": "^5.2.0",
     "react-datepicker": "^7.5.0",
     "react-router-dom": "^6.26.2",
     "swiper": "^11.1.14"

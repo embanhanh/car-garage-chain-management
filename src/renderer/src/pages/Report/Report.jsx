@@ -1,30 +1,6 @@
-// import './Report.css'
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-// import { faArrowUpWideShort } from '@fortawesome/free-solid-svg-icons'
-// function Report() {
-//     return (
-//         <>
-//             <div className="report-page">
-//                 <div className="report-page__header">
-//                     <div className="report-page__header-button-group">
-//                         <button className="report-page__header-button min-w-150">
-//                             <p>Doanh thu</p>
-//                         </button>
-//                         <button className="report-page__header-button ms-2 min-w-150">
-//                             <p>Nhập kho</p>
-//                         </button>
-//                     </div>
-//                 </div>
-//             </div>
-//         </>
-//     )
-// }
-
-// export default Report
-
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
-import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
+import DatePicker from 'react-datepicker'
 import { vi } from 'date-fns/locale'
 import { format, getWeek } from 'date-fns'
 import './Report.css'
@@ -33,9 +9,11 @@ import ReportRevenue from '../../components/Report/ReportRevenue'
 import ReportCost from '../../components/Report/ReportCost'
 import ReportProfit from '../../components/Report/ReportProfit'
 import ReportStock from '../../components/Report/ReportStock'
+import ReportCustomer from '../../components/Report/ReportCustomer'
+import RepairRegisterReport from '../../components/Report/RepairRegisterReport'
 
 const Report = () => {
-    const [tab, setTab] = useState('revenue')
+    const [tab, setTab] = useState('stock')
     const [dateRange, setDateRange] = useState('week')
     const [selectedDate, setSelectedDate] = useState(new Date())
 
@@ -58,7 +36,7 @@ const Report = () => {
                 >
                     Doanh thu
                 </button>
-                <button
+                {/* <button
                     className={`report-page__header-button ${tab === 'cost' ? 'active' : ''}`}
                     onClick={() => setTab('cost')}
                 >
@@ -69,12 +47,24 @@ const Report = () => {
                     onClick={() => setTab('profit')}
                 >
                     Lợi nhuận
-                </button>
+                </button> */}
                 <button
                     className={`report-page__header-button ${tab === 'stock' ? 'active' : ''}`}
                     onClick={() => setTab('stock')}
                 >
                     Nhập kho
+                </button>
+                <button
+                    className={`report-page__header-button ${tab === 'customer' ? 'active' : ''}`}
+                    onClick={() => setTab('customer')}
+                >
+                    Khách hàng
+                </button>
+                <button
+                    className={`report-page__header-button ${tab === 'repair' ? 'active' : ''}`}
+                    onClick={() => setTab('repair')}
+                >
+                    Phiếu sửa chữa
                 </button>
             </div>
             <div className="report-page__body mt-3">
@@ -103,7 +93,7 @@ const Report = () => {
                     showMonthYearPicker={dateRange === 'month'}
                     showYearPicker={dateRange === 'year'}
                     locale={vi}
-                    className="w-auto"
+                    className="report-page__header-date w-auto"
                 />
             </div>
             {tab === 'revenue' && (
@@ -112,6 +102,12 @@ const Report = () => {
             {tab === 'cost' && <ReportCost dateRange={dateRange} selectedDate={selectedDate} />}
             {tab === 'profit' && <ReportProfit dateRange={dateRange} selectedDate={selectedDate} />}
             {tab === 'stock' && <ReportStock dateRange={dateRange} selectedDate={selectedDate} />}
+            {tab === 'customer' && (
+                <ReportCustomer dateRange={dateRange} selectedDate={selectedDate} />
+            )}
+            {tab === 'repair' && (
+                <RepairRegisterReport dateRange={dateRange} selectedDate={selectedDate} />
+            )}
         </div>
     )
 }

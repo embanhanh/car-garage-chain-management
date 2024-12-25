@@ -1,11 +1,12 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 function ReportProfit({ dateRange, selectedDate }) {
+    useEffect(() => {
+        console.log(dateRange, selectedDate)
+    }, [dateRange, selectedDate])
     return (
         <div>
             <h1>ReportProfit</h1>
-            <h1>{dateRange}</h1>
-            <h1>{selectedDate}</h1>
         </div>
     )
 }
