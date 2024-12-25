@@ -1,13 +1,35 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCalendar } from '@fortawesome/free-regular-svg-icons'
 import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons'
 import Modal from '../Modal'
 import StaffInChargeModal from './StaffInChargeModal'
+import ComponentUsedModal from './ComponentUsedModal'
+import AddRepairRegisterModal from './AddRepairRegisterModal'
 
-function DetailRepairModal({ onClose, data }) {
+function DetailRepairModal({
+    onClose,
+    data,
+    onAddService,
+    onDeleteService,
+    onAddStaffInCharge,
+    onAddComponentUsed,
+    onCompleteService
+}) {
     const [repairData, setRepairData] = useState(data)
-    const [openStaffInChargeModal, setOpenStaffInChargeModal] = useState(false)
+    const [openStaffInChargeModal, setOpenStaffInChargeModal] = useState({
+        show: false,
+        data: null
+    })
+    const [openComponentUsedModal, setOpenComponentUsedModal] = useState({
+        show: false,
+        data: null
+    })
+    const [openAddRepairRegisterModal, setOpenAddRepairRegisterModal] = useState(false)
+
+    useEffect(() => {
+        setRepairData(data)
+    }, [data])
     return (
         <>
             <div className="detail-repair-modal w-100 h-100">
@@ -73,7 +95,9 @@ function DetailRepairModal({ onClose, data }) {
                                 id="expectedCompletionDate"
                                 placeholder="12/12/2024"
                                 disabled
-                                value={repairData?.expectedCompletionDate}
+                                value={new Date(
+                                    repairData?.expectedCompletionDate
+                                ).toLocaleDateString('en-GB')}
                             />
                             <FontAwesomeIcon icon={faCalendar} className="input-form__icon" />
                         </div>
@@ -90,41 +114,141 @@ function DetailRepairModal({ onClose, data }) {
                             Danh sách loại hình sửa chữa
                         </h3>
                         <div className="repair-modal__table-content">
-                            <table className="page-table detail-repair-table">
+                            <table className="page-table detail-repair-table table-scrollable">
                                 <thead>
                                     <tr>
                                         <th>Thứ tự</th>
                                         <th>Loại hình sửa chữa</th>
+                                        <th>Trạng thái</th>
                                         <th>Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>Thay bộ lọc động cơ</td>
-                                        <td>
-                                            <div
-                                                className="table__actions"
-                                                onClick={() => setOpenStaffInChargeModal(true)}
-                                            >
-                                                <FontAwesomeIcon
-                                                    icon={faEllipsisVertical}
-                                                    className="table__action-icon"
-                                                />
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    {repairData?.repairRegisters?.map((register, index) => (
+                                        <tr key={index}>
+                                            <td>{index + 1}</td>
+                                            <td>{register.service.name}</td>
+                                            <td>
+                                                <div
+                                                    className={`table__status ${register.status === 'Đang sửa chữa' ? 'car-completed' : 'car-normal'}`}
+                                                >
+                                                    {register.status}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="table__actions">
+                                                    <FontAwesomeIcon
+                                                        icon={faEllipsisVertical}
+                                                        className="table__action-icon"
+                                                    />
+                                                    <div className={`table__action-menu `}>
+                                                        <div
+                                                            className="table__action-item"
+                                                            onClick={() =>
+                                                                setOpenStaffInChargeModal({
+                                                                    show: true,
+                                                                    data: register
+                                                                })
+                                                            }
+                                                        >
+                                                            Chi tiết nhân viên
+                                                        </div>
+                                                        <div
+                                                            className="table__action-item"
+                                                            onClick={() =>
+                                                                setOpenComponentUsedModal({
+                                                                    show: true,
+                                                                    data: register
+                                                                })
+                                                            }
+                                                        >
+                                                            Chi tiết phụ tùng
+                                                        </div>
+                                                        {register.status === 'Đang sửa chữa' && (
+                                                            <div
+                                                                className="table__action-item"
+                                                                onClick={async () =>
+                                                                    await onCompleteService(
+                                                                        register.service.id
+                                                                    )
+                                                                }
+                                                            >
+                                                                Hoàn thành
+                                                            </div>
+                                                        )}
+                                                        <div
+                                                            className="table__action-item"
+                                                            onClick={async () =>
+                                                                await onDeleteService(
+                                                                    register.service.id
+                                                                )
+                                                            }
+                                                        >
+                                                            Xóa
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
                         <div className="repair-modal__btn-container">
-                            <button className="repair-modal__button confirm-button">Thêm</button>
+                            <button
+                                className="repair-modal__button confirm-button"
+                                onClick={() => setOpenAddRepairRegisterModal(true)}
+                            >
+                                Thêm
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
-            <Modal isOpen={openStaffInChargeModal} showHeader={false} width="720px">
-                <StaffInChargeModal onClose={() => setOpenStaffInChargeModal(false)} />
+            <Modal
+                isOpen={openStaffInChargeModal.show}
+                showHeader={false}
+                width="720px"
+                onClose={() => setOpenStaffInChargeModal({ show: false, data: null })}
+            >
+                <StaffInChargeModal
+                    onClose={() => setOpenStaffInChargeModal({ show: false, data: null })}
+                    data={openStaffInChargeModal.data}
+                    onAddStaffInCharge={onAddStaffInCharge}
+                />
+            </Modal>
+            <Modal
+                isOpen={openComponentUsedModal.show}
+                showHeader={false}
+                width="900px"
+                onClose={() =>
+                    setOpenComponentUsedModal({
+                        show: false,
+                        data: null
+                    })
+                }
+            >
+                <ComponentUsedModal
+                    onClose={() =>
+                        setOpenComponentUsedModal({
+                            show: false,
+                            data: null
+                        })
+                    }
+                    data={openComponentUsedModal.data}
+                    onAddComponentUsed={onAddComponentUsed}
+                />
+            </Modal>
+            <Modal
+                isOpen={openAddRepairRegisterModal}
+                showHeader={false}
+                onClose={() => setOpenAddRepairRegisterModal(false)}
+                width="700px"
+            >
+                <AddRepairRegisterModal
+                    onClose={() => setOpenAddRepairRegisterModal(false)}
+                    onAddService={onAddService}
+                />
             </Modal>
         </>
     )

@@ -8,6 +8,7 @@ import { db } from '../../firebase.config'
 import { dbService } from '../../services/DatabaseService'
 import { authService } from '../../services/AuthService'
 import { collection, getDocs, query, where } from 'firebase/firestore'
+import Swal from 'sweetalert2'
 import login1 from '../../assets/images/login/login_1.png'
 import login2 from '../../assets/images/login/login_2.png'
 import login3 from '../../assets/images/login/login_3.png'
@@ -43,11 +44,20 @@ function Auth() {
                 window.api.send('resize-window')
                 navigate('/dashboard')
             } else {
-                alert('Tên đăng nhập hoặc mật khẩu không đúng')
+                Swal.fire({
+                    title: 'Thất bại!',
+                    text: 'Tên đăng nhập hoặc mật khẩu không đúng',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                })
             }
         } catch (error) {
-            console.error('Lỗi đăng nhập:', error.message)
-            alert('Có lỗi xảy ra khi đăng nhập')
+            Swal.fire({
+                title: 'Thất bại!',
+                text: 'Có lỗi xảy ra khi đăng nhập',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            })
         } finally {
             setLoading(false)
         }

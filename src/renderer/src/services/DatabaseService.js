@@ -106,20 +106,24 @@ class DatabaseService {
             const docSnap = await getDoc(docRef)
 
             if (docSnap.exists()) {
-                const data = this.collections[collectionName].model.fromFirestore({
+                const data = docSnap.data()
+                if (data.isDeleted) {
+                    return null
+                }
+                const modelData = this.collections[collectionName].model.fromFirestore({
                     id: docSnap.id,
-                    ...docSnap.data()
+                    ...data
                 })
                 if (
                     this.collections[collectionName].model.relations &&
                     this.collections[collectionName].model.relations.length > 0
                 ) {
                     return await this.populate(
-                        data,
+                        modelData,
                         this.collections[collectionName].model.relations
                     )
                 }
-                return data
+                return modelData
             }
             return null
         } catch (error) {
@@ -185,9 +189,13 @@ class DatabaseService {
     async getAll(collectionName) {
         try {
             const ModelClass = this.collections[collectionName].model
-            const querySnapshot = await getDocs(
-                collection(db, this.collections[collectionName].name)
+
+            // Nếu có trường isDeleted, thêm điều kiện vào truy vấn
+            const q = query(
+                collection(db, this.collections[collectionName].name),
+                where('isDeleted', '!=', true)
             )
+            const querySnapshot = await getDocs(q)
 
             // Lấy dữ liệu cơ bản
             const docs = querySnapshot.docs.map((doc) =>
@@ -211,7 +219,12 @@ class DatabaseService {
 
     async add(collectionName, data) {
         try {
-            const docRef = await addDoc(collection(db, this.collections[collectionName].name), data)
+            const docRef = await addDoc(collection(db, this.collections[collectionName].name), {
+                ...data,
+                createdAt: new Date().toISOString(),
+                isDeleted: false
+            })
+            await updateDoc(docRef, { id: docRef.id })
             return {
                 id: docRef.id,
                 ...data
@@ -236,6 +249,36 @@ class DatabaseService {
         }
     }
 
+    async updateFields(collectionName, id, updatedFields) {
+        try {
+            const docRef = doc(db, this.collections[collectionName].name, id)
+            const currentDocSnap = await getDoc(docRef)
+
+            if (!currentDocSnap.exists()) {
+                throw new Error(
+                    `Document với ID "${id}" không tồn tại trong collection "${collectionName}"`
+                )
+            }
+
+            const currentData = currentDocSnap.data()
+
+            const newData = { ...currentData, ...updatedFields }
+
+            await updateDoc(docRef, newData)
+
+            return {
+                id,
+                ...newData
+            }
+        } catch (error) {
+            console.error(
+                `Lỗi khi cập nhật các trường trong ${collectionName} với ID ${id}:`,
+                error
+            )
+            throw error
+        }
+    }
+
     async delete(collectionName, id) {
         try {
             await deleteDoc(doc(db, this.collections[collectionName].name, id))
@@ -246,14 +289,42 @@ class DatabaseService {
         }
     }
 
+    async softDelete(collectionName, id) {
+        try {
+            const docRef = doc(db, this.collections[collectionName].name, id)
+
+            // Lấy dữ liệu hiện tại
+            const docSnap = await getDoc(docRef)
+            if (!docSnap.exists()) {
+                throw new Error(`Không tìm thấy document với id ${id}`)
+            }
+
+            const currentData = docSnap.data()
+
+            // Cập nhật với dữ liệu cũ + thêm các trường mới
+            await updateDoc(docRef, {
+                ...currentData,
+                deletedAt: new Date().toISOString(),
+                isDeleted: true
+            })
+
+            return {
+                id,
+                ...currentData,
+                deletedAt: new Date().toISOString(),
+                isDeleted: true
+            }
+        } catch (error) {
+            console.error(`Lỗi khi xóa mềm ${collectionName}:`, error)
+            throw error
+        }
+    }
+
     async findBy(collectionName, conditions = [], options = {}) {
         try {
             const ModelClass = this.collections[collectionName].model
             let q = collection(db, this.collections[collectionName].name)
-
-            // Tạo mảng các điều kiện query
             const queryConstraints = []
-
             // Thêm các điều kiện tìm kiếm
             conditions.forEach((condition) => {
                 switch (condition.operator) {
@@ -311,8 +382,10 @@ class DatabaseService {
             // Thực hiện query
             const querySnapshot = await getDocs(q)
 
+            const finalSnapshot = querySnapshot.docs.filter((doc) => !doc.data().isDeleted)
+
             // Chuyển đổi kết quả thành instances của model
-            const docs = querySnapshot.docs.map((doc) =>
+            const docs = finalSnapshot.map((doc) =>
                 ModelClass.fromFirestore({
                     id: doc.id,
                     ...doc.data()

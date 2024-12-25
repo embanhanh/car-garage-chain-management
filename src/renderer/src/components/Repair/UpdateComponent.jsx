@@ -1,4 +1,7 @@
-function UpdateComponent({ onClose }) {
+import { useState } from 'react'
+
+function UpdateComponent({ onClose, data, onConfirm }) {
+    const [quantity, setQuantity] = useState(data?.quantity || 0)
     return (
         <div className="update-component-modal">
             <div className="row">
@@ -10,6 +13,8 @@ function UpdateComponent({ onClose }) {
                             type="text"
                             id="componentCode"
                             placeholder="PCS001"
+                            value={data.component.id}
+                            disabled
                         />
                     </div>
                 </div>
@@ -21,6 +26,8 @@ function UpdateComponent({ onClose }) {
                             type="text"
                             id="componentName"
                             placeholder="Bộ lọc nước"
+                            value={data.component.name}
+                            disabled
                         />
                     </div>
                 </div>
@@ -32,6 +39,8 @@ function UpdateComponent({ onClose }) {
                             type="text"
                             id="componentType"
                             placeholder="Phụ tùng"
+                            value={data.component.category.name}
+                            disabled
                         />
                     </div>
                 </div>
@@ -43,6 +52,8 @@ function UpdateComponent({ onClose }) {
                             type="number"
                             id="componentQuantity"
                             placeholder="1"
+                            value={quantity}
+                            onChange={(e) => setQuantity(Number(e.target.value))}
                         />
                     </div>
                 </div>
@@ -51,7 +62,18 @@ function UpdateComponent({ onClose }) {
                 <button className="repair-modal__button cancel-button" onClick={onClose}>
                     Hủy
                 </button>
-                <button className="repair-modal__button confirm-button ml-3">Xác nhận</button>
+                <button
+                    className="repair-modal__button confirm-button ml-3"
+                    onClick={() => {
+                        if (quantity !== data.quantity && quantity > 0) {
+                            onConfirm(quantity)
+                        } else {
+                            onClose()
+                        }
+                    }}
+                >
+                    Xác nhận
+                </button>
             </div>
         </div>
     )
