@@ -34,12 +34,12 @@ export default function UpDetailCarModal({ onClose, data, type }) {
             // Tìm theo CMND/CCCD
             const customersByIdentifyCard = await dbService.findBy('customers', [
                 {
-                    field: 'indentifyCard',
+                    field: 'identifyCard',
                     operator: '>=',
                     value: searchText
                 },
                 {
-                    field: 'indentifyCard',
+                    field: 'identifyCard',
                     operator: '<=',
                     value: searchText + '\uf8ff'
                 }
@@ -143,7 +143,7 @@ export default function UpDetailCarModal({ onClose, data, type }) {
                             }}
                             renderItem={(customer) => (
                                 <div>
-                                    <div>{customer.name + ' - ' + customer.indentifyCard}</div>
+                                    <div>{customer.name + ' - ' + customer.identifyCard}</div>
                                 </div>
                             )}
                             placeholder="Nhập tên chủ xe..."

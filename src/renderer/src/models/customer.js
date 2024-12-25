@@ -5,7 +5,7 @@ export class Customer {
         phone = '',
         email = '',
         address = '',
-        indentifyCard = '',
+        identifyCard = '',
         birthday = new Date(),
         createdAt = new Date()
     } = {}) {
@@ -14,7 +14,7 @@ export class Customer {
         this.phone = phone
         this.email = email
         this.address = address
-        this.indentifyCard = indentifyCard
+        this.identifyCard = identifyCard
         this.birthday = birthday
         this.createdAt = createdAt
     }
@@ -26,7 +26,7 @@ export class Customer {
             phone: this.phone,
             email: this.email,
             address: this.address,
-            indentifyCard: this.indentifyCard,
+            identifyCard: this.identifyCard,
             birthday: this.birthday,
             createdAt: this.createdAt
         }

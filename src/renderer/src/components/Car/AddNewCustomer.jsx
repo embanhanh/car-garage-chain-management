@@ -7,7 +7,7 @@ export default function AddNewCustomer({ onClose, onSave }) {
         phone: '',
         email: '',
         address: '',
-        indentifyCard: '',
+        identifyCard: '',
         birthday: new Date()
     })
     const [error, setError] = useState('')
@@ -16,7 +16,7 @@ export default function AddNewCustomer({ onClose, onSave }) {
         return (
             customer.name &&
             customer.phone &&
-            customer.indentifyCard &&
+            customer.identifyCard &&
             customer.birthday &&
             customer.email &&
             customer.address
@@ -60,9 +60,9 @@ export default function AddNewCustomer({ onClose, onSave }) {
                                 className="w-100"
                                 type="text"
                                 placeholder="Nhập CCCD"
-                                value={customer.indentifyCard}
+                                value={customer.identifyCard}
                                 onChange={(e) =>
-                                    setCustomer({ ...customer, indentifyCard: e.target.value })
+                                    setCustomer({ ...customer, identifyCard: e.target.value })
                                 }
                             />
                         </div>
