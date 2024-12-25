@@ -80,58 +80,58 @@ function Employee() {
     )
 
     const addEmployee = () => {
-        setIsOpenAddDialog(true);
+        setIsOpenAddDialog(true)
     }
 
     return (
-        
-            <div className="main-container">
-                <div className="headerr">
-                    <div className="btn-area">
-                        <button className="addBtn" onClick={addEmployee}>Thêm Nhân Viên</button>
-                        <button className="addAccBtn">Cấp Tài Khoản</button>
-                    </div>
-    
-                    <div className="filter-area">
-                        <button className="page__header-button">
-                            <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
-                            Sắp xếp
-                        </button>
-                        <button className="page__header-button">
-                            <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
-                            Lọc
-                        </button>
-                        <div className="page__header-search">
-                            <FontAwesomeIcon icon={faSearch} className="page__header-icon" />
-                            <input type="text" placeholder="Tìm kiếm" />
-                        </div>
+        <div className="main-container">
+            <div className="headerr">
+                <div className="btn-area">
+                    <button className="addBtn" onClick={addEmployee}>
+                        Thêm Nhân Viên
+                    </button>
+                    <button className="addAccBtn">Cấp Tài Khoản</button>
+                </div>
+
+                <div className="filter-area">
+                    <button className="page__header-button">
+                        <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
+                        Sắp xếp
+                    </button>
+                    <button className="page__header-button">
+                        <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
+                        Lọc
+                    </button>
+                    <div className="page__header-search">
+                        <FontAwesomeIcon icon={faSearch} className="page__header-icon" />
+                        <input type="text" placeholder="Tìm kiếm" />
                     </div>
                 </div>
-                <Modal
+            </div>
+            <Modal
                 isOpen={isOpenAddDialog}
                 onClose={() => setIsOpenAddDialog(false)}
                 showHeader={false}
                 width="680px"
             >
-                <AddEmployee></AddEmployee>
+                <AddEmployee onClose={() => setIsOpenAddDialog(false)}></AddEmployee>
             </Modal>
-                <div className="employee-table">
-                    <div className="z-car-page">
-                        <div className="z-car-page__header">{/* Header content here */}</div>
-                        <div className="z-car-page__content">
-                            <ZTable columns={columns} data={currentData} />
-                        </div>
-                    </div>
-                    <div className="z-pagination">
-                        <Pagination
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            onPageChange={handlePageChange}
-                        />
+            <div className="employee-table">
+                <div className="z-car-page">
+                    <div className="z-car-page__header">{/* Header content here */}</div>
+                    <div className="z-car-page__content">
+                        <ZTable columns={columns} data={currentData} />
                     </div>
                 </div>
+                <div className="z-pagination">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                    />
+                </div>
             </div>
-        
+        </div>
     )
 }
 

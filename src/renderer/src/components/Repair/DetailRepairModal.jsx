@@ -112,7 +112,7 @@ function DetailRepairModal({
                     <div className="repair-modal__table-container">
                         <h3 className="repair-modal__table-title mt-2">
                             Danh sách loại hình sửa chữa
-                        </h3>
+                        </h3> 
                         <div className="repair-modal__table-content">
                             <table className="page-table detail-repair-table table-scrollable">
                                 <thead>
