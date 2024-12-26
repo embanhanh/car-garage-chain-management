@@ -66,8 +66,13 @@ function Employee() {
     }
     const fetchData = async () => {
         const data = await dbService.getAll('employees')
-        setListEmployees(data)
-        console.log('check data employees:', data)
+        const users = await dbService.getAll('users')
+        const newdata = data.map((nv) => ({
+            ...nv,
+            hasAccount: users.some((user) => user.employeeId === nv.id)
+        }))
+        setListEmployees(newdata)
+        console.log('check data employees:', newdata)
     }
 
     useEffect(() => {

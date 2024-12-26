@@ -203,3 +203,20 @@ input {
   color: gray;
   padding: 0px 5px;
 }
+
+/* .table__actions {
+  position: relative;
+}
+
+.table__action-menu {
+  position: fixed; /* Change from absolute to fixed */
+  transform: translateY(100%); /* Move below the icon */
+  right: auto; /* Reset right positioning */
+  bottom: auto; /* Reset bottom positioning */
+  z-index: 1000;
+}
+
+/* For menus that need to show above */
+.table__action-menu.show-top {
+  transform: translateY(-100%);
+} */
