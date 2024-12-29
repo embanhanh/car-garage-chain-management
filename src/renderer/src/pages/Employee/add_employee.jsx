@@ -4,16 +4,16 @@ import { useState } from 'react'
 import ComboBox from '../../components/Combobox.jsx'
 import { dbService } from '../../services/DatabaseService.js'
 
-function AddEmployee({ onClose }) {
-    const [conName, setConName] = useState('')
-    const [conEmail, setConEmail] = useState('')
-    const [conCCCD, setConCCCD] = useState('')
-    const [conAddress, setConAddress] = useState('')
-    const [conPhone, setConPhone] = useState('')
-    const [conSalary, setConSalary] = useState('')
-    const [conSex, setConSex] = useState(0)
-    const [conPosition, setConPosition] = useState('')
-    const [conWorkingTime, setConWorkingTime] = useState('')
+function AddEmployee({ onClose, nv = {}, isEdit = false }) {
+    const [conName, setConName] = useState(isEdit ? nv.name : '')
+    const [conEmail, setConEmail] = useState(isEdit ? nv.email : '')
+    const [conCCCD, setConCCCD] = useState(isEdit ? nv.identifyCard : '')
+    const [conAddress, setConAddress] = useState(isEdit ? nv.address : '')
+    const [conPhone, setConPhone] = useState(isEdit ? nv.phone : '')
+    const [conSalary, setConSalary] = useState(isEdit ? nv.salary : '')
+    const [conSex, setConSex] = useState(isEdit ? nv.gender : 'Nam')
+    const [conPosition, setConPosition] = useState(isEdit ? nv.position : '')
+    const [conWorkingTime, setConWorkingTime] = useState(isEdit ? nv.workHours : '')
     const formatDate = (date) => {
         const [year, month, day] = date.split('-')
         return `${day}/${month}/${year}`
@@ -39,6 +39,7 @@ function AddEmployee({ onClose }) {
                         className="col-6"
                         hintText="Nhập tên nhân viên"
                         name="Tên nhân viên"
+                        value={conName}
                         onChange={(value) => {
                             setConName(value)
                         }}
@@ -47,6 +48,7 @@ function AddEmployee({ onClose }) {
                         className="col-6"
                         hintText="Nhập email"
                         name="Email"
+                        value={conEmail}
                         onChange={(value) => {
                             setConEmail(value)
                         }}
@@ -57,6 +59,7 @@ function AddEmployee({ onClose }) {
                         className="col-6"
                         hintText="Nhập số CCCD/Passport"
                         name="Số CCCD/Passport"
+                        value={conCCCD}
                         onChange={(value) => {
                             setConCCCD(value)
                         }}
@@ -65,6 +68,7 @@ function AddEmployee({ onClose }) {
                         className="col-6"
                         hintText="Nhập địa chỉ"
                         name="Địa chỉ"
+                        value={conAddress}
                         onChange={(value) => {
                             setConAddress(value)
                         }}
@@ -93,6 +97,7 @@ function AddEmployee({ onClose }) {
                         className="col-6"
                         hintText="Nhập số điện thoại"
                         name="Số điện thoại"
+                        value={conPhone}
                         onChange={(value) => {
                             setConPhone(value)
                         }}
@@ -116,6 +121,7 @@ function AddEmployee({ onClose }) {
                         className="col-6"
                         hintText="Nhập mức lương"
                         name="Mức lương"
+                        value={conSalary}
                         onChange={(value) => {
                             setConSalary(value)
                         }}
@@ -173,18 +179,34 @@ function AddEmployee({ onClose }) {
                         disabled={false}
                         onClick={async () => {
                             try {
-                                await dbService.add('employees', {
-                                    name: conName,
-                                    email: conEmail,
-                                    identifyCard: conCCCD,
-                                    address: conAddress,
-                                    gender: conSex,
-                                    phone: conPhone,
-                                    birthday: conBirthDay,
-                                    salary: conSalary,
-                                    position: conPosition,
-                                    workHours: conWorkingTime
-                                })
+                                if (!isEdit) {
+                                    await dbService.add('employees', {
+                                        name: conName,
+                                        email: conEmail,
+                                        identifyCard: conCCCD,
+                                        address: conAddress,
+                                        gender: conSex,
+                                        phone: conPhone,
+                                        birthday: conBirthDay,
+                                        salary: conSalary,
+                                        position: conPosition,
+                                        workHours: conWorkingTime
+                                    })
+                                } else {
+                                    await dbService.update('employees', nv.id, {
+                                        name: conName,
+                                        email: conEmail,
+                                        identifyCard: conCCCD,
+                                        address: conAddress,
+                                        gender: conSex,
+                                        phone: conPhone,
+                                        birthday: conBirthDay,
+                                        salary: conSalary,
+                                        position: conPosition,
+                                        workHours: conWorkingTime
+                                    })
+                                }
+
                                 onClose()
                             } catch (error) {
                                 alert(error.message)
@@ -193,7 +215,7 @@ function AddEmployee({ onClose }) {
                             }
                         }}
                     >
-                        Thêm
+                        {isEdit ? 'Cập nhật' : 'Thêm'}
                     </button>
                 </div>
             </div>

@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons'
 import './ZTable.css' // Import the CSS file with 'z' prefixed class names
 
-const ZTable = ({ columns, data, addAccount = () => {}, detailAction = () => {} }) => {
+const ZTable = ({ columns, data, addAccount = () => {}, detailAction = () => {}, editAction = () => {} }) => {
     const itemsPerPage = 12
     return (
         <table className="z-page-table z-car-table overflow-visible">
@@ -64,7 +64,9 @@ const ZTable = ({ columns, data, addAccount = () => {}, detailAction = () => {} 
                                                 </div>
                                                 <div
                                                     className="table__action-item"
-                                                    onClick={() => {}}
+                                                    onClick={() => {
+                                                        editAction(item)
+                                                    }}
                                                 >
                                                     Cập nhật
                                                 </div>

@@ -47,6 +47,7 @@ function Employee() {
     const [isOpenAddDialog, setIsOpenAddDialog] = useState(false)
     const [isOpenAddAccount, setIsOpenAddAccount] = useState(false)
     const [isOpenDetailEmployee, setIsOpenDetailEmployee] = useState(false)
+    const [isOpenEditEmployee, setIsOpenEditEmployee] = useState(false)
 
     const [userAdd, setUserAdd] = useState({
         idNV: 'zont09',
@@ -85,6 +86,11 @@ function Employee() {
     const detailEmployee = (nv) => {
         setUserAdd(nv)
         setIsOpenDetailEmployee(true)
+    }
+
+    const editEmployee = (nv) => {
+        setUserAdd(nv)
+        setIsOpenEditEmployee(true)
     }
 
     const fetchData = async () => {
@@ -138,7 +144,15 @@ function Employee() {
                 showHeader={false}
                 width="680px"
             >
-                <AddEmployee onClose={() => setIsOpenAddDialog(false)}></AddEmployee>
+                <AddEmployee onClose={() => setIsOpenEditEmployee(false)}></AddEmployee>
+            </Modal>
+            <Modal
+                isOpen={isOpenEditEmployee}
+                onClose={() => setIsOpenEditEmployee(false)}
+                showHeader={false}
+                width="680px"
+            >
+                <AddEmployee onClose={() => setIsOpenEditEmployee(false)} isEdit = {true} nv = {userAdd}></AddEmployee>
             </Modal>
             <Modal
                 isOpen={isOpenAddAccount}
@@ -167,7 +181,7 @@ function Employee() {
                 <div className="z-car-page">
                     <div className="z-car-page__header">{/* Header content here */}</div>
                     <div className="z-car-page__content">
-                        <ZTable addAccount={addAccount} detailAction={detailEmployee} columns={columns} data={currentData} />
+                        <ZTable addAccount={addAccount} detailAction={detailEmployee} editAction={editEmployee} columns={columns} data={currentData} />
                     </div>
                 </div>
                 <div className="z-pagination">
