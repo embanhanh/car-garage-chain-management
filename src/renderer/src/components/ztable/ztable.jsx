@@ -4,9 +4,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons'
 import './ZTable.css' // Import the CSS file with 'z' prefixed class names
 
-const ZTable = ({ columns, data }) => {
+const ZTable = ({
+    columns,
+    data,
+    addAccount = () => {},
+    detailAction = () => {},
+    editAction = () => {},
+    deleteAction = () => {}
+}) => {
+    const itemsPerPage = 12
     return (
-        <table className="z-page-table z-car-table">
+        <table className="z-page-table z-car-table overflow-visible">
             <thead>
                 <tr>
                     {columns.map((col, index) => (
@@ -22,12 +30,64 @@ const ZTable = ({ columns, data }) => {
                         {columns.map((col, colIndex) => {
                             if (col.field === 'actions') {
                                 return (
-                                    <td key={colIndex}>
-                                        <div className="z-table__actions">
+                                    <td key={colIndex} className="overflow-visible">
+                                        <div className="table__actions">
                                             <FontAwesomeIcon
                                                 icon={faEllipsisVertical}
-                                                className="z-table__action-icon"
+                                                className="table__action-icon"
                                             />
+                                            <div
+                                                className={`table__action-menu ${
+                                                    (colIndex + 1) % itemsPerPage === 0
+                                                        ? 'show-top'
+                                                        : ''
+                                                }`}
+                                            ></div>
+                                            <div
+                                                className={`table__action-menu ${
+                                                    (colIndex + 1) % itemsPerPage === 0
+                                                        ? 'show-top'
+                                                        : ''
+                                                }`}
+                                            >
+                                                {'hasAccount' in item && !item.hasAccount ? (
+                                                    <div
+                                                        className="table__action-item"
+                                                        onClick={() =>
+                                                            addAccount({
+                                                                idNV: item.id,
+                                                                role: item.position
+                                                            })
+                                                        }
+                                                    >
+                                                        Tạo tài khoản
+                                                    </div>
+                                                ) : null}
+                                                <div
+                                                    className="table__action-item"
+                                                    onClick={() => {
+                                                        detailAction(item)
+                                                    }}
+                                                >
+                                                    Chi tiết
+                                                </div>
+                                                <div
+                                                    className="table__action-item"
+                                                    onClick={() => {
+                                                        editAction(item)
+                                                    }}
+                                                >
+                                                    Cập nhật
+                                                </div>
+                                                <div
+                                                    className="table__action-item"
+                                                    onClick={async () => {
+                                                        deleteAction(item)
+                                                    }}
+                                                >
+                                                    Xóa
+                                                </div>
+                                            </div>
                                         </div>
                                     </td>
                                 )

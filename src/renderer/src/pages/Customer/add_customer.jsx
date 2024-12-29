@@ -1,20 +1,16 @@
 import TextFieldForm from '../../components/text_field'
-import './add_employee.css'
 import { useState } from 'react'
 import ComboBox from '../../components/Combobox.jsx'
 import { dbService } from '../../services/DatabaseService.js'
 import Modal from '../../components/Modal.jsx'
 
-function AddEmployee({ onClose, nv = {}, isEdit = false }) {
-    const [conName, setConName] = useState(isEdit ? nv.name : '')
-    const [conEmail, setConEmail] = useState(isEdit ? nv.email : '')
-    const [conCCCD, setConCCCD] = useState(isEdit ? nv.identifyCard : '')
-    const [conAddress, setConAddress] = useState(isEdit ? nv.address : '')
-    const [conPhone, setConPhone] = useState(isEdit ? nv.phone : '')
-    const [conSalary, setConSalary] = useState(isEdit ? nv.salary : '')
-    const [conSex, setConSex] = useState(isEdit ? nv.gender : 'Nam')
-    const [conPosition, setConPosition] = useState(isEdit ? nv.position : '')
-    const [conWorkingTime, setConWorkingTime] = useState(isEdit ? nv.workHours : '')
+function AddCustomer({ onClose, kh = {}, isEdit = false }) {
+    const [conName, setConName] = useState(isEdit ? kh.name : '')
+    const [conEmail, setConEmail] = useState(isEdit ? kh.email : '')
+    const [conCCCD, setConCCCD] = useState(isEdit ? kh.identifyCard : '')
+    const [conAddress, setConAddress] = useState(isEdit ? kh.address : '')
+    const [conPhone, setConPhone] = useState(isEdit ? kh.phone : '')
+    
 
     const [isShowAlertlog, setIsShowAlertlog] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
@@ -31,10 +27,12 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
 
     // Khởi tạo state với ngày hiện tại
     const [conBirthDay, setConBirthDay] = useState(() => {
-        const today = isEdit ? new Date(nv.birthday) : new Date()
+        const today = isEdit ? new Date(kh.birthday) : new Date()
         const yyyyMMdd = today.toISOString().split('T')[0]
         return formatDate(yyyyMMdd) // Định dạng dd/MM/yyyy
     })
+
+
     return (
         <div>
             <div className="z-ae-container w-100">
@@ -52,8 +50,8 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
                 <div className="z-ae-row-data row w-100">
                     <TextFieldForm
                         className="col-6"
-                        hintText="Nhập tên nhân viên"
-                        name="Tên nhân viên"
+                        hintText="Phạm Ngọc Thịnh"
+                        name="Tên khách hàng"
                         value={conName}
                         onChange={(value) => {
                             setConName(value)
@@ -61,7 +59,7 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
                     ></TextFieldForm>
                     <TextFieldForm
                         className="col-6"
-                        hintText="Nhập email"
+                        hintText="zontcn09@gmail.com"
                         name="Email"
                         value={conEmail}
                         onChange={(value) => {
@@ -72,7 +70,7 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
                 <div className="z-ae-row-data row w-100">
                     <TextFieldForm
                         className="col-6"
-                        hintText="Nhập số CCCD/Passport"
+                        hintText="042104007362"
                         name="Số CCCD/Passport"
                         value={conCCCD}
                         onChange={(value) => {
@@ -81,40 +79,11 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
                     ></TextFieldForm>
                     <TextFieldForm
                         className="col-6"
-                        hintText="Nhập địa chỉ"
+                        hintText="Nghĩa Kỳ, Tư Nghĩa, Quảng Ngãi"
                         name="Địa chỉ"
                         value={conAddress}
                         onChange={(value) => {
                             setConAddress(value)
-                        }}
-                    ></TextFieldForm>
-                </div>
-                <div className="z-ae-row-data row w-100">
-                    <div className="repair-modal__input-item mb-3 col-6">
-                        <label htmlFor="componentCode">{'Gioi tinh'}</label>
-                        <ComboBox
-                            height="90px"
-                            options={[
-                                { value: 'Nam', label: 'Nam' },
-                                { value: 'Nữ', label: 'Nữ' },
-                                { value: 'Bê đê', label: 'Bê đê' }
-                            ]}
-                            className="col-6"
-                            placeholder="Chọn giới tính"
-                            value={conSex}
-                            onChange={(value) => {
-                                setConSex(value)
-                            }}
-                        ></ComboBox>
-                    </div>
-
-                    <TextFieldForm
-                        className="col-6"
-                        hintText="Nhập số điện thoại"
-                        name="Số điện thoại"
-                        value={conPhone}
-                        onChange={(value) => {
-                            setConPhone(value)
                         }}
                     ></TextFieldForm>
                 </div>
@@ -132,54 +101,18 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
                             {/* <FontAwesomeIcon icon={faCalendar} className="input-form__icon" /> */}
                         </div>
                     </div>
+
                     <TextFieldForm
                         className="col-6"
-                        hintText="Nhập mức lương"
-                        name="Mức lương"
-                        value={conSalary}
+                        hintText="0918078123"
+                        name="Số điện thoại"
+                        value={conPhone}
                         onChange={(value) => {
-                            setConSalary(value)
+                            setConPhone(value)
                         }}
                     ></TextFieldForm>
                 </div>
-                <div className="z-ae-row-data row w-100">
-                    <div className="repair-modal__input-item mb-3 col-6">
-                        <label htmlFor="componentCode">{'Vị trí làm việc'}</label>
-                        <ComboBox
-                            height="70px"
-                            options={[
-                                { value: 'Kỹ thuật', label: 'Kỹ thuật' },
-                                { value: 'Thu ngân', label: 'Thu ngân' },
-                                { value: 'Quản lý', label: 'Quản lý' }
-                            ]}
-                            className="col-6"
-                            placeholder="Chọn vị trí làm việc"
-                            value={conPosition}
-                            onChange={(value) => {
-                                setConPosition(value)
-                            }}
-                        ></ComboBox>
-                    </div>
-
-                    <div className="repair-modal__input-item mb-3 col-6">
-                        <label htmlFor="componentCode">{'Vị trí làm việc'}</label>
-                        <ComboBox
-                            height="70px"
-                            options={[
-                                { value: '07:00 - 17:00', label: '07:00 - 17:00' },
-                                { value: '17:00 - 22:00', label: '17:00 - 22:00' },
-                                { value: '07:00 - 12:00', label: '07:00 - 12:00' },
-                                { value: '12:00 - 17:00', label: '12:00 - 17:00' }
-                            ]}
-                            className="col-6"
-                            placeholder="Chọn giờ làm việc"
-                            value={conWorkingTime}
-                            onChange={(value) => {
-                                setConWorkingTime(value)
-                            }}
-                        ></ComboBox>
-                    </div>
-                </div>
+                
                 <div className="page-btns end">
                     <button
                         className="repair-modal__button cancel-button"
@@ -199,42 +132,30 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
                                     !conEmail ||
                                     !conCCCD ||
                                     !conAddress ||
-                                    !conSex ||
                                     !conPhone ||
-                                    !conBirthDay ||
-                                    !conSalary ||
-                                    !conPosition ||
-                                    !conWorkingTime
+                                    !conBirthDay 
                                 ) {
                                     setErrorMessage("Vui lòng nhập đầy đủ thông tin")
                                     setIsShowAlertlog(true)
                                     return
                                 }
                                 if (!isEdit) {
-                                    await dbService.add('employees', {
+                                    await dbService.add('customers', {
                                         name: conName,
                                         email: conEmail,
                                         identifyCard: conCCCD,
                                         address: conAddress,
-                                        gender: conSex,
                                         phone: conPhone,
                                         birthday: conBirthDay,
-                                        salary: conSalary,
-                                        position: conPosition,
-                                        workHours: conWorkingTime
                                     })
                                 } else {
-                                    await dbService.update('employees', nv.id, {
+                                    await dbService.update('customers', kh.id, {
                                         name: conName,
                                         email: conEmail,
                                         identifyCard: conCCCD,
                                         address: conAddress,
-                                        gender: conSex,
                                         phone: conPhone,
                                         birthday: conBirthDay,
-                                        salary: conSalary,
-                                        position: conPosition,
-                                        workHours: conWorkingTime
                                     })
                                 }
 
@@ -254,4 +175,4 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
     )
 }
 
-export default AddEmployee
+export default AddCustomer

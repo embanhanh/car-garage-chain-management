@@ -14,6 +14,9 @@ import AddEmployee from './add_employee'
 import { dbService } from '../../services/DatabaseService.js'
 import { doc, onSnapshot, collection } from 'firebase/firestore'
 import { db } from '../../firebase.config'
+import AddAccount from './add_account.jsx'
+import DetailEmployee from './detail_employee.jsx'
+import DialogConfirmDialog from '../../components/dialog_confirm_dialog.jsx'
 
 function Employee() {
     const [currentPage, setCurrentPage] = useState(1)
@@ -43,6 +46,15 @@ function Employee() {
     // ];
 
     const [isOpenAddDialog, setIsOpenAddDialog] = useState(false)
+    const [isOpenAddAccount, setIsOpenAddAccount] = useState(false)
+    const [isOpenDetailEmployee, setIsOpenDetailEmployee] = useState(false)
+    const [isOpenEditEmployee, setIsOpenEditEmployee] = useState(false)
+    const [isOpenDelete, setIsOpenDelete] = useState(false)
+
+    const [userAdd, setUserAdd] = useState({
+        idNV: 'zont09',
+        role: 'nhanvien'
+    })
     const [listEmployees, setListEmployees] = useState([])
 
     const totalPages = Math.ceil(listEmployees.length / itemsPerPage)
@@ -64,10 +76,39 @@ function Employee() {
     const addEmployee = () => {
         setIsOpenAddDialog(true)
     }
+
+    const addAccount = (map) => {
+        setUserAdd({
+            idNV: map.idNV,
+            role: map.role
+        })
+        setIsOpenAddAccount(true)
+    }
+
+    const detailEmployee = (nv) => {
+        setUserAdd(nv)
+        setIsOpenDetailEmployee(true)
+    }
+
+    const editEmployee = (nv) => {
+        setUserAdd(nv)
+        setIsOpenEditEmployee(true)
+    }
+
+    const deleteEmployee = (nv) => {
+        setUserAdd(nv)
+        setIsOpenDelete(true)
+    }
+
     const fetchData = async () => {
         const data = await dbService.getAll('employees')
-        setListEmployees(data)
-        console.log('check data employees:', data)
+        const users = await dbService.getAll('users')
+        const newdata = data.map((nv) => ({
+            ...nv,
+            hasAccount: users.some((user) => user.employeeId === nv.id)
+        }))
+        setListEmployees(newdata)
+        console.log('check data employees:', newdata)
     }
 
     useEffect(() => {
@@ -84,7 +125,6 @@ function Employee() {
                     <button className="addBtn" onClick={addEmployee}>
                         Thêm Nhân Viên
                     </button>
-                    <button className="addAccBtn">Cấp Tài Khoản</button>
                 </div>
 
                 <div className="filter-area">
@@ -110,11 +150,67 @@ function Employee() {
             >
                 <AddEmployee onClose={() => setIsOpenAddDialog(false)}></AddEmployee>
             </Modal>
+            <Modal
+                isOpen={isOpenEditEmployee}
+                onClose={() => setIsOpenEditEmployee(false)}
+                showHeader={false}
+                width="680px"
+            >
+                <AddEmployee
+                    onClose={() => setIsOpenEditEmployee(false)}
+                    isEdit={true}
+                    nv={userAdd}
+                ></AddEmployee>
+            </Modal>
+            <Modal
+                isOpen={isOpenAddAccount}
+                onClose={() => setIsOpenAddAccount(false)}
+                showHeader={false}
+                width="300px"
+            >
+                <AddAccount
+                    onClose={() => setIsOpenAddAccount(false)}
+                    idNV={userAdd.idNV}
+                    role={userAdd.role}
+                ></AddAccount>
+            </Modal>
+            <Modal
+                isOpen={isOpenDetailEmployee}
+                onClose={() => setIsOpenDetailEmployee(false)}
+                showHeader={false}
+                width="680px"
+            >
+                <DetailEmployee
+                    onClose={() => setIsOpenDetailEmployee(false)}
+                    nv={userAdd}
+                ></DetailEmployee>
+            </Modal>
+            <DialogConfirmDialog
+                isShow={isOpenDelete}
+                onClose={() => setIsOpenDelete(false)}
+                message="Bạn có chắn chắn muốn xoá nhân viên này"
+                onConfirm={async () => {
+                    await dbService.softDelete('employees', userAdd.id)
+                    const listUser = await dbService.getAll('users')
+                    const user = listUser.find((item) => item.employeeId === userAdd.id)
+                    if (user) {
+                        await dbService.softDelete('users', user.id)
+                    }
+                    setIsOpenDelete(false)
+                }}
+            ></DialogConfirmDialog>
             <div className="employee-table">
                 <div className="z-car-page">
                     <div className="z-car-page__header">{/* Header content here */}</div>
                     <div className="z-car-page__content">
-                        <ZTable columns={columns} data={currentData} />
+                        <ZTable
+                            addAccount={addAccount}
+                            detailAction={detailEmployee}
+                            editAction={editEmployee}
+                            deleteAction={deleteEmployee}
+                            columns={columns}
+                            data={currentData}
+                        />
                     </div>
                 </div>
                 <div className="z-pagination">
