@@ -118,9 +118,7 @@ function Employee() {
                     <button className="addBtn" onClick={addEmployee}>
                         Thêm Nhân Viên
                     </button>
-                    <button className="addAccBtn" onClick={addAccount}>
-                        Cấp Tài Khoản
-                    </button>
+            
                 </div>
 
                 <div className="filter-area">
