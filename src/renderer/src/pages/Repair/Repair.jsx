@@ -16,6 +16,13 @@ import ReceiveRepairModal from '../../components/Repair/ReceiveRepairModal'
 import DetailRepairModal from '../../components/Repair/DetailRepairModal'
 import DetailInvoiceModal from '../../components/Repair/DetailInvoice'
 import { db } from '../../firebase.config'
+import {
+    addService,
+    deleteService,
+    completeService,
+    addComponentUsed,
+    addStaffInCharge
+} from '../../controllers/repairController'
 
 const Repair = () => {
     const [currentPage, setCurrentPage] = useState(1)
@@ -57,92 +64,23 @@ const Repair = () => {
     )
 
     const onAddService = async (selectedService) => {
-        if (
-            selectedService !== null &&
-            !openDetailRepairModal.data.repairRegisters.some(
-                (item) => item.service.id === selectedService.id
-            )
-        ) {
-            const newData = {
-                status: 'Đang sửa chữa',
-                serviceId: selectedService.id,
-                employeeIds: [],
-                repairRegisterComponents: []
-            }
-            const newRepairRegister = await dbService.add('repairregisters', newData)
-            await dbService.updateFields('serviceregisters', openDetailRepairModal.data.id, {
-                repairRegisterIds: [
-                    ...openDetailRepairModal.data.repairRegisterIds,
-                    newRepairRegister.id
-                ]
-            })
-        }
+        await addService(selectedService, openDetailRepairModal)
     }
 
     const onDeleteService = async (serviceId) => {
-        // Xóa một repairRegister mới và thêm vào registerService
-        if (serviceId) {
-            const repairRegister = openDetailRepairModal.data?.repairRegisters?.find(
-                (item) => item.service.id === serviceId
-            )
-            await dbService.delete('repairregisters', repairRegister.id)
-            // Cập nhật registerService
-            await dbService.updateFields('serviceregisters', openDetailRepairModal.data.id, {
-                repairRegisterIds: openDetailRepairModal.data.repairRegisterIds.filter(
-                    (id) => id !== repairRegister.id
-                )
-            })
-        }
+        await deleteService(serviceId, openDetailRepairModal)
     }
 
     const onCompleteService = async (serviceId) => {
-        if (serviceId) {
-            await dbService.updateFields(
-                'repairregisters',
-                openDetailRepairModal.data?.repairRegisters?.find(
-                    (item) => item.service.id === serviceId
-                ).id,
-                {
-                    status: 'Đã hoàn thành'
-                }
-            )
-            await fetchData()
-        }
+        await completeService(serviceId, openDetailRepairModal, fetchData)
     }
 
     const onAddComponentUsed = async (repairComponents, serviceId) => {
-        if (repairComponents && serviceId) {
-            await dbService.updateFields(
-                'repairregisters',
-                openDetailRepairModal.data.repairRegisters.find(
-                    (item) => item.service.id === serviceId
-                ).id,
-                {
-                    repairRegisterComponents: [
-                        ...repairComponents.map((item) => ({
-                            componentId: item.component.id,
-                            quantity: item.quantity
-                        }))
-                    ]
-                }
-            )
-            await fetchData()
-        }
+        await addComponentUsed(repairComponents, serviceId, openDetailRepairModal, fetchData)
     }
 
     const onAddStaffInCharge = async (employees, serviceId) => {
-        if (employees && serviceId) {
-            await dbService.updateFields(
-                'repairregisters',
-                openDetailRepairModal.data.repairRegisters.find(
-                    (item) => item.service.id === serviceId
-                ).id,
-                {
-                    employeeIds: [...employees.map((item) => item.id)]
-                }
-            )
-            await fetchData()
-        }
+        await addStaffInCharge(employees, serviceId, openDetailRepairModal, fetchData)
     }
 
     useEffect(() => {
