@@ -3,6 +3,7 @@ import { useState } from 'react'
 import ComboBox from '../../components/Combobox.jsx'
 import { dbService } from '../../services/DatabaseService.js'
 import { authService } from '../../services/AuthService.js'
+import Swal from 'sweetalert2'
 
 function AddAccount({ onClose, idNV = 'zont09', role = 'nhanvien' }) {
     const [conUserName, setConUserName] = useState('')
@@ -13,6 +14,7 @@ function AddAccount({ onClose, idNV = 'zont09', role = 'nhanvien' }) {
             <TextFieldForm
                 className=""
                 hintText="Nhập tên đăng nhập"
+                value={conUserName}
                 name="Tên đăng nhập"
                 onChange={(value) => {
                     setConUserName(value)
@@ -22,6 +24,7 @@ function AddAccount({ onClose, idNV = 'zont09', role = 'nhanvien' }) {
                 type="password"
                 className=""
                 hintText="Nhập mật khẩu"
+                value={conPassword}
                 name="Mật khẩu"
                 onChange={(value) => {
                     setConPassword(value)
@@ -32,6 +35,7 @@ function AddAccount({ onClose, idNV = 'zont09', role = 'nhanvien' }) {
                 className=""
                 hintText="Xác nhận mật khẩu"
                 name="Nhập lại mật khẩu"
+                value={conRepeatPassword}
                 onChange={(value) => {
                     setConRepeatPassword(value)
                 }}
@@ -49,17 +53,37 @@ function AddAccount({ onClose, idNV = 'zont09', role = 'nhanvien' }) {
                     className="repair-modal__button confirm-button"
                     disabled={false}
                     onClick={async () => {
+                        if (conPassword !== conRepeatPassword) {
+                            Swal.fire({
+                                title: 'Thất bại!',
+                                text: 'Mật khẩu không khớp',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            })
+                            return
+                        }
                         try {
-                            const hasPassword = await authService.hashPassword(conPassword);
-                            await dbService.add('users', {
-                                employeeId: idNV,
+                            await authService.createUser({
                                 userName: conUserName,
-                                password: hasPassword,
+                                password: conPassword,
+                                employeeId: idNV,
                                 role: role
                             })
+                            await Swal.fire({
+                                title: 'Thành công!',
+                                text: 'Tạo tài khoản thành công',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            })
+
                             onClose()
                         } catch (error) {
-                            alert(error.message)
+                            Swal.fire({
+                                title: 'Thất bại!',
+                                text: error.message,
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            })
                         } finally {
                             // setIsLoading(false)
                         }
