@@ -16,6 +16,7 @@ import { doc, onSnapshot, collection } from 'firebase/firestore'
 import { db } from '../../firebase.config'
 import AddAccount from './add_account.jsx'
 import DetailEmployee from './detail_employee.jsx'
+import DialogConfirmDialog from '../../components/dialog_confirm_dialog.jsx'
 
 function Employee() {
     const [currentPage, setCurrentPage] = useState(1)
@@ -48,6 +49,7 @@ function Employee() {
     const [isOpenAddAccount, setIsOpenAddAccount] = useState(false)
     const [isOpenDetailEmployee, setIsOpenDetailEmployee] = useState(false)
     const [isOpenEditEmployee, setIsOpenEditEmployee] = useState(false)
+    const [isOpenDelete, setIsOpenDelete] = useState(false)
 
     const [userAdd, setUserAdd] = useState({
         idNV: 'zont09',
@@ -93,6 +95,11 @@ function Employee() {
         setIsOpenEditEmployee(true)
     }
 
+    const deleteEmployee = (nv) => {
+        setUserAdd(nv)
+        setIsOpenDelete(true)
+    }
+
     const fetchData = async () => {
         const data = await dbService.getAll('employees')
         const users = await dbService.getAll('users')
@@ -118,7 +125,6 @@ function Employee() {
                     <button className="addBtn" onClick={addEmployee}>
                         Thêm Nhân Viên
                     </button>
-            
                 </div>
 
                 <div className="filter-area">
@@ -142,7 +148,7 @@ function Employee() {
                 showHeader={false}
                 width="680px"
             >
-                <AddEmployee onClose={() => setIsOpenEditEmployee(false)}></AddEmployee>
+                <AddEmployee onClose={() => setIsOpenAddDialog(false)}></AddEmployee>
             </Modal>
             <Modal
                 isOpen={isOpenEditEmployee}
@@ -150,7 +156,11 @@ function Employee() {
                 showHeader={false}
                 width="680px"
             >
-                <AddEmployee onClose={() => setIsOpenEditEmployee(false)} isEdit = {true} nv = {userAdd}></AddEmployee>
+                <AddEmployee
+                    onClose={() => setIsOpenEditEmployee(false)}
+                    isEdit={true}
+                    nv={userAdd}
+                ></AddEmployee>
             </Modal>
             <Modal
                 isOpen={isOpenAddAccount}
@@ -175,11 +185,32 @@ function Employee() {
                     nv={userAdd}
                 ></DetailEmployee>
             </Modal>
+            <DialogConfirmDialog
+                isShow={isOpenDelete}
+                onClose={() => setIsOpenDelete(false)}
+                message="Bạn có chắn chắn muốn xoá nhân viên này"
+                onConfirm={async () => {
+                    await dbService.softDelete('employees', userAdd.id)
+                    const listUser = await dbService.getAll('users')
+                    const user = listUser.find((item) => item.employeeId === userAdd.id)
+                    if (user) {
+                        await dbService.softDelete('users', user.id)
+                    }
+                    setIsOpenDelete(false)
+                }}
+            ></DialogConfirmDialog>
             <div className="employee-table">
                 <div className="z-car-page">
                     <div className="z-car-page__header">{/* Header content here */}</div>
                     <div className="z-car-page__content">
-                        <ZTable addAccount={addAccount} detailAction={detailEmployee} editAction={editEmployee} columns={columns} data={currentData} />
+                        <ZTable
+                            addAccount={addAccount}
+                            detailAction={detailEmployee}
+                            editAction={editEmployee}
+                            deleteAction={deleteEmployee}
+                            columns={columns}
+                            data={currentData}
+                        />
                     </div>
                 </div>
                 <div className="z-pagination">

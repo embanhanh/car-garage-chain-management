@@ -1,11 +1,10 @@
 import TextFieldForm from '../../components/text_field'
-import './add_employee.css'
 import { useState } from 'react'
 import ComboBox from '../../components/Combobox.jsx'
 import { dbService } from '../../services/DatabaseService.js'
 
-function DetailEmployee({ nv, onClose }) {
-    console.group("Nhan vien", nv)
+function DetailCustomer({ nv, onClose }) {
+    
     function convertToDateString(dateTime) {
         console.log("date Time hehe",dateTime)
         const date = new Date(dateTime) // Chuyển chuỗi sang đối tượng Date
@@ -19,15 +18,15 @@ function DetailEmployee({ nv, onClose }) {
             <div className="z-ae-row-data row w-100">
                 <TextFieldForm
                     className="col-6"
-                    hintText="Nhập tên nhân viên"
-                    name="Tên nhân viên"
+                    hintText=""
+                    name="Tên khách hàng"
                     enable={false}
                     value={nv.name}
                     onChange={() => {}}
                 ></TextFieldForm>
                 <TextFieldForm
                     className="col-6"
-                    hintText="Nhập email"
+                    hintText=""
                     name="Email"
                     enable={false}
                     value={nv.email}
@@ -55,10 +54,10 @@ function DetailEmployee({ nv, onClose }) {
             <div className="z-ae-row-data row w-100">
                 <TextFieldForm
                     className="col-6"
-                    hintText="Nhập số điện thoại"
-                    name="Giới tính"
+                    hintText=""
+                    name="Ngày sinh"
                     enable={false}
-                    value={nv.gender}
+                    value={nv.birthday}
                     onChange={() => {}}
                 ></TextFieldForm>
 
@@ -68,43 +67,6 @@ function DetailEmployee({ nv, onClose }) {
                     name="Số điện thoại"
                     enable={false}
                     value={nv.phone}
-                    onChange={() => {}}
-                ></TextFieldForm>
-            </div>
-            <div className="z-ae-row-data row w-100">
-                <TextFieldForm
-                    className="col-6"
-                    hintText="Nhập số điện thoại"
-                    name="Ngày sinh"
-                    enable={false}
-                    value={nv.birthday}
-                    onChange={() => {}}
-                ></TextFieldForm>
-                <TextFieldForm
-                    className="col-6"
-                    hintText="Nhập mức lương"
-                    name="Mức lương"
-                    enable={false}
-                    value={nv.salary}
-                    onChange={() => {}}
-                ></TextFieldForm>
-            </div>
-            <div className="z-ae-row-data row w-100">
-                <TextFieldForm
-                    className="col-6"
-                    hintText="Nhập mức lương"
-                    name="Vị trí làm việc"
-                    enable={false}
-                    value={nv.position}
-                    onChange={() => {}}
-                ></TextFieldForm>
-
-                <TextFieldForm
-                    className="col-6"
-                    hintText="Nhập mức lương"
-                    name="Ca làm việc"
-                    enable={false}
-                    value={nv.workHours}
                     onChange={() => {}}
                 ></TextFieldForm>
             </div>
@@ -122,4 +84,4 @@ function DetailEmployee({ nv, onClose }) {
     )
 }
 
-export default DetailEmployee
+export default DetailCustomer
