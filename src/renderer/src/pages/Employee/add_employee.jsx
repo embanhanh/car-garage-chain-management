@@ -180,7 +180,7 @@ function AddEmployee({ onClose }) {
                                     address: conAddress,
                                     gender: conSex,
                                     phone: conPhone,
-                                    birthDay: conBirthDay,
+                                    birthday: conBirthDay,
                                     salary: conSalary,
                                     position: conPosition,
                                     workHours: conWorkingTime

@@ -15,6 +15,7 @@ import { dbService } from '../../services/DatabaseService.js'
 import { doc, onSnapshot, collection } from 'firebase/firestore'
 import { db } from '../../firebase.config'
 import AddAccount from './add_account.jsx'
+import DetailEmployee from './detail_employee.jsx'
 
 function Employee() {
     const [currentPage, setCurrentPage] = useState(1)
@@ -45,6 +46,7 @@ function Employee() {
 
     const [isOpenAddDialog, setIsOpenAddDialog] = useState(false)
     const [isOpenAddAccount, setIsOpenAddAccount] = useState(false)
+    const [isOpenDetailEmployee, setIsOpenDetailEmployee] = useState(false)
 
     const [userAdd, setUserAdd] = useState({
         idNV: 'zont09',
@@ -79,6 +81,12 @@ function Employee() {
         })
         setIsOpenAddAccount(true)
     }
+
+    const detailEmployee = (nv) => {
+        setUserAdd(nv)
+        setIsOpenDetailEmployee(true)
+    }
+
     const fetchData = async () => {
         const data = await dbService.getAll('employees')
         const users = await dbService.getAll('users')
@@ -144,11 +152,22 @@ function Employee() {
                     role={userAdd.role}
                 ></AddAccount>
             </Modal>
+            <Modal
+                isOpen={isOpenDetailEmployee}
+                onClose={() => setIsOpenDetailEmployee(false)}
+                showHeader={false}
+                width="680px"
+            >
+                <DetailEmployee
+                    onClose={() => setIsOpenDetailEmployee(false)}
+                    nv={userAdd}
+                ></DetailEmployee>
+            </Modal>
             <div className="employee-table">
                 <div className="z-car-page">
                     <div className="z-car-page__header">{/* Header content here */}</div>
                     <div className="z-car-page__content">
-                        <ZTable addAccount={addAccount} columns={columns} data={currentData} />
+                        <ZTable addAccount={addAccount} detailAction={detailEmployee} columns={columns} data={currentData} />
                     </div>
                 </div>
                 <div className="z-pagination">
