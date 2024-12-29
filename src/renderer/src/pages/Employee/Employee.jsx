@@ -14,6 +14,7 @@ import AddEmployee from './add_employee'
 import { dbService } from '../../services/DatabaseService.js'
 import { doc, onSnapshot, collection } from 'firebase/firestore'
 import { db } from '../../firebase.config'
+import AddAccount from './add_account.jsx'
 
 function Employee() {
     const [currentPage, setCurrentPage] = useState(1)
@@ -43,6 +44,12 @@ function Employee() {
     // ];
 
     const [isOpenAddDialog, setIsOpenAddDialog] = useState(false)
+    const [isOpenAddAccount, setIsOpenAddAccount] = useState(false)
+
+    const [userAdd, setUserAdd] = useState({
+        idNV: 'zont09',
+        role: 'nhanvien'
+    })
     const [listEmployees, setListEmployees] = useState([])
 
     const totalPages = Math.ceil(listEmployees.length / itemsPerPage)
@@ -63,6 +70,14 @@ function Employee() {
 
     const addEmployee = () => {
         setIsOpenAddDialog(true)
+    }
+
+    const addAccount = (map) => {
+        setUserAdd({
+            idNV: map.idNV,
+            role: map.role
+        })
+        setIsOpenAddAccount(true)
     }
     const fetchData = async () => {
         const data = await dbService.getAll('employees')
@@ -89,7 +104,9 @@ function Employee() {
                     <button className="addBtn" onClick={addEmployee}>
                         Thêm Nhân Viên
                     </button>
-                    <button className="addAccBtn">Cấp Tài Khoản</button>
+                    <button className="addAccBtn" onClick={addAccount}>
+                        Cấp Tài Khoản
+                    </button>
                 </div>
 
                 <div className="filter-area">
@@ -115,11 +132,23 @@ function Employee() {
             >
                 <AddEmployee onClose={() => setIsOpenAddDialog(false)}></AddEmployee>
             </Modal>
+            <Modal
+                isOpen={isOpenAddAccount}
+                onClose={() => setIsOpenAddAccount(false)}
+                showHeader={false}
+                width="300px"
+            >
+                <AddAccount
+                    onClose={() => setIsOpenAddAccount(false)}
+                    idNV={userAdd.idNV}
+                    role={userAdd.role}
+                ></AddAccount>
+            </Modal>
             <div className="employee-table">
                 <div className="z-car-page">
                     <div className="z-car-page__header">{/* Header content here */}</div>
                     <div className="z-car-page__content">
-                        <ZTable columns={columns} data={currentData} />
+                        <ZTable addAccount={addAccount} columns={columns} data={currentData} />
                     </div>
                 </div>
                 <div className="z-pagination">

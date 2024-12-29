@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import '../components/Modal.css'
 
-function TextFieldForm({ name, onChange, className, hintText }) {
+function TextFieldForm({ name, onChange, className, hintText, type = "text" }) {
     const [inputValue, setInputValue] = useState('')
     const handleChange = (event) => {
         const value = event.target.value
@@ -16,7 +16,7 @@ function TextFieldForm({ name, onChange, className, hintText }) {
                 <div className="input-form">
                     <input
                         className="w-100"
-                        type="text"
+                        type={type}
                         id="componentCode"
                         placeholder={hintText}
                         onChange={handleChange}

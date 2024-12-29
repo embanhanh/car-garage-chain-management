@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons'
 import './ZTable.css' // Import the CSS file with 'z' prefixed class names
 
-const ZTable = ({ columns, data }) => {
+const ZTable = ({ columns, data, addAccount = () => {} }) => {
     const itemsPerPage = 12
     return (
         <table className="z-page-table z-car-table overflow-visible">
@@ -43,13 +43,17 @@ const ZTable = ({ columns, data }) => {
                                                         : ''
                                                 }`}
                                             >
-                                                {!item.hasAccount ?
-                                                <div
-                                                    className="table__action-item"
-                                                    onClick={() => {}}
-                                                >
-                                                    Tạo tài khoản
-                                                </div> : null}
+                                                {"hasAccount" in item && !item.hasAccount ? (
+                                                    <div
+                                                        className="table__action-item"
+                                                        onClick={() => addAccount({
+                                                            idNV: item.id,
+                                                            role: item.position
+                                                        })}
+                                                    >
+                                                        Tạo tài khoản
+                                                    </div>
+                                                ) : null}
                                                 <div
                                                     className="table__action-item"
                                                     onClick={() => {}}
