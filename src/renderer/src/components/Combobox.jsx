@@ -21,7 +21,7 @@ function ComboBox({ value, onChange, options, placeholder = 'Chọn', height = '
                 {selectedOption ? selectedOption.label : placeholder}
             </div>
             {isOpen && (
-                <div className="custom-select__options" style={{ height: height }}>
+                <div className="custom-select__options" style={{ maxHeight: height }}>
                     {options.map((option) => (
                         <div
                             key={option.value}

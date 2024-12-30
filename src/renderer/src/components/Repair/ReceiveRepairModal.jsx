@@ -285,6 +285,7 @@ export default function ReceiveRepairModal({ onClose }) {
                         onAddStaffInCharge={onAddStaffInCharge}
                         onAddComponentUsed={onAddComponentUsed}
                         onCompleteService={onCompleteService}
+                        type="add"
                     />
                     <div className="page-btns center">
                         <button

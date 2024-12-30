@@ -238,10 +238,10 @@ class DatabaseService {
     async update(collectionName, id, data) {
         try {
             const docRef = doc(db, this.collections[collectionName].name, id)
-            await updateDoc(docRef, data)
+            const newData = await updateDoc(docRef, data)
             return {
                 id,
-                ...data
+                ...newData
             }
         } catch (error) {
             console.error(`Lỗi khi cập nhật ${collectionName}:`, error)
