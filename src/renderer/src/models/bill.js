@@ -26,7 +26,7 @@ export class Bill {
         serviceRegisterId = '',
         serviceRegister = null,
         status = '',
-        paymentMethod = '',
+        type = '',
         createdAt = new Date()
     } = {}) {
         this.id = id
@@ -38,7 +38,7 @@ export class Bill {
         this.serviceRegisterId = serviceRegisterId
         this.serviceRegister = serviceRegister
         this.status = status
-        this.paymentMethod = paymentMethod
+        this.type = type
         this.createdAt = createdAt
     }
 
@@ -50,7 +50,7 @@ export class Bill {
             total: this.total,
             serviceRegisterId: this.serviceRegisterId,
             status: this.status,
-            paymentMethod: this.paymentMethod,
+            type: this.type,
             createdAt: this.createdAt
         }
     }

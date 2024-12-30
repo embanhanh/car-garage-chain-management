@@ -102,7 +102,8 @@ const StaffInChargeModal = ({ onClose, data, onAddStaffInCharge }) => {
                         Hủy
                     </button>
                     <button
-                        className="repair-modal__button confirm-button"
+                        className="primary-button"
+                        disabled={data?.status == 'Đã hoàn thành'}
                         onClick={() => {
                             if (selectedStaff !== null) {
                                 setStaffInChargeData((pre) => [...pre, selectedStaff])
@@ -140,18 +141,22 @@ const StaffInChargeModal = ({ onClose, data, onAddStaffInCharge }) => {
                                                 icon={faEllipsisVertical}
                                                 className="table__action-icon"
                                             />
-                                            <div className={`table__action-menu`}>
-                                                <div
-                                                    className="table__action-item"
-                                                    onClick={() => {
-                                                        setStaffInChargeData((pre) =>
-                                                            pre?.filter((emp) => emp.id !== item.id)
-                                                        )
-                                                    }}
-                                                >
-                                                    Xóa
+                                            {data?.status != 'Đã hoàn thành' && (
+                                                <div className={`table__action-menu`}>
+                                                    <div
+                                                        className="table__action-item"
+                                                        onClick={() => {
+                                                            setStaffInChargeData((pre) =>
+                                                                pre?.filter(
+                                                                    (emp) => emp.id !== item.id
+                                                                )
+                                                            )
+                                                        }}
+                                                    >
+                                                        Xóa
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
@@ -161,7 +166,7 @@ const StaffInChargeModal = ({ onClose, data, onAddStaffInCharge }) => {
                 </div>
                 <div className="repair-modal__btn-container">
                     <button
-                        className="repair-modal__button confirm-button"
+                        className="primary-button mt-3"
                         onClick={async () => {
                             if (staffInChargeData) {
                                 try {
@@ -175,7 +180,7 @@ const StaffInChargeModal = ({ onClose, data, onAddStaffInCharge }) => {
                                 onClose()
                             }
                         }}
-                        disabled={isLoading}
+                        disabled={isLoading || data?.status == 'Đã hoàn thành'}
                     >
                         Xác nhận
                     </button>

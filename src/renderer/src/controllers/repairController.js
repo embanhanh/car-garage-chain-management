@@ -1,3 +1,4 @@
+import { increment } from 'firebase/firestore'
 import { dbService } from '../services/DatabaseService'
 
 export const addService = async (selectedService, openDetailRepairModal) => {
@@ -55,7 +56,7 @@ export const deleteService = async (serviceId, openDetailRepairModal) => {
 
 export const completeService = async (serviceId, openDetailRepairModal, fetchData) => {
     if (serviceId) {
-        await dbService.updateFields(
+        await dbService.update(
             'repairregisters',
             openDetailRepairModal.data?.repairRegisters?.find(
                 (item) => item.service.id === serviceId
@@ -64,6 +65,13 @@ export const completeService = async (serviceId, openDetailRepairModal, fetchDat
                 status: 'Đã hoàn thành'
             }
         )
+        openDetailRepairModal.data?.repairRegisters
+            ?.find((item) => item.service.id === serviceId)
+            .repairRegisterComponents.forEach(async (item) => {
+                await dbService.update('components', item.component.id, {
+                    inventory: increment(Number(item.quantity) * -1)
+                })
+            })
         if (
             !openDetailRepairModal.data.repairRegisters
                 .filter((item) => item.service.id !== serviceId)

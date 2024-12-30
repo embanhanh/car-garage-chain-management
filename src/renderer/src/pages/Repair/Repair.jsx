@@ -55,11 +55,13 @@ const Repair = () => {
         return () => unsubscribe()
     }, [])
 
-    const totalPages = Math.ceil(repairRegisterData.length / itemsPerPage)
+    const totalPages = Math.ceil(
+        repairRegisterData.filter((item) => item.car).length / itemsPerPage
+    )
 
     const currentData = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage
-        return repairRegisterData.slice(start, start + itemsPerPage)
+        return repairRegisterData.filter((item) => item.car).slice(start, start + itemsPerPage)
     }, [currentPage, repairRegisterData])
 
     const handlePageChange = useCallback(
@@ -70,8 +72,6 @@ const Repair = () => {
         },
         [totalPages]
     )
-
-    const checkStatus = () => {}
 
     const onAddService = async (selectedService) => {
         await addService(selectedService, openDetailRepairModal)

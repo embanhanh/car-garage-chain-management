@@ -6,7 +6,7 @@ import {
     faSearch,
     faEllipsisVertical
 } from '@fortawesome/free-solid-svg-icons'
-import { collection, onSnapshot } from 'firebase/firestore'
+import { collection, increment, onSnapshot } from 'firebase/firestore'
 import Swal from 'sweetalert2'
 import Pagination from '../../components/Pagination'
 import Modal from '../../components/Modal'
@@ -16,6 +16,7 @@ import { db } from '../../firebase.config'
 import './Component.css'
 import UpDetailComponentModal from '../../components/Component/UpDetailComponentModal'
 import DetailImportModal from '../../components/Component/DetailImportModal'
+import ComponentUsedModal from '../../components/Repair/ComponentUsedModal'
 
 function Component() {
     const [currentPage, setCurrentPage] = useState(1)
@@ -33,6 +34,7 @@ function Component() {
         data: null,
         show: false
     })
+    const [openPurchase, setOpenPurchase] = useState(false)
     const [data, setData] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const itemsPerPage = 8
@@ -119,7 +121,7 @@ function Component() {
                             className="primary-button"
                             onClick={() => {
                                 tab === 'component'
-                                    ? console.log('...')
+                                    ? setOpenPurchase(true)
                                     : setOpenImportModal({
                                           show: true,
                                           data: null
@@ -391,6 +393,70 @@ function Component() {
                             show: false
                         })
                     }
+                />
+            </Modal>
+            <Modal
+                width="900px"
+                showHeader={false}
+                isOpen={openPurchase}
+                onClose={() => setOpenPurchase(false)}
+            >
+                <ComponentUsedModal
+                    onClose={() => setOpenPurchase(false)}
+                    onAddComponentUsed={async (data) => {
+                        if (data.length > 0) {
+                            const repairRegister = {
+                                status: 'Đã hoàn thành',
+                                serviceId: 'WJu9TV0IyIwaLcVlIVLc',
+                                employeeIds: [],
+                                repairRegisterComponents: data.map((item) => ({
+                                    componentId: item.component.id,
+                                    quantity: item.quantity
+                                }))
+                            }
+                            const newRepairRegister = await dbService.add(
+                                'repairregisters',
+                                repairRegister
+                            )
+                            const serviceRegister = {
+                                employeeId: JSON.parse(localStorage.getItem('currentUser')).employee
+                                    ?.id,
+                                carId: null,
+                                status: 'Đã hoàn thành',
+                                expectedCompletionDate: new Date().toISOString(),
+                                repairRegisterIds: [newRepairRegister.id]
+                            }
+                            const newServiceRegister = await dbService.add(
+                                'serviceregisters',
+                                serviceRegister
+                            )
+                            data.forEach(async (item) => {
+                                await dbService.update('components', item.component.id, {
+                                    inventory: increment(Number(item.quantity) * -1)
+                                })
+                            })
+                            await dbService.add('bills', {
+                                employeeId: JSON.parse(localStorage.getItem('currentUser')).employee
+                                    ?.id,
+                                customerId: null,
+                                total: data.reduce((total, item) => {
+                                    return (
+                                        total + Number(item.component.price) * Number(item.quantity)
+                                    )
+                                }, 0),
+                                serviceRegisterId: newServiceRegister.id,
+                                status: 'Đã thanh toán',
+                                type: 'purchase'
+                            })
+                            await Swal.fire({
+                                title: 'Thành công',
+                                text: 'Tạo phiếu mua hàng thành công',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            })
+                        }
+                    }}
+                    data={null}
                 />
             </Modal>
         </>

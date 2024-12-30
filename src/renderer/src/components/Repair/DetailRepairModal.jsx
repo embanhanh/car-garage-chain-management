@@ -14,7 +14,8 @@ function DetailRepairModal({
     onDeleteService,
     onAddStaffInCharge,
     onAddComponentUsed,
-    onCompleteService
+    onCompleteService,
+    type
 }) {
     const [repairData, setRepairData] = useState(data)
     const [openStaffInChargeModal, setOpenStaffInChargeModal] = useState({
@@ -112,7 +113,7 @@ function DetailRepairModal({
                     <div className="repair-modal__table-container">
                         <h3 className="repair-modal__table-title mt-2">
                             Danh sách loại hình sửa chữa
-                        </h3> 
+                        </h3>
                         <div className="repair-modal__table-content">
                             <table className="page-table detail-repair-table table-scrollable">
                                 <thead>
@@ -164,28 +165,31 @@ function DetailRepairModal({
                                                         >
                                                             Chi tiết phụ tùng
                                                         </div>
+                                                        {register.status === 'Đang sửa chữa' &&
+                                                            type !== 'add' && (
+                                                                <div
+                                                                    className="table__action-item"
+                                                                    onClick={async () =>
+                                                                        await onCompleteService(
+                                                                            register.service.id
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Hoàn thành
+                                                                </div>
+                                                            )}
                                                         {register.status === 'Đang sửa chữa' && (
                                                             <div
                                                                 className="table__action-item"
                                                                 onClick={async () =>
-                                                                    await onCompleteService(
+                                                                    await onDeleteService(
                                                                         register.service.id
                                                                     )
                                                                 }
                                                             >
-                                                                Hoàn thành
+                                                                Xóa
                                                             </div>
                                                         )}
-                                                        <div
-                                                            className="table__action-item"
-                                                            onClick={async () =>
-                                                                await onDeleteService(
-                                                                    register.service.id
-                                                                )
-                                                            }
-                                                        >
-                                                            Xóa
-                                                        </div>
                                                     </div>
                                                 </div>
                                             </td>

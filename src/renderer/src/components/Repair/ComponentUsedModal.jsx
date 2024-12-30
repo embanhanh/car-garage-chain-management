@@ -12,7 +12,9 @@ const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
         show: false,
         data: null
     })
-    const [componentUsedData, setComponentUsedData] = useState(data?.repairRegisterComponents || [])
+    const [componentUsedData, setComponentUsedData] = useState(
+        data ? data.repairRegisterComponents : []
+    )
     const [componentName, setComponentName] = useState('')
     const [searchResults, setSearchResults] = useState([])
     const [isSearching, setIsSearching] = useState(false)
@@ -21,7 +23,9 @@ const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
     const [isLoading, setIsLoading] = useState(false)
 
     useEffect(() => {
-        setComponentUsedData(data?.repairRegisterComponents)
+        if (data) {
+            setComponentUsedData(data?.repairRegisterComponents)
+        }
     }, [data])
 
     const searchComponents = debounce(async (searchText) => {
@@ -44,8 +48,10 @@ const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
                     }
                 ])
             }
+
             const filteredComponents = components.filter(
-                (component) => !componentUsedData.some((item) => item.component.id === component.id)
+                (component) =>
+                    !componentUsedData?.some((item) => item.component.id === component.id)
             )
             setSearchResults(filteredComponents)
         } catch (error) {
@@ -54,6 +60,10 @@ const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
             setIsSearching(false)
         }
     }, 300)
+
+    useEffect(() => {
+        console.log(componentUsedData)
+    }, [componentUsedData])
 
     const handleConfirmUpdateComponent = (quantity) => {
         if (openUpdateComponentModal.data) {
@@ -144,7 +154,8 @@ const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
                             Hủy
                         </button>
                         <button
-                            className="repair-modal__button confirm-button"
+                            className="primary-button"
+                            disabled={data?.status == 'Đã hoàn thành'}
                             onClick={async () => {
                                 if (selectedComponent !== null && quantity > 0) {
                                     setComponentUsedData((pre) => [
@@ -194,33 +205,35 @@ const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
                                                     icon={faEllipsisVertical}
                                                     className="table__action-icon"
                                                 />
-                                                <div className={`table__action-menu`}>
-                                                    <div
-                                                        className="table__action-item"
-                                                        onClick={() => {
-                                                            setOpenUpdateComponentModal({
-                                                                show: true,
-                                                                data: item
-                                                            })
-                                                        }}
-                                                    >
-                                                        Cập nhật
-                                                    </div>
-                                                    <div
-                                                        className="table__action-item"
-                                                        onClick={() => {
-                                                            setComponentUsedData((pre) =>
-                                                                pre?.filter(
-                                                                    (comp) =>
-                                                                        comp.component.id !==
-                                                                        item.component.id
+                                                {data?.status !== 'Đã hoàn thành' && (
+                                                    <div className={`table__action-menu`}>
+                                                        <div
+                                                            className="table__action-item"
+                                                            onClick={() => {
+                                                                setOpenUpdateComponentModal({
+                                                                    show: true,
+                                                                    data: item
+                                                                })
+                                                            }}
+                                                        >
+                                                            Cập nhật
+                                                        </div>
+                                                        <div
+                                                            className="table__action-item"
+                                                            onClick={() => {
+                                                                setComponentUsedData((pre) =>
+                                                                    pre?.filter(
+                                                                        (comp) =>
+                                                                            comp.component.id !==
+                                                                            item.component.id
+                                                                    )
                                                                 )
-                                                            )
-                                                        }}
-                                                    >
-                                                        Xóa
+                                                            }}
+                                                        >
+                                                            Xóa
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -230,7 +243,7 @@ const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
                     </div>
                     <div className="repair-modal__btn-container">
                         <button
-                            className="repair-modal__button confirm-button"
+                            className="primary-button mt-3"
                             onClick={async () => {
                                 if (componentUsedData) {
                                     try {
@@ -247,7 +260,7 @@ const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
                                     onClose()
                                 }
                             }}
-                            disabled={isLoading}
+                            disabled={isLoading || data?.status == 'Đã hoàn thành'}
                         >
                             Xác nhận
                         </button>
