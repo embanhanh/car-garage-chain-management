@@ -14,12 +14,17 @@ export const addService = async (selectedService, openDetailRepairModal) => {
             repairRegisterComponents: []
         }
         const newRepairRegister = await dbService.add('repairregisters', newData)
-        await dbService.updateFields('serviceregisters', openDetailRepairModal.data.id, {
+        await dbService.update('serviceregisters', openDetailRepairModal.data.id, {
             repairRegisterIds: [
                 ...openDetailRepairModal.data.repairRegisterIds,
                 newRepairRegister.id
             ]
         })
+        if (openDetailRepairModal.data.status == 'Đã hoàn thành') {
+            await dbService.update('serviceregisters', openDetailRepairModal.data.id, {
+                status: 'Đang sửa chữa'
+            })
+        }
     }
 }
 
@@ -31,11 +36,20 @@ export const deleteService = async (serviceId, openDetailRepairModal) => {
         )
         await dbService.delete('repairregisters', repairRegister.id)
         // Cập nhật registerService
-        await dbService.updateFields('serviceregisters', openDetailRepairModal.data.id, {
+        await dbService.update('serviceregisters', openDetailRepairModal.data.id, {
             repairRegisterIds: openDetailRepairModal.data.repairRegisterIds.filter(
                 (id) => id !== repairRegister.id
             )
         })
+        if (
+            !openDetailRepairModal.data.repairRegisters
+                .filter((item) => item.service.id !== serviceId)
+                .some((item) => item.status == 'Đang sửa chữa')
+        ) {
+            await dbService.update('serviceregisters', openDetailRepairModal.data.id, {
+                status: 'Đã hoàn thành'
+            })
+        }
     }
 }
 
@@ -50,6 +64,15 @@ export const completeService = async (serviceId, openDetailRepairModal, fetchDat
                 status: 'Đã hoàn thành'
             }
         )
+        if (
+            !openDetailRepairModal.data.repairRegisters
+                .filter((item) => item.service.id !== serviceId)
+                .some((item) => item.status == 'Đang sửa chữa')
+        ) {
+            await dbService.update('serviceregisters', openDetailRepairModal.data.id, {
+                status: 'Đã hoàn thành'
+            })
+        }
         await fetchData()
     }
 }

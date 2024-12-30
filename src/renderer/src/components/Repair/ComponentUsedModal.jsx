@@ -25,25 +25,25 @@ const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
     }, [data])
 
     const searchComponents = debounce(async (searchText) => {
-        if (!searchText) {
-            setSearchResults([])
-            return
-        }
         setIsSearching(true)
         try {
-            const components = await dbService.findBy('components', [
-                {
-                    field: 'name',
-                    operator: '>=',
-                    value: searchText
-                },
-                {
-                    field: 'name',
-                    operator: '<=',
-                    value: searchText + '\uf8ff'
-                }
-            ])
-            // Lọc ra những nhân viên chưa được phân công
+            let components = []
+            if (!searchText) {
+                components = await dbService.getAll('components')
+            } else {
+                components = await dbService.findBy('components', [
+                    {
+                        field: 'name',
+                        operator: '>=',
+                        value: searchText
+                    },
+                    {
+                        field: 'name',
+                        operator: '<=',
+                        value: searchText + '\uf8ff'
+                    }
+                ])
+            }
             const filteredComponents = components.filter(
                 (component) => !componentUsedData.some((item) => item.component.id === component.id)
             )
@@ -157,6 +157,7 @@ const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
                                     setComponentName('')
                                     setSelectedComponent(null)
                                     setQuantity(0)
+                                    setSearchResults([])
                                 }
                             }}
                         >
