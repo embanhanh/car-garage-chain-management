@@ -1,4 +1,5 @@
 import { dbService } from '../services/DatabaseService'
+import { parseISO, isWithinInterval } from 'date-fns'
 
 export const addService = async (selectedService, openDetailRepairModal) => {
     if (
@@ -90,4 +91,19 @@ export const addStaffInCharge = async (employees, serviceId, openDetailRepairMod
         )
         await fetchData()
     }
+}
+
+export const getRepairRegisterByDate = async (startDate, endDate) => {
+    const repairRegister = await dbService.getAll('repairregisters')
+
+    const parsedStartDate = new Date(startDate)
+    const parsedEndDate = new Date(endDate)
+    const filteredData = repairRegister.filter((item) => {
+        const itemDate = parseISO(item.createdAt)
+        return isWithinInterval(itemDate, {
+            start: parsedStartDate,
+            end: parsedEndDate
+        })
+    })
+    return filteredData
 }

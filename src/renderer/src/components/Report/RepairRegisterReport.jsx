@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react'
-import { Bar } from 'react-chartjs-2'
+import { Pie } from 'react-chartjs-2'
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend
-} from 'chart.js'
-import { format, addDays, startOfWeek, startOfMonth, startOfYear } from 'date-fns'
+    startOfWeek,
+    startOfMonth,
+    startOfYear,
+    endOfWeek,
+    endOfMonth,
+    endOfYear,
+    format,
+    getWeek
+} from 'date-fns'
+import { getRepairRegisterByDate } from '../../controllers/repairController'
 import './Report.css'
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
+ChartJS.register(ArcElement, Tooltip, Legend)
 
 function ReportRepair({ dateRange = 'week', selectedDate = new Date() }) {
     const [repairData, setRepairData] = useState([])
@@ -20,92 +22,61 @@ function ReportRepair({ dateRange = 'week', selectedDate = new Date() }) {
         labels: [],
         datasets: [
             {
-                label: 'Số lượng phiếu',
                 data: [],
-                backgroundColor: 'rgba(53, 162, 235, 0.8)'
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.8)', // Hoàn thành
+                    'rgba(255, 206, 86, 0.8)', // Đang sửa chữa
+                    'rgba(255, 99, 132, 0.8)', // Khác
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(153, 102, 255, 0.8)',
+                    'rgba(255, 159, 64, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
             }
         ]
     })
 
-    const [monthlyChartData, setMonthlyChartData] = useState({
-        labels: [],
-        datasets: [
-            {
-                label: 'Số lượng phiếu',
-                data: [],
-                backgroundColor: 'rgba(53, 162, 235, 0.8)',
-                yAxisID: 'y'
-            },
-            {
-                label: 'Tổng chi phí (triệu đồng)',
-                data: [],
-                backgroundColor: 'rgba(255, 99, 132, 0.8)',
-                yAxisID: 'y1'
-            }
-        ]
-    })
-
-    useEffect(() => {
-        generateFakeRepairData()
-    }, [dateRange, selectedDate])
-
-    const generateFakeRepairData = () => {
-        // Tạo dữ liệu giả về phiếu sửa chữa
-        const repairs = []
-
-        // Tạo dữ liệu dựa trên dateRange
-        const getRandomRepair = (date) => ({
-            id: `PSC${repairs.length + 1}`.padStart(6, '0'),
-            customerName: `Khách hàng ${repairs.length + 1}`,
-            status: Math.random() > 0.5 ? 'Đã hoàn thành' : 'Đang chờ',
-            totalCost: Math.floor(Math.random() * 5000000) + 1000000,
-            profit: Math.floor(Math.random() * 1000000) + 300000,
-            completionTime: format(date, 'yyyy-MM-dd HH:mm'),
-            services: ['Bảo dưỡng định kỳ', 'Thay dầu máy'],
-            mechanic: 'Nhân viên ' + (repairs.length + 1)
-        })
-
-        // Tạo dữ liệu theo khoảng thời gian
+    const getDateRangeText = () => {
         switch (dateRange) {
             case 'week':
-                // Tạo dữ liệu cho 7 ngày
-                for (let i = 0; i < 7; i++) {
-                    const date = addDays(startOfWeek(selectedDate), i)
-                    const dailyRepairCount = Math.floor(Math.random() * 3) + 1 // 1-3 phiếu mỗi ngày
-                    for (let j = 0; j < dailyRepairCount; j++) {
-                        repairs.push(getRandomRepair(date))
-                    }
-                }
-                break
-
+                const weekNumber = getWeek(selectedDate, { weekStartsOn: 1 })
+                return `Tuần ${weekNumber}, ${format(selectedDate, 'yyyy')}`
             case 'month':
-                // Tạo dữ liệu cho 30 ngày
-                for (let i = 0; i < 30; i++) {
-                    const date = addDays(startOfMonth(selectedDate), i)
-                    const dailyRepairCount = Math.floor(Math.random() * 4) + 2 // 2-5 phiếu mỗi ngày
-                    for (let j = 0; j < dailyRepairCount; j++) {
-                        repairs.push(getRandomRepair(date))
-                    }
-                }
-                break
-
+                return format(selectedDate, 'MM/yyyy')
             case 'year':
-                // Tạo dữ liệu cho 12 tháng
-                for (let month = 0; month < 12; month++) {
-                    const daysInMonth = Math.floor(Math.random() * 50) + 30 // 30-80 phiếu mỗi tháng
-                    for (let i = 0; i < daysInMonth; i++) {
-                        const date = addDays(startOfYear(selectedDate), month * 30 + i)
-                        repairs.push(getRandomRepair(date))
+                return format(selectedDate, 'yyyy')
+            default:
+                return ''
+        }
+    }
+
+    const processAndUpdateChartData = (data) => {
+        if (!Array.isArray(data) || data.length === 0) {
+            setStatusChartData({
+                labels: ['Không có dữ liệu'],
+                datasets: [
+                    {
+                        data: [1],
+                        backgroundColor: ['#e0e0e0'],
+                        borderColor: ['#cccccc'],
+                        borderWidth: 1
                     }
-                }
-                break
+                ]
+            })
+            return
         }
 
-        setRepairData(repairs)
-
-        // Cập nhật dữ liệu cho biểu đồ trạng thái
-        const statusCount = repairs.reduce((acc, repair) => {
-            acc[repair.status] = (acc[repair.status] || 0) + 1
+        const statusCount = data.reduce((acc, repair) => {
+            const status = repair.status || 'Không xác định'
+            acc[status] = (acc[status] || 0) + 1
             return acc
         }, {})
 
@@ -113,149 +84,100 @@ function ReportRepair({ dateRange = 'week', selectedDate = new Date() }) {
             labels: Object.keys(statusCount),
             datasets: [
                 {
-                    label: 'Số lượng phiếu',
                     data: Object.values(statusCount),
-                    backgroundColor: ['rgba(75, 192, 192, 0.8)', 'rgba(255, 206, 86, 0.8)']
-                }
-            ]
-        })
-
-        // Cập nhật dữ liệu cho biểu đồ theo thời gian
-        let timeLabels = []
-        let timeData = new Map()
-
-        switch (dateRange) {
-            case 'week':
-                // Nhóm theo ngày trong tuần
-                timeLabels = Array.from({ length: 7 }, (_, i) =>
-                    format(addDays(startOfWeek(selectedDate), i), 'dd/MM')
-                )
-                repairs.forEach((repair) => {
-                    const day = format(new Date(repair.completionTime), 'dd/MM')
-                    if (!timeData.has(day)) {
-                        timeData.set(day, { count: 0, cost: 0 })
-                    }
-                    const data = timeData.get(day)
-                    data.count++
-                    data.cost += repair.totalCost / 1000000
-                })
-                break
-
-            case 'month':
-                // Nhóm theo tuần trong tháng
-                timeLabels = ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5']
-                repairs.forEach((repair) => {
-                    const date = new Date(repair.completionTime)
-                    const week = Math.ceil(date.getDate() / 7)
-                    if (!timeData.has(week)) {
-                        timeData.set(week, { count: 0, cost: 0 })
-                    }
-                    const data = timeData.get(week)
-                    data.count++
-                    data.cost += repair.totalCost / 1000000
-                })
-                break
-
-            case 'year':
-                // Nhóm theo tháng
-                timeLabels = [
-                    'Jan',
-                    'Feb',
-                    'Mar',
-                    'Apr',
-                    'May',
-                    'Jun',
-                    'Jul',
-                    'Aug',
-                    'Sep',
-                    'Oct',
-                    'Nov',
-                    'Dec'
-                ]
-                repairs.forEach((repair) => {
-                    const month = new Date(repair.completionTime).getMonth()
-                    if (!timeData.has(month)) {
-                        timeData.set(month, { count: 0, cost: 0 })
-                    }
-                    const data = timeData.get(month)
-                    data.count++
-                    data.cost += repair.totalCost / 1000000
-                })
-                break
-        }
-
-        const timeSeriesData = timeLabels.map((label, index) => {
-            const data = timeData.get(
-                dateRange === 'month' ? index + 1 : dateRange === 'year' ? index : label
-            ) || { count: 0, cost: 0 }
-            return data
-        })
-
-        setMonthlyChartData({
-            labels: timeLabels,
-            datasets: [
-                {
-                    label: 'Số lượng phiếu',
-                    data: timeSeriesData.map((d) => d.count),
-                    backgroundColor: 'rgba(53, 162, 235, 0.8)',
-                    yAxisID: 'y'
-                },
-                {
-                    label: 'Tổng chi phí (triệu đồng)',
-                    data: timeSeriesData.map((d) => d.cost),
-                    backgroundColor: 'rgba(255, 99, 132, 0.8)',
-                    yAxisID: 'y1'
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.8)', // Hoàn thành
+                        'rgba(255, 206, 86, 0.8)', // Đang sửa chữa
+                        'rgba(255, 99, 132, 0.8)', // Khác
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(153, 102, 255, 0.8)',
+                        'rgba(255, 159, 64, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
                 }
             ]
         })
     }
 
-    const statusOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'top'
-            },
-            title: {
-                display: true,
-                text: 'Số lượng phiếu theo trạng thái'
+    const fetchDataByDateRange = async () => {
+        try {
+            const now = selectedDate || new Date()
+            let startDate, endDate
+
+            switch (dateRange) {
+                case 'week':
+                    startDate = startOfWeek(now, { weekStartsOn: 1 })
+                    endDate = endOfWeek(now, { weekStartsOn: 1 })
+                    break
+                case 'month':
+                    startDate = startOfMonth(now)
+                    endDate = endOfMonth(now)
+                    break
+                case 'year':
+                    startDate = startOfYear(now)
+                    endDate = endOfYear(now)
+                    break
+                default:
+                    startDate = startOfWeek(now, { weekStartsOn: 1 })
+                    endDate = endOfWeek(now, { weekStartsOn: 1 })
             }
+
+            const response = await getRepairRegisterByDate(startDate, endDate)
+
+            if (Array.isArray(response)) {
+                setRepairData(response)
+                processAndUpdateChartData(response)
+            }
+        } catch (error) {
+            console.error('Error fetching repair data:', error)
+            setRepairData([])
+            processAndUpdateChartData([])
         }
     }
 
-    const monthlyOptions = {
+    useEffect(() => {
+        fetchDataByDateRange()
+    }, [dateRange, selectedDate])
+
+    const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                position: 'top'
-            },
-            title: {
-                display: true,
-                text: 'Thống kê phiếu sửa chữa theo tháng'
-            }
-        },
-        scales: {
-            y: {
-                type: 'linear',
-                display: true,
-                position: 'left',
-                title: {
-                    display: true,
-                    text: 'Số lượng phiếu'
-                }
-            },
-            y1: {
-                type: 'linear',
-                display: true,
                 position: 'right',
-                title: {
-                    display: true,
-                    text: 'Tổng chi phí (triệu đồng)'
+                labels: {
+                    padding: 20,
+                    font: {
+                        size: 12
+                    }
+                }
+            },
+            title: {
+                display: true,
+                text: `Thống kê phiếu sửa chữa - ${getDateRangeText()}`,
+                font: {
+                    size: 16,
+                    weight: 'bold'
                 },
-                grid: {
-                    drawOnChartArea: false
+                padding: 20
+            },
+            tooltip: {
+                callbacks: {
+                    label: function (context) {
+                        const label = context.label || ''
+                        const value = context.raw || 0
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0)
+                        const percentage = ((value / total) * 100).toFixed(1)
+                        return `${label}: ${value} phiếu (${percentage}%)`
+                    }
                 }
             }
         }
@@ -263,52 +185,13 @@ function ReportRepair({ dateRange = 'week', selectedDate = new Date() }) {
 
     return (
         <div className="report-stock">
-            {/* <div className="report-stock__table-container">
-                <h2 className="report-stock__title">Danh sách phiếu sửa chữa</h2>
-                <table className="report-stock__table">
-                    <thead>
-                        <tr>
-                            <th>Mã phiếu</th>
-                            <th>Khách hàng</th>
-                            <th>Trạng thái</th>
-                            <th>Tổng chi phí</th>
-                            <th>Lợi nhuận</th>
-                            <th>Thời gian hoàn thành</th>
-                            <th>Dịch vụ</th>
-                            <th>Nhân viên</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {repairData.map((repair) => (
-                            <tr key={repair.id}>
-                                <td>{repair.id}</td>
-                                <td>{repair.customerName}</td>
-                                <td>
-                                    <span
-                                        className={`status-badge status-badge--${repair.status.toLowerCase().replace(' ', '-')}`}
-                                    >
-                                        {repair.status}
-                                    </span>
-                                </td>
-                                <td>{repair.totalCost.toLocaleString('vi-VN')}đ</td>
-                                <td>{repair.profit.toLocaleString('vi-VN')}đ</td>
-                                <td>
-                                    {format(new Date(repair.completionTime), 'dd/MM/yyyy HH:mm')}
-                                </td>
-                                <td>{repair.services.join(', ')}</td>
-                                <td>{repair.mechanic}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div> */}
-
             <div className="report-stock__charts">
-                <div className="report-stock__chart-container" style={{ height: '400px' }}>
-                    <Bar options={statusOptions} data={statusChartData} />
+                <div className="report-stock__chart-container" style={{ height: '500px' }}>
+                    <Pie options={chartOptions} data={statusChartData} />
                 </div>
-                <div className="report-stock__chart-container" style={{ height: '400px' }}>
-                    <Bar options={monthlyOptions} data={monthlyChartData} />
+                <div className="report-stock__summary">
+                    <h3>Tổng số phiếu: {repairData.length}</h3>
+                    <p>Thời gian: {getDateRangeText()}</p>
                 </div>
             </div>
         </div>

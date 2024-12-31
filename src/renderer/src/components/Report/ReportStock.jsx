@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Bar, Pie } from 'react-chartjs-2'
+import { Bar } from 'react-chartjs-2'
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -7,13 +7,21 @@ import {
     BarElement,
     Title,
     Tooltip,
-    Legend,
-    ArcElement
+    Legend
 } from 'chart.js'
-import { generateFakeData } from '../../utils/fakeData'
-import './Report.css'
+import {
+    startOfWeek,
+    endOfWeek,
+    startOfMonth,
+    endOfMonth,
+    startOfYear,
+    endOfYear,
+    format,
+    getWeek
+} from 'date-fns'
+import { getInputComponentRegisterByDate } from '../../controllers/inputComponentRegisterController'
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement)
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 function ReportStock({ dateRange = 'week', selectedDate = new Date() }) {
     const [partsData, setPartsData] = useState([])
@@ -21,66 +29,114 @@ function ReportStock({ dateRange = 'week', selectedDate = new Date() }) {
         labels: [],
         datasets: [
             {
-                label: 'Số lượng tồn kho',
+                label: 'Số lượng nhập',
                 data: [],
-                backgroundColor: 'rgba(53, 162, 235, 0.8)'
+                backgroundColor: 'rgba(53, 162, 235, 0.8)',
+                borderColor: 'rgba(53, 162, 235, 1)',
+                borderWidth: 1
             }
         ]
     })
 
-    const [pieChartData, setPieChartData] = useState({
-        labels: [],
-        datasets: [
-            {
-                data: [],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.8)',
-                    'rgba(54, 162, 235, 0.8)',
-                    'rgba(255, 206, 86, 0.8)',
-                    'rgba(75, 192, 192, 0.8)',
-                    'rgba(153, 102, 255, 0.8)'
-                ]
+    const getDateRangeText = () => {
+        const now = selectedDate || new Date()
+        switch (dateRange) {
+            case 'week':
+                const weekStart = startOfWeek(now, { weekStartsOn: 1 })
+                const weekEnd = endOfWeek(now, { weekStartsOn: 1 })
+                return `từ ${format(weekStart, 'dd/MM/yyyy')} đến ${format(weekEnd, 'dd/MM/yyyy')}`
+            case 'month':
+                const monthStart = startOfMonth(now)
+                const monthEnd = endOfMonth(now)
+                return `từ ${format(monthStart, 'dd/MM/yyyy')} đến ${format(monthEnd, 'dd/MM/yyyy')}`
+            case 'year':
+                const yearStart = startOfYear(now)
+                const yearEnd = endOfYear(now)
+                return `từ ${format(yearStart, 'dd/MM/yyyy')} đến ${format(yearEnd, 'dd/MM/yyyy')}`
+            default:
+                return ''
+        }
+    }
+
+    const fetchDataByDateRange = async () => {
+        try {
+            const now = selectedDate || new Date()
+            let startDate, endDate
+
+            switch (dateRange) {
+                case 'week':
+                    startDate = startOfWeek(now, { weekStartsOn: 1 })
+                    endDate = endOfWeek(now, { weekStartsOn: 1 })
+                    break
+                case 'month':
+                    startDate = startOfMonth(now)
+                    endDate = endOfMonth(now)
+                    break
+                case 'year':
+                    startDate = startOfYear(now)
+                    endDate = endOfYear(now)
+                    break
+                default:
+                    startDate = startOfWeek(now, { weekStartsOn: 1 })
+                    endDate = endOfWeek(now, { weekStartsOn: 1 })
             }
-        ]
-    })
+
+            const response = await getInputComponentRegisterByDate(startDate, endDate)
+
+            if (!response || !Array.isArray(response)) {
+                console.warn('Invalid response:', response)
+                return
+            }
+
+            // Tổng hợp dữ liệu theo componentId
+            const aggregatedData = response.reduce((acc, register) => {
+                register.details?.forEach((detail) => {
+                    const componentId = detail.componentId
+                    if (!acc[componentId]) {
+                        acc[componentId] = {
+                            componentId: componentId,
+                            componentName: detail.component?.name || 'Unknown',
+                            categoryName: detail.component?.category?.name || 'Unknown',
+                            quantity: 0,
+                            inputPrice: detail.inputPrice || 0,
+                            totalPrice: 0
+                        }
+                    }
+                    acc[componentId].quantity += detail.quantity || 0
+                    acc[componentId].totalPrice += detail.quantity * detail.inputPrice || 0
+                })
+                return acc
+            }, {})
+
+            const result = Object.values(aggregatedData)
+            setPartsData(result)
+
+            // Sắp xếp dữ liệu theo số lượng giảm dần
+            const sortedData = [...result].sort((a, b) => b.quantity - a.quantity)
+
+            setChartData({
+                labels: sortedData.map((item) => item.componentName),
+                datasets: [
+                    {
+                        label: 'Số lượng nhập',
+                        data: sortedData.map((item) => item.quantity),
+                        backgroundColor: 'rgba(53, 162, 235, 0.8)',
+                        borderColor: 'rgba(53, 162, 235, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            })
+        } catch (error) {
+            console.error('Error fetching data:', error)
+            setPartsData([])
+        }
+    }
 
     useEffect(() => {
-        const fakeData = generateFakeData(dateRange, selectedDate)
-        const stockData = fakeData.stock
-
-        setPartsData(stockData)
-
-        // Cập nhật dữ liệu cho biểu đồ cột
-        setChartData({
-            labels: stockData.map((part) => part.name),
-            datasets: [
-                {
-                    label: 'Số lượng tồn kho',
-                    data: stockData.map((part) => part.stock),
-                    backgroundColor: 'rgba(53, 162, 235, 0.8)'
-                }
-            ]
-        })
-
-        // Cập nhật dữ liệu cho biểu đồ tròn
-        setPieChartData({
-            labels: stockData.map((part) => part.name),
-            datasets: [
-                {
-                    data: stockData.map((part) => part.stock),
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.8)',
-                        'rgba(54, 162, 235, 0.8)',
-                        'rgba(255, 206, 86, 0.8)',
-                        'rgba(75, 192, 192, 0.8)',
-                        'rgba(153, 102, 255, 0.8)'
-                    ]
-                }
-            ]
-        })
+        fetchDataByDateRange()
     }, [dateRange, selectedDate])
 
-    const barOptions = {
+    const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
@@ -89,84 +145,72 @@ function ReportStock({ dateRange = 'week', selectedDate = new Date() }) {
             },
             title: {
                 display: true,
-                text: 'Số lượng tồn kho theo phụ tùng'
+                text: `Thống kê số lượng nhập kho ${getDateRangeText()}`,
+                font: {
+                    size: 16,
+                    weight: 'bold'
+                }
             }
-        }
-    }
-
-    const pieOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'right'
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Số lượng nhập'
+                }
             },
-            title: {
-                display: true,
-                text: 'Tỷ lệ phụ tùng trong kho'
+            x: {
+                title: {
+                    display: true,
+                    text: 'Tên phụ tùng'
+                },
+                ticks: {
+                    maxRotation: 45,
+                    minRotation: 0
+                }
             }
         }
     }
 
     return (
         <div className="report-stock">
-            {/* Bảng phụ tùng */}
             <div className="report-stock__table-container">
-                <h2 className="report-stock__title">Danh sách phụ tùng</h2>
+                <h2 className="report-stock__title">
+                    Danh sách phụ tùng đã nhập{' '}
+                    <span className="report-stock__date">{getDateRangeText()}</span>
+                </h2>
                 <table className="report-stock__table">
                     <thead>
                         <tr>
                             <th>Tên phụ tùng</th>
                             <th>Loại</th>
-                            <th>Tồn kho</th>
-                            <th>Đã sử dụng</th>
+                            <th>Số lượng nhập</th>
                             <th>Giá nhập</th>
-                            <th>Giá bán</th>
-                            <th>Lợi nhuận</th>
+                            <th>Thành tiền</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {partsData.map((part) => (
-                            <tr key={part.id}>
-                                <td>{part.name}</td>
-                                <td>{part.category}</td>
-                                <td>
-                                    <span
-                                        className={`stock-status ${
-                                            part.stock > 100
-                                                ? 'stock-status--high'
-                                                : part.stock > 30
-                                                  ? 'stock-status--medium'
-                                                  : 'stock-status--low'
-                                        }`}
-                                    >
-                                        {part.stock}
-                                    </span>
-                                </td>
-                                <td>{part.used}</td>
-                                <td>{part.importPrice.toLocaleString('vi-VN')}đ</td>
-                                <td>{part.sellPrice.toLocaleString('vi-VN')}đ</td>
-                                <td>
-                                    {(
-                                        ((part.sellPrice - part.importPrice) / part.importPrice) *
-                                        100
-                                    ).toFixed(1)}
-                                    %
-                                </td>
+                        {partsData.map((item, index) => (
+                            <tr key={item.componentId || index}>
+                                <td>{item.componentName}</td>
+                                <td>{item.categoryName}</td>
+                                <td>{item.quantity}</td>
+                                <td>{item.inputPrice?.toLocaleString('vi-VN')}đ</td>
+                                <td>{item.totalPrice?.toLocaleString('vi-VN')}đ</td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
 
-            {/* Biểu đồ */}
             <div className="report-stock__charts">
-                <div className="report-stock__chart-container" style={{ height: '400px' }}>
-                    <Bar options={barOptions} data={chartData} />
+                <div
+                    className="report-stock__chart-container"
+                    style={{ height: '400px', marginBottom: '2rem' }}
+                >
+                    <Bar options={chartOptions} data={chartData} />
                 </div>
-                {/* <div className="report-stock__chart-container" style={{ height: '400px' }}>
-                    <Pie options={pieOptions} data={pieChartData} />
-                </div> */}
             </div>
         </div>
     )

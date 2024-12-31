@@ -482,3 +482,19 @@
     background-color: #a5d6a7;
     color: #000;
 }
+
+.report-stock__title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.report-stock__date {
+    font-size: 1.6rem;
+    color: #000;
+    font-weight: 500;
+}
