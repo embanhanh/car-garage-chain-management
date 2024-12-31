@@ -1,3 +1,4 @@
+import { increment } from 'firebase/firestore'
 import { dbService } from '../services/DatabaseService'
 import { parseISO, isWithinInterval } from 'date-fns'
 
@@ -15,12 +16,17 @@ export const addService = async (selectedService, openDetailRepairModal) => {
             repairRegisterComponents: []
         }
         const newRepairRegister = await dbService.add('repairregisters', newData)
-        await dbService.updateFields('serviceregisters', openDetailRepairModal.data.id, {
+        await dbService.update('serviceregisters', openDetailRepairModal.data.id, {
             repairRegisterIds: [
                 ...openDetailRepairModal.data.repairRegisterIds,
                 newRepairRegister.id
             ]
         })
+        if (openDetailRepairModal.data.status == 'Đã hoàn thành') {
+            await dbService.update('serviceregisters', openDetailRepairModal.data.id, {
+                status: 'Đang sửa chữa'
+            })
+        }
     }
 }
 
@@ -32,17 +38,26 @@ export const deleteService = async (serviceId, openDetailRepairModal) => {
         )
         await dbService.delete('repairregisters', repairRegister.id)
         // Cập nhật registerService
-        await dbService.updateFields('serviceregisters', openDetailRepairModal.data.id, {
+        await dbService.update('serviceregisters', openDetailRepairModal.data.id, {
             repairRegisterIds: openDetailRepairModal.data.repairRegisterIds.filter(
                 (id) => id !== repairRegister.id
             )
         })
+        if (
+            !openDetailRepairModal.data.repairRegisters
+                .filter((item) => item.service.id !== serviceId)
+                .some((item) => item.status == 'Đang sửa chữa')
+        ) {
+            await dbService.update('serviceregisters', openDetailRepairModal.data.id, {
+                status: 'Đã hoàn thành'
+            })
+        }
     }
 }
 
 export const completeService = async (serviceId, openDetailRepairModal, fetchData) => {
     if (serviceId) {
-        await dbService.updateFields(
+        await dbService.update(
             'repairregisters',
             openDetailRepairModal.data?.repairRegisters?.find(
                 (item) => item.service.id === serviceId
@@ -51,6 +66,22 @@ export const completeService = async (serviceId, openDetailRepairModal, fetchDat
                 status: 'Đã hoàn thành'
             }
         )
+        openDetailRepairModal.data?.repairRegisters
+            ?.find((item) => item.service.id === serviceId)
+            .repairRegisterComponents.forEach(async (item) => {
+                await dbService.update('components', item.component.id, {
+                    inventory: increment(Number(item.quantity) * -1)
+                })
+            })
+        if (
+            !openDetailRepairModal.data.repairRegisters
+                .filter((item) => item.service.id !== serviceId)
+                .some((item) => item.status == 'Đang sửa chữa')
+        ) {
+            await dbService.update('serviceregisters', openDetailRepairModal.data.id, {
+                status: 'Đã hoàn thành'
+            })
+        }
         await fetchData()
     }
 }

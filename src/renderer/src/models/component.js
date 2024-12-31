@@ -4,27 +4,21 @@ export class Component {
             collection: 'categories',
             foreignKey: 'categoryId',
             as: 'category'
-        },
-        {
-            collection: 'suppliers',
-            foreignKey: 'supplierIds',
-            as: 'suppliers',
-            isArray: true
         }
     ]
+
     constructor({
         id = '',
         name = '',
         price = 0,
         categoryId = '',
         category = null,
-        supplierIds = [],
-        suppliers = [],
         description = '',
         size = '',
         weight = '',
         material = '',
         inventory = 0,
+        storagePosition = '',
         createdAt = new Date()
     } = {}) {
         this.id = id
@@ -32,13 +26,12 @@ export class Component {
         this.price = price
         this.categoryId = categoryId
         this.category = category
-        this.supplierIds = supplierIds
-        this.suppliers = suppliers
         this.description = description
         this.size = size
         this.weight = weight
         this.material = material
         this.inventory = inventory
+        this.storagePosition = storagePosition
         this.createdAt = createdAt
     }
 
@@ -48,12 +41,12 @@ export class Component {
             name: this.name,
             price: this.price,
             categoryId: this.categoryId,
-            supplierIds: this.supplierIds,
             description: this.description,
             size: this.size,
             weight: this.weight,
             material: this.material,
             inventory: this.inventory,
+            storagePosition: this.storagePosition,
             createdAt: this.createdAt
         }
     }

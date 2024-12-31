@@ -6,6 +6,11 @@ export class InputComponentRegister {
             as: 'employee'
         },
         {
+            collection: 'suppliers',
+            foreignKey: 'supplierId',
+            as: 'supplier'
+        },
+        {
             collection: 'components',
             foreignKey: 'componentId',
             as: 'component',
@@ -19,6 +24,8 @@ export class InputComponentRegister {
         employeeId = '',
         employee = null,
         details = [],
+        supplierId = '',
+        supplier = null,
         createdAt = new Date()
     } = {}) {
         this.id = id
@@ -26,6 +33,8 @@ export class InputComponentRegister {
         this.employee = employee
         this.details = details
         this.createdAt = createdAt
+        this.supplierId = supplierId
+        this.supplier = supplier
     }
 
     toFirestore() {
@@ -37,6 +46,7 @@ export class InputComponentRegister {
                 quantity,
                 inputPrice
             })),
+            supplierId: this.supplierId,
             createdAt: this.createdAt
         }
     }

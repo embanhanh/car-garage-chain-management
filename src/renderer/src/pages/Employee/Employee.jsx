@@ -122,7 +122,7 @@ function Employee() {
         <div className="main-container">
             <div className="headerr">
                 <div className="btn-area">
-                    <button className="addBtn" onClick={addEmployee}>
+                    <button className="primary-button" onClick={addEmployee}>
                         Thêm Nhân Viên
                     </button>
                 </div>

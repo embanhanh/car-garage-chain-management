@@ -33,6 +33,7 @@ const Repair = () => {
     const [openReceiveRepairModal, setOpenReceiveRepairModal] = useState(false)
     const [openInvoiceModal, setOpenInvoiceModal] = useState(false)
     const [repairRegisterData, setRepairRegisterData] = useState([])
+    const [isLoading, setIsLoading] = useState(false)
     const itemsPerPage = 8
 
     const fetchData = async () => {
@@ -42,16 +43,25 @@ const Repair = () => {
 
     useEffect(() => {
         const unsubscribe = onSnapshot(collection(db, 'serviceregisters'), async (snapshot) => {
-            await fetchData()
+            try {
+                setIsLoading(true)
+                await fetchData()
+            } catch (e) {
+                console.log(e)
+            } finally {
+                setIsLoading(false)
+            }
         })
         return () => unsubscribe()
     }, [])
 
-    const totalPages = Math.ceil(repairRegisterData.length / itemsPerPage)
+    const totalPages = Math.ceil(
+        repairRegisterData.filter((item) => item.car).length / itemsPerPage
+    )
 
     const currentData = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage
-        return repairRegisterData.slice(start, start + itemsPerPage)
+        return repairRegisterData.filter((item) => item.car).slice(start, start + itemsPerPage)
     }, [currentPage, repairRegisterData])
 
     const handlePageChange = useCallback(
@@ -121,80 +131,90 @@ const Repair = () => {
                 </div>
             </div>
             <div className="repair-page__content">
-                <table className="page-table repair-table">
-                    <thead>
-                        <tr>
-                            <th>Mã phiếu</th>
-                            <th>Nhân viên nhập</th>
-                            <th>Khách hàng</th>
-                            <th>Ngày tạo phiếu</th>
-                            <th>Biển số xe</th>
-                            <th>Ngày hoàn thành</th>
-                            <th>Trạng thái</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {currentData.map((repair, index) => (
-                            <tr key={repair.id}>
-                                <td>{repair.id}</td>
-                                <td>{repair.employee?.name}</td>
-                                <td>{repair.car?.customer?.name}</td>
-                                <td>{new Date(repair.createdAt).toLocaleDateString('vi-VN')}</td>
-                                <td>{repair.car?.licensePlate}</td>
-                                <td>
-                                    {new Date(repair.expectedCompletionDate).toLocaleDateString(
-                                        'vi-VN'
-                                    )}
-                                </td>
-                                <td>
-                                    <div
-                                        className={`table__status ${repair.status === 'Đang sửa chữa' ? 'car-completed' : 'car-normal'}`}
-                                    >
-                                        {repair.status}
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="table__actions">
-                                        <FontAwesomeIcon
-                                            icon={faEllipsisVertical}
-                                            className="table__action-icon"
-                                        />
+                {isLoading ? (
+                    <div className="d-flex justify-content-center">
+                        <p>Đang tải...</p>
+                    </div>
+                ) : (
+                    <table className="page-table repair-table">
+                        <thead>
+                            <tr>
+                                <th>Mã phiếu</th>
+                                <th>Nhân viên nhập</th>
+                                <th>Khách hàng</th>
+                                <th>Ngày tạo phiếu</th>
+                                <th>Biển số xe</th>
+                                <th>Ngày hoàn thành</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {currentData.map((repair, index) => (
+                                <tr key={repair.id}>
+                                    <td>{repair.id}</td>
+                                    <td>{repair.employee?.name}</td>
+                                    <td>{repair.car?.customer?.name}</td>
+                                    <td>
+                                        {new Date(repair.createdAt).toLocaleDateString('vi-VN')}
+                                    </td>
+                                    <td>{repair.car?.licensePlate}</td>
+                                    <td>
+                                        {new Date(repair.expectedCompletionDate).toLocaleDateString(
+                                            'vi-VN'
+                                        )}
+                                    </td>
+                                    <td>
                                         <div
-                                            className={`table__action-menu ${
-                                                (index + 1) % itemsPerPage === 0 ? 'show-top' : ''
-                                            }`}
+                                            className={`table__status ${repair.status === 'Đang sửa chữa' ? 'car-completed' : 'car-normal'}`}
                                         >
+                                            {repair.status}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div className="table__actions">
+                                            <FontAwesomeIcon
+                                                icon={faEllipsisVertical}
+                                                className="table__action-icon"
+                                            />
                                             <div
-                                                className="table__action-item"
-                                                onClick={() =>
-                                                    setOpenDetailRepairModal({
-                                                        show: true,
-                                                        data: repair
-                                                    })
-                                                }
+                                                className={`table__action-menu ${
+                                                    (index + 1) % itemsPerPage === 0
+                                                        ? 'show-top'
+                                                        : ''
+                                                }`}
                                             >
-                                                Chi tiết
-                                            </div>
+                                                <div
+                                                    className="table__action-item"
+                                                    onClick={() =>
+                                                        setOpenDetailRepairModal({
+                                                            show: true,
+                                                            data: repair
+                                                        })
+                                                    }
+                                                >
+                                                    Chi tiết
+                                                </div>
 
-                                            <div
-                                                className="table__action-item"
-                                                onClick={async () => {
-                                                    await dbService.softDelete(
-                                                        'serviceregisters',
-                                                        repair.id
-                                                    )
-                                                }}
-                                            >
-                                                Xóa
+                                                <div
+                                                    className="table__action-item"
+                                                    onClick={async () => {
+                                                        await dbService.softDelete(
+                                                            'serviceregisters',
+                                                            repair.id
+                                                        )
+                                                    }}
+                                                >
+                                                    Xóa
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
             </div>
             <Pagination
                 currentPage={currentPage}
