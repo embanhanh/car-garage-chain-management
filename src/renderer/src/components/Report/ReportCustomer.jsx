@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import { Bar, Pie } from 'react-chartjs-2'
 import {
     Chart as ChartJS,
@@ -10,8 +10,10 @@ import {
     Legend,
     ArcElement
 } from 'chart.js'
-import { getCustomerByServiceRegister } from '../../controllers/serviceRegisterController'
+
+import { getServiceRegisterByDate } from '../../controllers/serviceRegisterController'
 import './Report.css'
+import { getDateRangeText } from '../../utils/StringUtil'
 import {
     format,
     startOfWeek,
@@ -23,11 +25,18 @@ import {
     parseISO,
     getWeek
 } from 'date-fns'
+import Pagination from '../Pagination'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement)
 
 function ReportCustomer({ dateRange = 'week', selectedDate = new Date() }) {
-    const [customerData, setCustomerData] = useState([])
+    const [customerData, setCustomerData] = useState([
+        {
+            customerId: '',
+            customerName: '',
+            quantity: 0
+        }
+    ])
     const [chartData, setChartData] = useState({
         labels: [],
         datasets: [
@@ -53,27 +62,16 @@ function ReportCustomer({ dateRange = 'week', selectedDate = new Date() }) {
             }
         ]
     })
+    const [currentPage, setCurrentPage] = useState(1)
+    const itemsPerPage = 9 // Số item trên mỗi trang
 
-    const getDateRangeText = () => {
-        switch (dateRange) {
-            case 'week':
-                const weekNumber = getWeek(selectedDate, { weekStartsOn: 1 })
-                return `Tuần ${weekNumber}, ${format(selectedDate, 'yyyy')}`
-            case 'month':
-                return format(selectedDate, 'MM/yyyy')
-            case 'year':
-                return format(selectedDate, 'yyyy')
-            default:
-                return ''
-        }
-    }
-
-    const processAndUpdateChartData = (data) => {
-        if (!Array.isArray(data) || data.length === 0) {
+    const processAndUpdateChartData = (serviceRegisters) => {
+        if (!Array.isArray(serviceRegisters) || serviceRegisters.length === 0) {
             setChartData({
                 labels: ['Không có dữ liệu'],
                 datasets: [
                     {
+                        label: 'Số lần sử dụng dịch vụ',
                         data: [1],
                         backgroundColor: ['#e0e0e0'],
                         borderColor: ['#cccccc'],
@@ -84,17 +82,48 @@ function ReportCustomer({ dateRange = 'week', selectedDate = new Date() }) {
             return
         }
 
-        // Tính toán số lần sử dụng dịch vụ cho mỗi khách hàng
-        const customerVisits = data.reduce((acc, customer) => {
-            acc[customer.name] = (acc[customer.name] || 0) + 1
+        // Tạo map để đếm số lần sử dụng dịch vụ của mỗi khách hàng
+        const customerVisits = serviceRegisters.reduce((acc, register) => {
+            // Kiểm tra đầy đủ dữ liệu
+            if (register?.car?.customer?.name) {
+                const customerId = register.car.customer.id
+                const customerName = register.car.customer.name
+
+                if (!acc[customerId]) {
+                    acc[customerId] = {
+                        id: customerId,
+                        name: customerName,
+                        visitCount: 0
+                    }
+                }
+                acc[customerId].visitCount++
+            }
             return acc
         }, {})
 
+        // Chuyển đổi map thành array và sắp xếp
+        const customersArray = Object.values(customerVisits).sort(
+            (a, b) => b.visitCount - a.visitCount
+        )
+
+        // Tạo labels và data riêng biệt
+        const labels = customersArray.map((customer) => customer.name || 'Không xác định')
+        const data = customersArray.map((customer) => customer.visitCount)
+
+        // Log để debug
+        console.log('Labels:', labels)
+        console.log('Data:', data)
+
+        // Cập nhật state
+        setCustomerData(customersArray)
+
+        // Cập nhật chart data
         setChartData({
-            labels: Object.keys(customerVisits),
+            labels: labels,
             datasets: [
                 {
-                    data: Object.values(customerVisits),
+                    label: 'Số lần sử dụng dịch vụ',
+                    data: data,
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.8)',
                         'rgba(54, 162, 235, 0.8)',
@@ -140,12 +169,9 @@ function ReportCustomer({ dateRange = 'week', selectedDate = new Date() }) {
                     endDate = endOfWeek(now, { weekStartsOn: 1 })
             }
 
-            console.log('Fetching data for:', { dateRange, startDate, endDate })
-            const response = await getCustomerByServiceRegister(startDate, endDate)
-            console.log('Fetched customers:', response)
+            const response = await getServiceRegisterByDate(startDate, endDate)
 
             if (Array.isArray(response)) {
-                setCustomerData(response)
                 processAndUpdateChartData(response)
             }
         } catch (error) {
@@ -184,26 +210,84 @@ function ReportCustomer({ dateRange = 'week', selectedDate = new Date() }) {
             tooltip: {
                 callbacks: {
                     label: function (context) {
-                        const label = context.label || ''
+                        if (context.label === undefined) return 'Không xác định'
                         const value = context.raw || 0
                         const total = context.dataset.data.reduce((a, b) => a + b, 0)
-                        const percentage = ((value / total) * 100).toFixed(1)
-                        return `${label}: ${value} lần (${percentage}%)`
+                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0
+                        return `${context.label}: ${value} lần (${percentage}%)`
                     }
                 }
             }
         }
     }
 
+    // Tính toán số trang
+    const totalPages = Math.ceil(customerData.length / itemsPerPage)
+
+    // Lấy dữ liệu cho trang hiện tại
+    const currentCustomerData = useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage
+        return customerData.slice(start, start + itemsPerPage)
+    }, [currentPage, customerData])
+
+    // Xử lý thay đổi trang
+    const handlePageChange = useCallback(
+        (page) => {
+            if (page >= 1 && page <= totalPages) {
+                setCurrentPage(page)
+            }
+        },
+        [totalPages]
+    )
+
     return (
         <div className="report-stock">
+            <div className="report-stock__table">
+                <p className="report__table-title">
+                    Danh sách khách hàng từ {getDateRangeText(dateRange, selectedDate)}
+                </p>
+                <table className="page-table">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Tên khách hàng</th>
+                            <th>Số lần sử dụng dịch vụ</th>
+                            <th>Tỷ lệ (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {currentCustomerData.map((customer, index) => {
+                            const totalVisits = customerData.reduce(
+                                (sum, c) => sum + c.visitCount,
+                                0
+                            )
+                            const percentage = ((customer.visitCount / totalVisits) * 100).toFixed(
+                                1
+                            )
+                            return (
+                                <tr key={customer.id}>
+                                    <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                                    <td>{customer.name}</td>
+                                    <td>{customer.visitCount}</td>
+                                    <td>{percentage}%</td>
+                                </tr>
+                            )
+                        })}
+                    </tbody>
+                </table>
+
+                {/* Thêm phân trang */}
+                <div className="z-pagination">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                    />
+                </div>
+            </div>
             <div className="report-stock__charts">
                 <div className="report-stock__chart-container" style={{ height: '500px' }}>
                     <Pie options={chartOptions} data={chartData} />
-                </div>
-                <div className="report-stock__summary">
-                    <h3>Tổng số khách hàng: {customerData.length}</h3>
-                    <p>Thời gian: {getDateRangeText()}</p>
                 </div>
             </div>
         </div>

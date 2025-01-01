@@ -18,9 +18,7 @@ export const getInputComponentRegisterByDate = async (startDate, endDate) => {
         const parsedEndDate = new Date(endDate)
 
         if (isNaN(parsedStartDate) || isNaN(parsedEndDate)) {
-            console.error(
-                'Ngày bắt đầu hoặc ngày kết thúc không hợp lệ. Hãy đảm bảo chúng được định dạng theo ISO.'
-            )
+            console.error('Ngày bắt đầu hoặc ngày kết thúc không hợp lệ.')
             return []
         }
 

@@ -20,11 +20,21 @@ import {
     getWeek
 } from 'date-fns'
 import { getInputComponentRegisterByDate } from '../../controllers/inputComponentRegisterController'
-
+import { getDateRangeText } from '../../utils/StringUtil'
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 function ReportStock({ dateRange = 'week', selectedDate = new Date() }) {
-    const [partsData, setPartsData] = useState([])
+    const [componentsData, setComponentsData] = useState([
+        {
+            componentName: '',
+            categoryName: '',
+            quantity: 0,
+            inputPrice: 0,
+            salePrice: 0,
+            totalPrice: 0
+        }
+    ])
+    const [isLoading, setIsLoading] = useState(false)
     const [chartData, setChartData] = useState({
         labels: [],
         datasets: [
@@ -38,27 +48,8 @@ function ReportStock({ dateRange = 'week', selectedDate = new Date() }) {
         ]
     })
 
-    const getDateRangeText = () => {
-        const now = selectedDate || new Date()
-        switch (dateRange) {
-            case 'week':
-                const weekStart = startOfWeek(now, { weekStartsOn: 1 })
-                const weekEnd = endOfWeek(now, { weekStartsOn: 1 })
-                return `từ ${format(weekStart, 'dd/MM/yyyy')} đến ${format(weekEnd, 'dd/MM/yyyy')}`
-            case 'month':
-                const monthStart = startOfMonth(now)
-                const monthEnd = endOfMonth(now)
-                return `từ ${format(monthStart, 'dd/MM/yyyy')} đến ${format(monthEnd, 'dd/MM/yyyy')}`
-            case 'year':
-                const yearStart = startOfYear(now)
-                const yearEnd = endOfYear(now)
-                return `từ ${format(yearStart, 'dd/MM/yyyy')} đến ${format(yearEnd, 'dd/MM/yyyy')}`
-            default:
-                return ''
-        }
-    }
-
     const fetchDataByDateRange = async () => {
+        setIsLoading(true)
         try {
             const now = selectedDate || new Date()
             let startDate, endDate
@@ -83,33 +74,42 @@ function ReportStock({ dateRange = 'week', selectedDate = new Date() }) {
 
             const response = await getInputComponentRegisterByDate(startDate, endDate)
 
-            if (!response || !Array.isArray(response)) {
+            if (!response || !Array.isArray(Object.values(response))) {
                 console.warn('Invalid response:', response)
                 return
             }
 
-            // Tổng hợp dữ liệu theo componentId
-            const aggregatedData = response.reduce((acc, register) => {
+            // Chuyển đổi object thành array
+            const responseArray = Object.values(response)
+
+            // Tổng hợp dữ liệu theo componentId và inputPrice
+            const aggregatedData = responseArray.reduce((acc, register) => {
                 register.details?.forEach((detail) => {
-                    const componentId = detail.componentId
-                    if (!acc[componentId]) {
-                        acc[componentId] = {
+                    const componentId = detail.component?.id
+                    const key = `${componentId}-${detail.inputPrice}` // Tạo key duy nhất cho mỗi cặp component-price
+
+                    if (!acc[key]) {
+                        acc[key] = {
                             componentId: componentId,
                             componentName: detail.component?.name || 'Unknown',
                             categoryName: detail.component?.category?.name || 'Unknown',
                             quantity: 0,
                             inputPrice: detail.inputPrice || 0,
+                            salePrice: detail.component?.price || 0,
                             totalPrice: 0
                         }
                     }
-                    acc[componentId].quantity += detail.quantity || 0
-                    acc[componentId].totalPrice += detail.quantity * detail.inputPrice || 0
+
+                    // Cộng dồn số lượng và tổng giá trị cho cùng component và cùng giá nhập
+                    acc[key].quantity += detail.quantity || 0
+                    acc[key].totalPrice += detail.quantity * detail.inputPrice || 0
                 })
                 return acc
             }, {})
 
+            // Chuyển đổi từ object sang array
             const result = Object.values(aggregatedData)
-            setPartsData(result)
+            setComponentsData(result)
 
             // Sắp xếp dữ liệu theo số lượng giảm dần
             const sortedData = [...result].sort((a, b) => b.quantity - a.quantity)
@@ -128,7 +128,9 @@ function ReportStock({ dateRange = 'week', selectedDate = new Date() }) {
             })
         } catch (error) {
             console.error('Error fetching data:', error)
-            setPartsData([])
+            setComponentsData([])
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -175,43 +177,58 @@ function ReportStock({ dateRange = 'week', selectedDate = new Date() }) {
 
     return (
         <div className="report-stock">
-            <div className="report-stock__table-container">
-                <h2 className="report-stock__title">
-                    Danh sách phụ tùng đã nhập{' '}
-                    <span className="report-stock__date">{getDateRangeText()}</span>
-                </h2>
-                <table className="report-stock__table">
-                    <thead>
-                        <tr>
-                            <th>Tên phụ tùng</th>
-                            <th>Loại</th>
-                            <th>Số lượng nhập</th>
-                            <th>Giá nhập</th>
-                            <th>Thành tiền</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {partsData.map((item, index) => (
-                            <tr key={item.componentId || index}>
-                                <td>{item.componentName}</td>
-                                <td>{item.categoryName}</td>
-                                <td>{item.quantity}</td>
-                                <td>{item.inputPrice?.toLocaleString('vi-VN')}đ</td>
-                                <td>{item.totalPrice?.toLocaleString('vi-VN')}đ</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
-            <div className="report-stock__charts">
-                <div
-                    className="report-stock__chart-container"
-                    style={{ height: '400px', marginBottom: '2rem' }}
-                >
-                    <Bar options={chartOptions} data={chartData} />
+            <>
+                <div className="report-stock__table-container">
+                    <p className="report__table-title">
+                        Danh sách phụ tùng đã nhập {getDateRangeText(dateRange, selectedDate)}
+                    </p>
+                    {isLoading ? (
+                        <div className="d-flex justify-content-center">
+                            <p>Đang tải...</p>
+                        </div>
+                    ) : (
+                        <table className="page-table">
+                            <thead>
+                                <tr>
+                                    <th>Tên phụ tùng</th>
+                                    <th>Loại</th>
+                                    <th>Số lượng nhập</th>
+                                    <th>Giá nhập</th>
+                                    <th>Giá bán</th>
+                                    <th>Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {componentsData.map((item, index) => (
+                                    <tr key={index}>
+                                        <td>{item.componentName}</td>
+                                        <td>{item.categoryName}</td>
+                                        <td>{item.quantity}</td>
+                                        <td>{item.inputPrice?.toLocaleString('vi-VN')}đ</td>
+                                        <td>{item.salePrice?.toLocaleString('vi-VN')}đ</td>
+                                        <td>{item.totalPrice?.toLocaleString('vi-VN')}đ</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
-            </div>
+
+                <div className="report-stock__charts">
+                    <div
+                        className="report-stock__chart-container"
+                        style={{ height: '400px', marginBottom: '2rem' }}
+                    >
+                        {isLoading ? (
+                            <div className="d-flex justify-content-center">
+                                <p>Đang tải...</p>
+                            </div>
+                        ) : (
+                            <Bar options={chartOptions} data={chartData} />
+                        )}
+                    </div>
+                </div>
+            </>
         </div>
     )
 }

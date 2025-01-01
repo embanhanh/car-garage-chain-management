@@ -186,7 +186,7 @@ function ReportRepair({ dateRange = 'week', selectedDate = new Date() }) {
     return (
         <div className="report-stock">
             <div className="report-stock__charts">
-                <div className="report-stock__chart-container" style={{ height: '500px' }}>
+                <div className="report-stock__chart-container" style={{ height: '400px' }}>
                     <Pie options={chartOptions} data={statusChartData} />
                 </div>
                 <div className="report-stock__summary">
