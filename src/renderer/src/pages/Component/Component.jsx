@@ -17,6 +17,7 @@ import './Component.css'
 import UpDetailComponentModal from '../../components/Component/UpDetailComponentModal'
 import DetailImportModal from '../../components/Component/DetailImportModal'
 import ComponentUsedModal from '../../components/Repair/ComponentUsedModal'
+import { addInputComponentRegister } from '../../controllers/inputComponentRegisterController'
 
 function Component() {
     const [currentPage, setCurrentPage] = useState(1)
@@ -426,10 +427,11 @@ function Component() {
                                 expectedCompletionDate: new Date().toISOString(),
                                 repairRegisterIds: [newRepairRegister.id]
                             }
-                            const newServiceRegister = await dbService.add(
-                                'serviceregisters',
-                                serviceRegister
-                            )
+                            // const newServiceRegister = await dbService.add(
+                            //     'serviceregisters',
+                            //     serviceRegister
+                            // )
+                            const newServiceRegister = await addServiceRegister(serviceRegister)
                             data.forEach(async (item) => {
                                 await dbService.update('components', item.component.id, {
                                     inventory: increment(Number(item.quantity) * -1)

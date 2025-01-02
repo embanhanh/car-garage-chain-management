@@ -5,9 +5,9 @@ import ComboBox from '../../components/Combobox.jsx'
 import { dbService } from '../../services/DatabaseService.js'
 
 function DetailEmployee({ nv, onClose }) {
-    console.group("Nhan vien", nv)
+    console.group('Nhan vien', nv)
     function convertToDateString(dateTime) {
-        console.log("date Time hehe",dateTime)
+        console.log('date Time hehe', dateTime)
         const date = new Date(dateTime) // Chuyển chuỗi sang đối tượng Date
         const day = String(date.getDate()).padStart(2, '0') // Lấy ngày, đảm bảo 2 chữ số
         const month = String(date.getMonth() + 1).padStart(2, '0') // Lấy tháng (tháng bắt đầu từ 0)
@@ -85,7 +85,7 @@ function DetailEmployee({ nv, onClose }) {
                     hintText="Nhập mức lương"
                     name="Mức lương"
                     enable={false}
-                    value={nv.salary}
+                    value={Number(nv.salary).toLocaleString('vi-VN')}
                     onChange={() => {}}
                 ></TextFieldForm>
             </div>

@@ -26,7 +26,8 @@ function Customer() {
     const [customer, selecteCustomer] = useState({})
     const [listCustomers, setListCustomers] = useState([])
     const [currentPage, setCurrentPage] = useState(1)
-    const itemsPerPage = 9
+    const itemsPerPage = 8
+    const [searchTerm, setSearchTerm] = useState('')
 
     const columns = [
         { name: 'Mã KH', field: 'id', width: '8%' },
@@ -51,12 +52,54 @@ function Customer() {
     //   // ... more data items
     // ];
 
-    const totalPages = Math.ceil(listCustomers.length / itemsPerPage)
+    const searchCustomers = useMemo(() => {
+        if (!searchTerm) return listCustomers
+
+        const searchLower = searchTerm.toLowerCase().trim()
+
+        return listCustomers.filter((customer) => {
+            // Kiểm tra mã khách hàng (format KHxxxx)
+            if (searchLower.startsWith('kh')) {
+                return customer.id.toLowerCase().includes(searchLower)
+            }
+
+            // Kiểm tra số điện thoại
+            if (
+                /^(\+84|0)\d{9,10}$/.test(searchLower.replace(/\s/g, '')) ||
+                (/^\d+$/.test(searchLower) && searchLower.length >= 9 && searchLower.length <= 10)
+            ) {
+                const phoneSearch = searchLower.replace(/\s/g, '').replace(/^\+84/, '0')
+                const customerPhone = customer.phone?.replace(/\s/g, '').replace(/^\+84/, '0') || ''
+                return customerPhone.includes(phoneSearch)
+            }
+
+            // Kiểm tra CCCD
+            if (/^\d+$/.test(searchLower) && searchLower.length >= 9) {
+                return customer.identifyCard.includes(searchLower)
+            }
+
+            // Kiểm tra email
+            if (searchLower.includes('@')) {
+                return customer.email.toLowerCase().includes(searchLower)
+            }
+
+            // Mặc định tìm theo tất cả
+            return (
+                customer.name.toLowerCase().includes(searchLower) ||
+                customer.id.toLowerCase().includes(searchLower) ||
+                customer.email.toLowerCase().includes(searchLower) ||
+                customer.identifyCard.includes(searchLower) ||
+                (customer.phone || '').replace(/\s/g, '').includes(searchLower.replace(/\s/g, ''))
+            )
+        })
+    }, [listCustomers, searchTerm])
 
     const currentData = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage
-        return listCustomers.slice(start, start + itemsPerPage)
-    }, [currentPage, listCustomers])
+        return searchCustomers.slice(start, start + itemsPerPage)
+    }, [currentPage, searchCustomers])
+
+    const totalPages = Math.ceil(searchCustomers.length / itemsPerPage)
 
     const fetchData = async () => {
         const data = await dbService.getAll('customers')
@@ -93,6 +136,7 @@ function Customer() {
         selecteCustomer(kh)
         setIsOpenDelete(true)
     }
+
     return (
         <div className="main-container">
             <div className="headerr">
@@ -109,7 +153,12 @@ function Customer() {
                     </button>
                     <div className="page__header-search">
                         <FontAwesomeIcon icon={faSearch} className="page__header-icon" />
-                        <input type="text" placeholder="Tìm kiếm" />
+                        <input
+                            type="text"
+                            placeholder="Tìm kiếm theo mã KH, tên, email, SĐT, CCCD..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
                 </div>
             </div>

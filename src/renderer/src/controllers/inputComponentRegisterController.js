@@ -5,6 +5,7 @@ export const getInputComponentRegister = async () => {
     const inputComponentRegister = await dbService.getAll('inputcomponentregisters')
     return inputComponentRegister
 }
+
 export const getInputComponentRegisterByDate = async (startDate, endDate) => {
     try {
         const inputComponentRegister = await dbService.getAll('inputcomponentregisters')
@@ -41,5 +42,33 @@ export const getInputComponentRegisterByDate = async (startDate, endDate) => {
     } catch (error) {
         console.error('Lỗi trong getInputComponentRegisterByDate:', error)
         return []
+    }
+}
+
+export const addInputComponentRegister = async (inputComponentRegisterData) => {
+    try {
+        // Lấy tất cả input component registers để đếm số lượng
+        const registers = await dbService.getAll('inputcomponentregisters')
+
+        // Tạo ID mới với format CR000N
+        const nextNumber = registers.length + 1
+        const registerId = `CR${nextNumber.toString().padStart(4, '0')}`
+        console.log('check registerId:', registerId)
+
+        // Thêm các trường cần thiết
+        const dataToAdd = {
+            ...inputComponentRegisterData,
+            id: registerId,
+            createdAt: new Date().toISOString(),
+            isDeleted: false
+        }
+
+        // Thêm vào database
+        const result = await dbService.addWithId('inputcomponentregisters', registerId, dataToAdd)
+        console.log('check result:', result)
+        return result
+    } catch (error) {
+        console.error('Error in addInputComponentRegister:', error)
+        throw new Error('Không thể thêm phiếu nhập linh kiện')
     }
 }

@@ -8,7 +8,8 @@ import {
     doc,
     query,
     where,
-    getDoc
+    getDoc,
+    setDoc
 } from 'firebase/firestore'
 import { User } from '../models/user'
 import { Customer } from '../models/customer'
@@ -231,6 +232,25 @@ class DatabaseService {
             }
         } catch (error) {
             console.error(`Lỗi khi thêm ${collectionName}:`, error)
+            throw error
+        }
+    }
+
+    async addWithId(collectionName, id, data) {
+        try {
+            const docRef = doc(db, this.collections[collectionName].name, id)
+            await setDoc(docRef, {
+                ...data,
+                id: id,
+                createdAt: new Date().toISOString(),
+                isDeleted: false
+            })
+            return {
+                id,
+                ...data
+            }
+        } catch (error) {
+            console.error(`Lỗi khi thêm ${collectionName} với ID ${id}:`, error)
             throw error
         }
     }

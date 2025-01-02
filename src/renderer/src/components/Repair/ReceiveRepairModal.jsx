@@ -4,7 +4,8 @@ import Dropdown from '../Dropdown'
 import { debounce } from 'lodash'
 import { dbService } from '../../services/DatabaseService'
 import { format } from 'date-fns'
-
+import { addCustomer } from '../../controllers/customerController'
+import { addServiceRegister } from '../../controllers/serviceRegisterController'
 export default function ReceiveRepairModal({ onClose }) {
     const [serviceRegisterData, setServiceRegisterData] = useState({
         car: {
@@ -133,7 +134,7 @@ export default function ReceiveRepairModal({ onClose }) {
 
             let customerId = serviceRegisterData.car.customer.id || null
             if (!customers || customers.length === 0) {
-                const customer = await dbService.add('customers', {
+                const customer = await addCustomer({
                     ...serviceRegisterData.car.customer
                 })
                 customerId = customer.id
@@ -154,7 +155,8 @@ export default function ReceiveRepairModal({ onClose }) {
                 data.carId = car.id
             }
 
-            await dbService.add('serviceregisters', data)
+            // await dbService.add('serviceregisters', data)
+            await addServiceRegister(data)
             onClose()
         } catch (error) {
             alert(error.message)

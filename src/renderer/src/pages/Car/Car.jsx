@@ -22,6 +22,7 @@ const Car = () => {
         type: 'detail'
     })
     const [carData, setCarData] = useState([])
+    const [searchTerm, setSearchTerm] = useState('')
     const itemsPerPage = 8
 
     const fetchData = async () => {
@@ -35,12 +36,62 @@ const Car = () => {
         return () => unsub()
     }, [])
 
-    const totalPages = Math.ceil(carData.length / itemsPerPage)
+    const searchCars = useMemo(() => {
+        if (!searchTerm) return carData
 
+        const searchLower = searchTerm.toLowerCase().trim()
+
+        return carData.filter((car) => {
+            // Kiểm tra biển số xe (loại bỏ khoảng trắng và dấu -)
+            const normalizedLicensePlate = car.licensePlate?.replace(/[\s-]/g, '').toLowerCase()
+            const normalizedSearch = searchLower.replace(/[\s-]/g, '')
+            if (normalizedLicensePlate?.includes(normalizedSearch)) {
+                return true
+            }
+
+            // Kiểm tra mã xe (format XExxxx)
+            if (searchLower.startsWith('xe')) {
+                return car.id.toLowerCase().includes(searchLower)
+            }
+
+            // Kiểm tra năm sản xuất
+            if (/^\d{4}$/.test(searchLower)) {
+                return car.manufacturingYear?.toString().includes(searchLower)
+            }
+
+            // Kiểm tra hãng xe và mẫu xe
+            if (
+                car.brand?.toLowerCase().includes(searchLower) ||
+                car.model?.toLowerCase().includes(searchLower)
+            ) {
+                return true
+            }
+
+            // Kiểm tra tên chủ xe
+            if (car.customer?.name?.toLowerCase().includes(searchLower)) {
+                return true
+            }
+
+            // Mặc định tìm theo tất cả
+            return (
+                car.id.toLowerCase().includes(searchLower) ||
+                (car.licensePlate || '').toLowerCase().includes(searchLower) ||
+                (car.brand || '').toLowerCase().includes(searchLower) ||
+                (car.model || '').toLowerCase().includes(searchLower) ||
+                (car.manufacturingYear || '').toString().includes(searchLower) ||
+                (car.customer?.name || '').toLowerCase().includes(searchLower)
+            )
+        })
+    }, [carData, searchTerm])
+
+    // Cập nhật currentData để sử dụng kết quả tìm kiếm
     const currentData = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage
-        return carData.slice(start, start + itemsPerPage)
-    }, [currentPage, carData])
+        return searchCars.slice(start, start + itemsPerPage)
+    }, [currentPage, searchCars])
+
+    // Cập nhật totalPages
+    const totalPages = Math.ceil(searchCars.length / itemsPerPage)
 
     const handlePageChange = useCallback(
         (page) => {
@@ -64,7 +115,12 @@ const Car = () => {
                 </button>
                 <div className="page__header-search">
                     <FontAwesomeIcon icon={faSearch} className="page__header-icon" />
-                    <input type="text" placeholder="Tìm kiếm" />
+                    <input
+                        type="text"
+                        placeholder="Tìm kiếm theo biển số, mã xe, hãng xe, mẫu xe, năm SX, chủ xe..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                 </div>
             </div>
             <div className="car-page__content">
@@ -90,7 +146,7 @@ const Car = () => {
                                 <td>{car.brand}</td>
                                 <td>{car.manufacturingYear}</td>
                                 <td>{car.customer?.name}</td>
-                                {/* <td>
+                                {/* <td></td>
                                     <div
                                         className={`table__status ${car.status === 'Đang sửa chữa' ? 'car-repairing' : 'car-normal'}`}
                                     >

@@ -35,6 +35,7 @@ const Repair = () => {
     const [repairRegisterData, setRepairRegisterData] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const itemsPerPage = 8
+    const [searchTerm, setSearchTerm] = useState('')
 
     const fetchData = async () => {
         const data = await dbService.getAll('serviceregisters')
@@ -55,14 +56,30 @@ const Repair = () => {
         return () => unsubscribe()
     }, [])
 
-    const totalPages = Math.ceil(
-        repairRegisterData.filter((item) => item.car).length / itemsPerPage
-    )
+    const searchedRepairs = useMemo(() => {
+        if (!searchTerm) return repairRegisterData
+
+        const searchLower = searchTerm.toLowerCase().trim()
+
+        return repairRegisterData.filter((repair) => {
+            if (repair.id.toLowerCase().includes(searchLower)) return true
+
+            if (repair.car?.customer?.name.toLowerCase().includes(searchLower)) return true
+
+            if (repair.car?.licensePlate.toLowerCase().includes(searchLower)) return true
+
+            if (repair.employee?.name.toLowerCase().includes(searchLower)) return true
+
+            return false
+        })
+    }, [repairRegisterData, searchTerm])
+
+    const totalPages = Math.ceil(searchedRepairs.filter((item) => item.car).length / itemsPerPage)
 
     const currentData = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage
-        return repairRegisterData.filter((item) => item.car).slice(start, start + itemsPerPage)
-    }, [currentPage, repairRegisterData])
+        return searchedRepairs.filter((item) => item.car).slice(start, start + itemsPerPage)
+    }, [currentPage, searchedRepairs])
 
     const handlePageChange = useCallback(
         (page) => {
@@ -126,7 +143,12 @@ const Repair = () => {
                     </button>
                     <div className="page__header-search">
                         <FontAwesomeIcon icon={faSearch} className="page__header-icon" />
-                        <input type="text" placeholder="Tìm kiếm" />
+                        <input
+                            type="text"
+                            placeholder="Tìm kiếm theo mã phiếu, tên khách hàng, biển số xe..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
                 </div>
             </div>
@@ -151,7 +173,7 @@ const Repair = () => {
                         </thead>
                         <tbody>
                             {currentData.map((repair, index) => (
-                                <tr key={repair.id}>
+                                <tr key={index}>
                                     <td>{repair.id}</td>
                                     <td>{repair.employee?.name}</td>
                                     <td>{repair.car?.customer?.name}</td>

@@ -1,6 +1,11 @@
 import { dbService } from '../services/DatabaseService'
 import { parseISO, isWithinInterval } from 'date-fns'
 
+export const getServiceRegister = async () => {
+    const serviceRegister = await dbService.getAll('serviceregisters')
+    return serviceRegister
+}
+
 export const getServiceRegisterByDate = async (startDate, endDate) => {
     try {
         const serviceRegisters = await dbService.getAll('serviceregisters')
@@ -35,7 +40,38 @@ export const getServiceRegisterByDate = async (startDate, endDate) => {
 
         return filteredServiceRegisters
     } catch (error) {
-        console.error('Error in getRepairRegisterByDate:', error)
-        throw error
+        console.error('Error in getServiceRegisterByDate:', error)
+        return []
+    }
+}
+
+export const addServiceRegister = async (serviceRegisterData) => {
+    try {
+        // Lấy tất cả service registers để đếm số lượng
+        const registers = await dbService.getAll('serviceregisters')
+
+        // Tạo ID mới với format SR000N
+        const nextNumber = registers.length + 1
+        const registerId = `SR${nextNumber.toString().padStart(4, '0')}`
+        console.log('check registerId:', registerId)
+
+        // Thêm các trường cần thiết
+        const dataToAdd = {
+            ...serviceRegisterData,
+            id: registerId,
+            createdAt: new Date().toISOString(),
+            isDeleted: false,
+            status: serviceRegisterData.status || 'Đang sửa chữa',
+            repairRegisterIds: serviceRegisterData.repairRegisterIds || [],
+            totalCost: serviceRegisterData.totalCost || 0
+        }
+
+        // Thêm vào database
+        const result = await dbService.addWithId('serviceregisters', registerId, dataToAdd)
+        console.log('check result:', result)
+        return result
+    } catch (error) {
+        console.error('Error in addServiceRegister:', error)
+        throw new Error('Không thể thêm phiếu dịch vụ')
     }
 }

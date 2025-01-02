@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { dbService } from '../../services/DatabaseService'
 import Dropdown from '../Dropdown'
 import ComboBox from '../Combobox'
+import { addServiceRegister } from '../../controllers/serviceRegisterController'
 
 function AddRepairRegisterModal({ onClose, onAddService }) {
     const [selectedService, setSelectedService] = useState({})
