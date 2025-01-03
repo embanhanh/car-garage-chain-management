@@ -287,6 +287,9 @@ export default function ReceiveRepairModal({ onClose }) {
                         onAddStaffInCharge={onAddStaffInCharge}
                         onAddComponentUsed={onAddComponentUsed}
                         onCompleteService={onCompleteService}
+                        isOpen={showDetailService}
+                        showHeader={true}
+                        title="Chi tiết phiếu dịch vụ"
                         type="add"
                     />
                     <div className="page-btns center">

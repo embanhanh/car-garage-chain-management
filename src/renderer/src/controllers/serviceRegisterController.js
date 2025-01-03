@@ -75,3 +75,10 @@ export const addServiceRegister = async (serviceRegisterData) => {
         throw new Error('Không thể thêm phiếu dịch vụ')
     }
 }
+
+export const getRecentServiceRegisters = async () => {
+    const serviceRegisters = await dbService.getAll('serviceregisters')
+    return serviceRegisters
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5)
+}

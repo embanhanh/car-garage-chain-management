@@ -332,7 +332,12 @@ function Component() {
             </div>
             <Modal
                 width="900px"
-                showHeader={false}
+                showHeader={true}
+                title={
+                    openImportModal.data === null
+                        ? 'Thêm phiếu nhập kho'
+                        : 'Cập nhật phiếu nhập kho'
+                }
                 isOpen={openImportModal.show}
                 onClose={() =>
                     setOpenImportModal({
@@ -353,7 +358,8 @@ function Component() {
             </Modal>
             <Modal
                 width="700px"
-                showHeader={false}
+                showHeader={true}
+                title={openComponent.type === 'detail' ? 'Chi tiết phụ tùng' : 'Cập nhật phụ tùng'}
                 isOpen={openComponent.show}
                 onClose={() =>
                     setOpenComponent((pre) => ({
@@ -377,7 +383,8 @@ function Component() {
             </Modal>
             <Modal
                 width="700px"
-                showHeader={false}
+                showHeader={true}
+                title="Chi tiết phiếu nhập kho"
                 isOpen={openDetailImportModal.show}
                 onClose={() =>
                     setOpenDetailImportModal({
@@ -398,7 +405,8 @@ function Component() {
             </Modal>
             <Modal
                 width="900px"
-                showHeader={false}
+                showHeader={true}
+                title="Chi tiết phụ tùng sử dụng mua hàng"
                 isOpen={openPurchase}
                 onClose={() => setOpenPurchase(false)}
             >

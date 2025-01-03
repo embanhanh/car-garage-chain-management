@@ -1,13 +1,42 @@
 import './Regulation.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus, faEllipsisVertical } from '@fortawesome/free-solid-svg-icons'
+import AddServiceModal from '../../components/Service/AddServiceModal'
+import { getService } from '../../controllers/serviceController'
+import Swal from 'sweetalert2'
+
+import { useState, useEffect } from 'react'
 
 function Regulation() {
+    const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false)
+    const [isAddBrandModalOpen, setIsAddBrandModalOpen] = useState(false)
+    const [services, setServices] = useState([])
+
+    const fetchServices = async () => {
+        const services = await getService()
+        setServices(services)
+    }
+
+    useEffect(() => {
+        fetchServices()
+    }, [])
+
+    const handleAddService = () => {
+        setIsAddServiceModalOpen(true)
+    }
+
+    const handleAddBrand = () => {
+        setIsAddBrandModalOpen(true)
+    }
     return (
         <div className="regulation-page">
             <div className="regulation-page__header">
-                <button className="primary-button">Thêm dịch vụ</button>
-                <button className="primary-button">Thêm hãng xe</button>
+                <button className="primary-button" onClick={handleAddService}>
+                    Thêm dịch vụ
+                </button>
+                <button className="primary-button" onClick={handleAddBrand}>
+                    Thêm hãng xe
+                </button>
             </div>
             <div className="regulation-page__content">
                 <div className="regulation-page__body">
@@ -24,25 +53,29 @@ function Regulation() {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Thay nhớt</td>
-                                    <td>Dịch vụ trong xe</td>
-                                    <td>3 ngày</td>
-                                    <td>300,000</td>
-                                    <td className="overflow-visible">
-                                        <div className="table__actions">
-                                            <FontAwesomeIcon
-                                                icon={faEllipsisVertical}
-                                                className="table__action-icon"
-                                            />
-                                            <div className="table__action-menu">
-                                                <div className="table__action-item">Cập nhật</div>
-                                                <div className="table__action-item">Xóa</div>
+                                {services.map((service, index) => (
+                                    <tr key={service.id}>
+                                        <td>{index + 1}</td>
+                                        <td>{service.name}</td>
+                                        <td>{service.serviceType?.name || ''}</td>
+                                        <td>{service.duration}</td>
+                                        <td>{service.price?.toLocaleString('vi-VN')}đ</td>
+                                        <td className="overflow-visible">
+                                            <div className="table__actions">
+                                                <FontAwesomeIcon
+                                                    icon={faEllipsisVertical}
+                                                    className="table__action-icon"
+                                                />
+                                                <div className="table__action-menu">
+                                                    <div className="table__action-item">
+                                                        Cập nhật
+                                                    </div>
+                                                    <div className="table__action-item">Xóa</div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                </tr>
+                                        </td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
@@ -77,6 +110,12 @@ function Regulation() {
                     </div>
                 </div>
             </div>
+            <AddServiceModal
+                isOpen={isAddServiceModalOpen}
+                onClose={() => setIsAddServiceModalOpen(false)}
+                onSuccess={() => fetchServices()}
+            />
+            {isAddBrandModalOpen && <AddBrandModal onClose={() => setIsAddBrandModalOpen(false)} />}
         </div>
     )
 }

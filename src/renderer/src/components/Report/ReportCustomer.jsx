@@ -63,7 +63,8 @@ function ReportCustomer({ dateRange = 'week', selectedDate = new Date() }) {
         ]
     })
     const [currentPage, setCurrentPage] = useState(1)
-    const itemsPerPage = 9 // Số item trên mỗi trang
+    const itemsPerPage = 5 // Số item trên mỗi trang
+    const [isLoading, setIsLoading] = useState(false)
 
     const processAndUpdateChartData = (serviceRegisters) => {
         if (!Array.isArray(serviceRegisters) || serviceRegisters.length === 0) {
@@ -147,6 +148,7 @@ function ReportCustomer({ dateRange = 'week', selectedDate = new Date() }) {
     }
 
     const fetchCustomerData = async (dateRange, selectedDate) => {
+        setIsLoading(true)
         try {
             const now = selectedDate || new Date()
             let startDate, endDate
@@ -178,6 +180,8 @@ function ReportCustomer({ dateRange = 'week', selectedDate = new Date() }) {
             console.error('Error fetching customer data:', error)
             setCustomerData([])
             processAndUpdateChartData([])
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -200,7 +204,7 @@ function ReportCustomer({ dateRange = 'week', selectedDate = new Date() }) {
             },
             title: {
                 display: true,
-                text: `Thống kê khách hàng - ${getDateRangeText()}`,
+                text: `Thống kê khách hàng - ${getDateRangeText(dateRange, selectedDate)}`,
                 font: {
                     size: 16,
                     weight: 'bold'
@@ -246,48 +250,101 @@ function ReportCustomer({ dateRange = 'week', selectedDate = new Date() }) {
                 <p className="report__table-title">
                     Danh sách khách hàng từ {getDateRangeText(dateRange, selectedDate)}
                 </p>
-                <table className="page-table">
-                    <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th>Tên khách hàng</th>
-                            <th>Số lần sử dụng dịch vụ</th>
-                            <th>Tỷ lệ (%)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {currentCustomerData.map((customer, index) => {
-                            const totalVisits = customerData.reduce(
-                                (sum, c) => sum + c.visitCount,
-                                0
-                            )
-                            const percentage = ((customer.visitCount / totalVisits) * 100).toFixed(
-                                1
-                            )
-                            return (
-                                <tr key={customer.id}>
-                                    <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                                    <td>{customer.name}</td>
-                                    <td>{customer.visitCount}</td>
-                                    <td>{percentage}%</td>
+                {isLoading ? (
+                    <div
+                        className="d-flex justify-content-center align-items-center"
+                        style={{ minHeight: '200px' }}
+                    >
+                        <div className="spinner-border text-primary" role="status">
+                            <span className="visually-hidden">Đang tải...</span>
+                        </div>
+                    </div>
+                ) : customerData.length <= 1 && customerData[0].customerId === '' ? (
+                    <div
+                        className="d-flex justify-content-center align-items-center"
+                        style={{ minHeight: '200px' }}
+                    >
+                        <p>Không có dữ liệu</p>
+                    </div>
+                ) : (
+                    <>
+                        <table className="page-table">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Tên khách hàng</th>
+                                    <th>Số lần sử dụng dịch vụ</th>
+                                    <th>Tỷ lệ (%)</th>
                                 </tr>
-                            )
-                        })}
-                    </tbody>
-                </table>
+                            </thead>
+                            <tbody>
+                                {currentCustomerData.map((customer, index) => {
+                                    const totalVisits = customerData.reduce(
+                                        (sum, c) => sum + c.visitCount,
+                                        0
+                                    )
+                                    const percentage = (
+                                        (customer.visitCount / totalVisits) *
+                                        100
+                                    ).toFixed(1)
+                                    return (
+                                        <tr key={customer.id}>
+                                            <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                                            <td>{customer.name}</td>
+                                            <td>{customer.visitCount}</td>
+                                            <td>{percentage}%</td>
+                                        </tr>
+                                    )
+                                })}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td
+                                        colSpan="2"
+                                        style={{ textAlign: 'right', fontWeight: 'bold' }}
+                                    >
+                                        Tổng cộng:
+                                    </td>
+                                    <td style={{ fontWeight: 'bold' }}>
+                                        {customerData.reduce((sum, c) => sum + c.visitCount, 0)}
+                                    </td>
+                                    <td style={{ fontWeight: 'bold' }}>100%</td>
+                                </tr>
+                            </tfoot>
+                        </table>
 
-                {/* Thêm phân trang */}
-                <div className="z-pagination">
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={handlePageChange}
-                    />
-                </div>
+                        <div className="z-pagination">
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={handlePageChange}
+                            />
+                        </div>
+                    </>
+                )}
             </div>
+
             <div className="report-stock__charts">
                 <div className="report-stock__chart-container" style={{ height: '500px' }}>
-                    <Pie options={chartOptions} data={chartData} />
+                    {isLoading ? (
+                        <div
+                            className="d-flex justify-content-center align-items-center"
+                            style={{ minHeight: '200px' }}
+                        >
+                            <div className="spinner-border text-primary" role="status">
+                                <span className="visually-hidden">Đang tải...</span>
+                            </div>
+                        </div>
+                    ) : customerData.length <= 1 && customerData[0].customerId === '' ? (
+                        <div
+                            className="d-flex justify-content-center align-items-center"
+                            style={{ minHeight: '200px' }}
+                        >
+                            <p>Không có dữ liệu</p>
+                        </div>
+                    ) : (
+                        <Pie options={chartOptions} data={chartData} />
+                    )}
                 </div>
             </div>
         </div>

@@ -71,7 +71,7 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
     })
 
     return (
-        <div>
+        <>
             <div className="z-ae-container w-100">
                 <Modal
                     isOpen={isShowAlertlog}
@@ -296,7 +296,7 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
                     </button>
                 </div>
             </div>
-        </div>
+        </>
     )
 }
 

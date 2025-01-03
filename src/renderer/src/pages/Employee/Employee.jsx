@@ -22,8 +22,8 @@ function Employee() {
     const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 9
     const columns = [
-        { name: 'Mã NV', field: 'id', width: '8%' },
-        { name: 'Họ tên', field: 'name', width: '20%' },
+        { name: 'Mã NV', field: 'id', width: '10%' },
+        { name: 'Họ tên', field: 'name', width: '18%' },
         { name: 'Email', field: 'email', width: '25%' },
         { name: 'CCCD', field: 'identifyCard', width: '15%' },
         { name: 'Giới tính', field: 'gender', width: '10%' },
@@ -190,7 +190,8 @@ function Employee() {
             <Modal
                 isOpen={isOpenAddDialog}
                 onClose={() => setIsOpenAddDialog(false)}
-                showHeader={false}
+                showHeader={true}
+                title="Thêm nhân viên mới"
                 width="680px"
             >
                 <AddEmployee onClose={() => setIsOpenAddDialog(false)}></AddEmployee>
@@ -198,7 +199,8 @@ function Employee() {
             <Modal
                 isOpen={isOpenEditEmployee}
                 onClose={() => setIsOpenEditEmployee(false)}
-                showHeader={false}
+                showHeader={true}
+                title="Cập nhật nhân viên"
                 width="680px"
             >
                 <AddEmployee
@@ -210,8 +212,9 @@ function Employee() {
             <Modal
                 isOpen={isOpenAddAccount}
                 onClose={() => setIsOpenAddAccount(false)}
-                showHeader={false}
+                showHeader={true}
                 width="300px"
+                title="Thêm tài khoản nhân viên"
             >
                 <AddAccount
                     onClose={() => setIsOpenAddAccount(false)}
@@ -222,8 +225,9 @@ function Employee() {
             <Modal
                 isOpen={isOpenDetailEmployee}
                 onClose={() => setIsOpenDetailEmployee(false)}
-                showHeader={false}
+                showHeader={true}
                 width="680px"
+                title="Chi tiết nhân viên"
             >
                 <DetailEmployee
                     onClose={() => setIsOpenDetailEmployee(false)}
