@@ -4,6 +4,7 @@ import { faPlus, faEllipsisVertical } from '@fortawesome/free-solid-svg-icons'
 import AddServiceModal from '../../components/Service/AddServiceModal'
 import { getService } from '../../controllers/serviceController'
 import Swal from 'sweetalert2'
+import Pagination from '../../components/Pagination'
 
 import { useState, useEffect } from 'react'
 
@@ -11,6 +12,8 @@ function Regulation() {
     const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false)
     const [isAddBrandModalOpen, setIsAddBrandModalOpen] = useState(false)
     const [services, setServices] = useState([])
+    const [currentPage, setCurrentPage] = useState(1)
+    const itemsPerPage = 7 // Số dịch vụ trên mỗi trang
 
     const fetchServices = async () => {
         const services = await getService()
@@ -28,6 +31,19 @@ function Regulation() {
     const handleAddBrand = () => {
         setIsAddBrandModalOpen(true)
     }
+
+    // Tính toán dữ liệu cho trang hiện tại
+    const getCurrentPageData = () => {
+        const startIndex = (currentPage - 1) * itemsPerPage
+        const endIndex = startIndex + itemsPerPage
+        return services.slice(startIndex, endIndex)
+    }
+
+    // Xử lý thay đổi trang
+    const handlePageChange = (page) => {
+        setCurrentPage(page)
+    }
+
     return (
         <div className="regulation-page">
             <div className="regulation-page__header">
@@ -53,9 +69,9 @@ function Regulation() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {services.map((service, index) => (
+                                {getCurrentPageData().map((service, index) => (
                                     <tr key={service.id}>
-                                        <td>{index + 1}</td>
+                                        <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                         <td>{service.name}</td>
                                         <td>{service.serviceType?.name || ''}</td>
                                         <td>{service.duration}</td>
@@ -78,6 +94,12 @@ function Regulation() {
                                 ))}
                             </tbody>
                         </table>
+
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={Math.ceil(services.length / itemsPerPage)}
+                            onPageChange={handlePageChange}
+                        />
                     </div>
                     <div className="regulation-page__header-service col-4">
                         <table className="regulation-table page-table">

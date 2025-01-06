@@ -285,16 +285,6 @@ function ReportCustomer({ dateRange = 'week', selectedDate = new Date() }) {
 
     return (
         <div className="report-stock">
-            <div className="d-flex justify-content-end mb-3">
-                <button
-                    className="btn btn-primary"
-                    onClick={handleExportExcel}
-                    disabled={isLoading || customerData.length <= 1}
-                >
-                    Xuất Excel
-                </button>
-            </div>
-
             {/* <div className="report-stock__table">
                 <p className="report__table-title">
                     Danh sách khách hàng từ {getDateRangeText(dateRange, selectedDate)}
