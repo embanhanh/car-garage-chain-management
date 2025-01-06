@@ -7,6 +7,8 @@ import Modal from '../Modal'
 import StaffInChargeModal from './StaffInChargeModal'
 import ComponentUsedModal from './ComponentUsedModal'
 import AddRepairRegisterModal from './AddRepairRegisterModal'
+import { query, getDocs, collection, where } from 'firebase/firestore'
+import { db } from '../../firebase.config'
 
 function DetailRepairModal({
     onClose,
@@ -19,6 +21,7 @@ function DetailRepairModal({
     type
 }) {
     const [repairData, setRepairData] = useState(data)
+    const [isPaid, setIsPaid] = useState(false)
     const [openStaffInChargeModal, setOpenStaffInChargeModal] = useState({
         show: false,
         data: null
@@ -31,7 +34,18 @@ function DetailRepairModal({
 
     useEffect(() => {
         setRepairData(data)
+        if (data.id) {
+            const getIsPaid = async () => {
+                const q = query(collection(db, 'bills'), where('serviceRegisterId', '==', data.id))
+                const querySnapshot = await getDocs(q)
+                if (querySnapshot.docs.length > 0) {
+                    setIsPaid(true)
+                }
+            }
+            getIsPaid()
+        }
     }, [data])
+
     return (
         <>
             <div className="modal-header">
@@ -209,6 +223,7 @@ function DetailRepairModal({
                             <button
                                 className="repair-modal__button confirm-button"
                                 onClick={() => setOpenAddRepairRegisterModal(true)}
+                                disabled={isPaid}
                             >
                                 Thêm
                             </button>
