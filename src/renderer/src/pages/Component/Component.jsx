@@ -43,8 +43,14 @@ function Component() {
     const fetchData = async () => {
         const data =
             tab === 'component'
-                ? await dbService.getAll('components')
-                : await dbService.getAll('inputcomponentregisters')
+                ? await dbService.getAll(
+                      'components',
+                      JSON.parse(localStorage.getItem('currentGarage'))?.id
+                  )
+                : await dbService.getAll(
+                      'inputcomponentregisters',
+                      JSON.parse(localStorage.getItem('currentGarage'))?.id
+                  )
         setData(data)
     }
 

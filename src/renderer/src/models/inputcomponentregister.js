@@ -26,7 +26,8 @@ export class InputComponentRegister {
         details = [],
         supplierId = '',
         supplier = null,
-        createdAt = new Date()
+        createdAt = new Date(),
+        garageId = ''
     } = {}) {
         this.id = id
         this.employeeId = employeeId
@@ -35,6 +36,7 @@ export class InputComponentRegister {
         this.createdAt = createdAt
         this.supplierId = supplierId
         this.supplier = supplier
+        this.garageId = garageId
     }
 
     toFirestore() {
@@ -47,7 +49,8 @@ export class InputComponentRegister {
                 inputPrice
             })),
             supplierId: this.supplierId,
-            createdAt: this.createdAt
+            createdAt: this.createdAt,
+            garageId: this.garageId
         }
     }
 

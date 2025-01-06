@@ -25,6 +25,7 @@ export default function Header() {
 
     const handleLogout = () => {
         localStorage.removeItem('currentUser')
+        localStorage.removeItem('currentGarage')
         window.api.send('resize-window-login')
         navigate('/')
     }
@@ -56,7 +57,7 @@ export default function Header() {
                     <img src={garageIcon} alt="Garage Icon" className="header__garage-name-icon" />
                     <p className="header__garage-name-text">
                         {' '}
-                        {currentUser?.employee?.garage?.name}
+                        {currentUser?.employee?.garage?.name || 'Garage'}
                     </p>
                 </div>
                 <div className="header__time">
@@ -64,7 +65,6 @@ export default function Header() {
                     <span>{formatTime(currentTime)}</span>
                 </div>
                 <div className="header__actions">
-                    <FontAwesomeIcon icon={faBell} className="header__action-icon" />
                     <div className="header__user">
                         <div className="header__user-name">
                             {currentUser?.role == 'admin' ? 'admin' : currentUser?.employee?.name}
@@ -78,18 +78,18 @@ export default function Header() {
                     </div>
                     <div className="header__actions-mini-info">
                         <h2 className="text-center">
-                            Chào mừng bạn trở lại Garage, {currentUser?.employee?.name}!
+                            Chào mừng bạn trở lại Garage, {currentUser?.employee?.name || 'admin'}!
                         </h2>
                         <img
                             src={currentUser?.employee?.avatar || userImage}
                             alt="Logo"
                             className="header__actions-mini-info-img"
                         />
-                        <h2>{currentUser?.employee?.name}</h2>
-                        <p>{currentUser?.employee?.position}</p>
+                        <h2>{currentUser?.employee?.name || 'admin'}</h2>
+                        <p>{currentUser?.employee?.position || 'admin'}</p>
                         <span className="header__actions-mini-info-separate"></span>
                         <p>Thời gian làm việc</p>
-                        <p>{currentUser?.employee?.workHours}</p>
+                        <p>{currentUser?.employee?.workHours || '...'}</p>
                         <div className="page-btns center p-2">
                             <button className="primary-button" onClick={handleLogout}>
                                 Đăng xuất

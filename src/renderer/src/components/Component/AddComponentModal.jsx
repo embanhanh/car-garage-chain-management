@@ -13,7 +13,8 @@ function AddComponentModal({ onClose }) {
         weight: '',
         material: '',
         inventory: 0,
-        storagePosition: ''
+        storagePosition: '',
+        garageId: JSON.parse(localStorage.getItem('currentGarage'))?.id
     })
     const [categories, setCategories] = useState([])
     const [isLoading, setIsLoading] = useState(false)

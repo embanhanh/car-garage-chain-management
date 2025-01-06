@@ -10,7 +10,8 @@ const ZTable = ({
     addAccount = () => {},
     detailAction = () => {},
     editAction = () => {},
-    deleteAction = () => {}
+    deleteAction = () => {},
+    isAdmin = false
 }) => {
     const itemsPerPage = 12
     return (
@@ -79,14 +80,16 @@ const ZTable = ({
                                                 >
                                                     Cập nhật
                                                 </div>
-                                                <div
-                                                    className="table__action-item"
-                                                    onClick={async () => {
-                                                        deleteAction(item)
-                                                    }}
-                                                >
-                                                    Xóa
-                                                </div>
+                                                {isAdmin && (
+                                                    <div
+                                                        className="table__action-item"
+                                                        onClick={async () => {
+                                                            deleteAction(item)
+                                                        }}
+                                                    >
+                                                        Xóa
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </td>

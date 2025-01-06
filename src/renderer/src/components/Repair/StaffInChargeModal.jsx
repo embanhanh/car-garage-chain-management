@@ -37,7 +37,10 @@ const StaffInChargeModal = ({ onClose, data, onAddStaffInCharge }) => {
             ])
             // Lọc ra những nhân viên chưa được phân công
             const filteredStaffs = staffs.filter(
-                (staff) => !staffInChargeData.some((emp) => emp.id === staff.id)
+                (staff) =>
+                    !staffInChargeData.some((emp) => emp.id === staff.id) &&
+                    staff.garageId === JSON.parse(localStorage.getItem('currentGarage')).id &&
+                    staff.position == 'Kỹ thuật'
             )
             setSearchResults(filteredStaffs)
         } catch (error) {

@@ -63,7 +63,7 @@ const ImportComponentModal = ({ onClose, data }) => {
                 (component) =>
                     !inputComponentRegister.details.some(
                         (item) => item.component.id === component.id
-                    )
+                    ) && component.garageId === JSON.parse(localStorage.getItem('currentGarage')).id
             )
             setSearchResults(filteredComponents)
         } catch (error) {
@@ -77,13 +77,15 @@ const ImportComponentModal = ({ onClose, data }) => {
         setIsLoading(true)
         try {
             const componentRegister = {
-                employeeId: JSON.parse(localStorage.getItem('currentUser'))?.employee?.id,
+                employeeId:
+                    JSON.parse(localStorage.getItem('currentUser'))?.employee?.id || 'admin',
                 details: inputComponentRegister.details.map((item) => ({
                     componentId: item.component.id,
                     quantity: Number(item.quantity),
                     inputPrice: Number(item.inputPrice)
                 })),
-                supplierId: inputComponentRegister.supplierId
+                supplierId: inputComponentRegister.supplierId,
+                garageId: JSON.parse(localStorage.getItem('currentGarage'))?.id
             }
             // await dbService.add('inputcomponentregisters', componentRegister)
             await addInputComponentRegister(componentRegister)

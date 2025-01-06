@@ -9,7 +9,8 @@
     border-radius: 8px;
     cursor: pointer;
     border: 1px solid #858d9d;
-    background-color: #fff;
+    background-color: #fff !important;
+    color: #333 !important;
     font-size: 1.4rem;
 }
 

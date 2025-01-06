@@ -9,17 +9,19 @@ export class TrackingRegister {
             idField: 'componentId'
         }
     ]
-    constructor({ id = '', details = [], createdAt = new Date() } = {}) {
+    constructor({ id = '', details = [], createdAt = new Date(), garageId = '' } = {}) {
         this.id = id
         this.details = details
         this.createdAt = createdAt
+        this.garageId = garageId
     }
 
     toFirestore() {
         return {
             id: this.id,
             details: this.details.map(({ componentId, quantity }) => ({ componentId, quantity })),
-            createdAt: this.createdAt
+            createdAt: this.createdAt,
+            garageId: this.garageId
         }
     }
 

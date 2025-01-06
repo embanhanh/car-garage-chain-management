@@ -2,14 +2,26 @@ import { useNavigate } from 'react-router-dom'
 import './Home.css'
 import { useEffect, useState } from 'react'
 import { dbService } from '../../services/DatabaseService'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCalendarPlus } from '@fortawesome/free-solid-svg-icons'
 import { getRecentRepairRegisters } from '../../controllers/repairController'
 import { getRecentServiceRegisters } from '../../controllers/serviceRegisterController'
 import { getBillsByDate } from '../../controllers/billController'
+import { onSnapshot, collection } from 'firebase/firestore'
+import Modal from '../../components/Modal'
+import { db } from '../../firebase.config'
 
 function Home() {
     const nav = useNavigate()
 
     const [recentServices, setRecentServices] = useState([])
+    const [notifications, setNotifications] = useState([])
+    const [addNotification, setAddNotification] = useState(false)
+    const [notification, setNotification] = useState({
+        title: '',
+        content: '',
+        garageId: JSON.parse(localStorage.getItem('currentGarage'))?.id
+    })
     const [processedData, setProcessedData] = useState([
         {
             customerName: '',
@@ -64,8 +76,19 @@ function Home() {
     }, [])
 
     useEffect(() => {
-        console.log('check recentServices:', recentServices)
-    }, [recentServices])
+        const unsubscribe = onSnapshot(collection(db, 'notifications'), (snapshot) => {
+            setNotifications(
+                snapshot.docs
+                    .map((doc) => doc.data())
+                    .filter(
+                        (notification) =>
+                            notification.garageId ===
+                            JSON.parse(localStorage.getItem('currentGarage'))?.id
+                    )
+            )
+        })
+        return () => unsubscribe()
+    }, [])
 
     const processData = () => {
         let processedData = []
@@ -275,11 +298,24 @@ function Home() {
                         )}
                     </div>
                     <div className="home-page__content-notification col-4 p-3 d-flex flex-column gap-3">
-                        <h1 className="home-page__title">Thông báo</h1>
+                        <div className="d-flex justify-content-between align-items-center">
+                            <h1 className="home-page__title">Thông báo</h1>
+                            {(JSON.parse(localStorage.getItem('currentUser'))?.role === 'Quản lý' ||
+                                JSON.parse(localStorage.getItem('currentUser'))?.role ===
+                                    'admin') && (
+                                <FontAwesomeIcon
+                                    onClick={() => {
+                                        setAddNotification(true)
+                                    }}
+                                    icon={faCalendarPlus}
+                                    className="icon-add-notification"
+                                />
+                            )}
+                        </div>
                         <div className="home-page__content-notification-body scrollbar p-1">
-                            {Array.from({ length: 5 }).map((_, index) => (
-                                <div className="home-page__notification-item" key={index}>
-                                    <div className="home-page__notification-item-header">
+                            {notifications.length > 0 ? (
+                                notifications.map((notification, index) => (
+                                    <div className="home-page__notification-item" key={index}>
                                         <p
                                             style={{
                                                 fontSize: '1.6rem',
@@ -287,7 +323,7 @@ function Home() {
                                                 fontWeight: '600'
                                             }}
                                         >
-                                            Thông báo 1
+                                            {notification.title}
                                         </p>
                                         <p
                                             style={{
@@ -296,25 +332,103 @@ function Home() {
                                                 fontWeight: '600'
                                             }}
                                         >
-                                            1 phút trước
+                                            {new Intl.DateTimeFormat('vi-VN', {
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                day: '2-digit',
+                                                month: 'numeric',
+                                                year: 'numeric'
+                                            }).format(new Date(notification.createdAt))}
                                         </p>
+                                        <div className="home-page__notification-item-body">
+                                            <p
+                                                style={{
+                                                    fontSize: '1.4rem',
+                                                    fontWeight: '600'
+                                                }}
+                                            >
+                                                {notification.content}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div className="home-page__notification-item-body">
-                                        <p
-                                            style={{
-                                                fontSize: '1.4rem',
-                                                fontWeight: '600'
-                                            }}
-                                        >
-                                            Họp vào lúc 10h30 sáng ngày 30/11/2024.
-                                        </p>
-                                    </div>
+                                ))
+                            ) : (
+                                <div className="d-flex justify-content-center w-100">
+                                    <p>Không có thông báo</p>
                                 </div>
-                            ))}
+                            )}
                         </div>
                     </div>
                 </div>
             </div>
+            <Modal
+                isOpen={addNotification}
+                onClose={() => setAddNotification(false)}
+                title="Thêm thông báo"
+                showHeader={true}
+                width="600px"
+            >
+                <div className="d-flex flex-column gap-3">
+                    <div className="row">
+                        <div className="col-12">
+                            <label className="label-for-input" htmlFor="">
+                                Tiêu đề
+                            </label>
+                            <div className="input-form">
+                                <input
+                                    className="w-100"
+                                    type="text"
+                                    placeholder="Nhập tiêu đề"
+                                    value={notification.title}
+                                    onChange={(e) => {
+                                        setNotification((pre) => ({
+                                            ...pre,
+                                            title: e.target.value
+                                        }))
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        <div className="col-12">
+                            <label className="label-for-input" htmlFor="">
+                                Nội dung
+                            </label>
+                            <div className="input-form">
+                                <textarea
+                                    className="w-100"
+                                    placeholder="Nhập nội dung"
+                                    value={notification.content}
+                                    rows={5}
+                                    onChange={(e) => {
+                                        setNotification((pre) => ({
+                                            ...pre,
+                                            content: e.target.value
+                                        }))
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="page-btns end">
+                        <button
+                            className="page__header-button"
+                            onClick={() => setAddNotification(false)}
+                        >
+                            Hủy
+                        </button>
+                        <button
+                            disabled={false}
+                            className="primary-button"
+                            onClick={async () => {
+                                await dbService.add('notifications', notification)
+                                setAddNotification(false)
+                            }}
+                        >
+                            Xác nhận
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </>
     )
 }

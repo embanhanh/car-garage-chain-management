@@ -19,6 +19,7 @@ export class Component {
         material = '',
         inventory = 0,
         storagePosition = '',
+        garageId = '',
         createdAt = new Date()
     } = {}) {
         this.id = id
@@ -32,6 +33,7 @@ export class Component {
         this.material = material
         this.inventory = inventory
         this.storagePosition = storagePosition
+        this.garageId = garageId
         this.createdAt = createdAt
     }
 
@@ -47,7 +49,8 @@ export class Component {
             material: this.material,
             inventory: this.inventory,
             storagePosition: this.storagePosition,
-            createdAt: this.createdAt
+            createdAt: this.createdAt,
+            garageId: this.garageId
         }
     }
 

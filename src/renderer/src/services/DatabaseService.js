@@ -26,6 +26,7 @@ import { Supplier } from '../models/supplier'
 import { ServiceRegister } from '../models/serviceregister'
 import { ServiceType } from '../models/servicetype'
 import { TrackingRegister } from '../models/trackingregister'
+import { Notification } from '../models/notification'
 import { Parameter } from '../models/paramater'
 
 class DatabaseService {
@@ -98,6 +99,10 @@ class DatabaseService {
             trackingregisters: {
                 name: 'trackingregisters',
                 model: TrackingRegister
+            },
+            notifications: {
+                name: 'notifications',
+                model: Notification
             },
             parameters: {
                 name: 'parameters',
@@ -192,7 +197,7 @@ class DatabaseService {
         }
     }
 
-    async getAll(collectionName) {
+    async getAll(collectionName, garageId = null) {
         try {
             const ModelClass = this.collections[collectionName].model
 
@@ -202,14 +207,14 @@ class DatabaseService {
                 where('isDeleted', '!=', true)
             )
             const querySnapshot = await getDocs(q)
-
-            // Lấy dữ liệu cơ bản
-            const docs = querySnapshot.docs.map((doc) =>
-                ModelClass.fromFirestore({
+            const docs = querySnapshot.docs
+                .map((doc) => ({
                     id: doc.id,
                     ...doc.data()
-                })
-            )
+                }))
+                .filter((doc) => !doc.isDeleted) // Lọc isDeleted
+                .filter((doc) => !garageId || doc.garageId === garageId) // Lọc theo garageId nếu có
+                .map((doc) => ModelClass.fromFirestore(doc))
 
             // Kiểm tra xem model có định nghĩa relations không
             if (ModelClass.relations && ModelClass.relations.length > 0) {
