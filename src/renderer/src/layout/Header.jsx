@@ -67,7 +67,7 @@ export default function Header() {
                     <FontAwesomeIcon icon={faBell} className="header__action-icon" />
                     <div className="header__user">
                         <div className="header__user-name">
-                            {currentUser.role == 'admin' ? 'admin' : currentUser?.employee?.name}
+                            {currentUser?.role == 'admin' ? 'admin' : currentUser?.employee?.name}
                         </div>
                         <div className="header__user-avatar">
                             <img
