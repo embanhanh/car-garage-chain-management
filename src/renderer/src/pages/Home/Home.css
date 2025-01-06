@@ -69,14 +69,17 @@
 .home-page__notification-item {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 5px;
     border: 1px solid #1b1e28;
     border-radius: 8px;
     padding: 15px;
 }
 
-.home-page__notification-item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.icon-add-notification {
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+.icon-add-notification:hover {
+    color: var(--primary-color);
 }

@@ -338,6 +338,10 @@ function Customer() {
                             deleteAction={handleDelete}
                             columns={columns}
                             data={currentData}
+                            isAdmin={
+                                JSON.parse(localStorage.getItem('currentUser'))?.role == 'admin' ||
+                                JSON.parse(localStorage.getItem('currentUser'))?.role == 'Quản lý'
+                            }
                         />
                     </div>
                 </div>

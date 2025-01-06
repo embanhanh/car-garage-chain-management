@@ -51,7 +51,8 @@ function DetailInvoiceModal({ onClose, data }) {
                 }
 
                 const invoice = {
-                    employeeId: JSON.parse(localStorage.getItem('currentUser')).employee?.id,
+                    employeeId:
+                        JSON.parse(localStorage.getItem('currentUser')).employee?.id || 'admin',
                     customerId: null,
                     total: data?.repairRegisters?.reduce(
                         (sum, item) =>
@@ -67,7 +68,8 @@ function DetailInvoiceModal({ onClose, data }) {
                     ),
                     serviceRegisterId: data?.id,
                     status: 'Chưa thanh toán',
-                    type: 'repair'
+                    type: 'repair',
+                    garageId: JSON.parse(localStorage.getItem('currentGarage'))?.id
                 }
 
                 const newInvoice = await dbService.add('bills', invoice)

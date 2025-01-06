@@ -51,7 +51,8 @@ const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
 
             const filteredComponents = components.filter(
                 (component) =>
-                    !componentUsedData?.some((item) => item.component.id === component.id)
+                    !componentUsedData?.some((item) => item.component.id === component.id) &&
+                    component.garageId === JSON.parse(localStorage.getItem('currentGarage')).id
             )
             setSearchResults(filteredComponents)
         } catch (error) {

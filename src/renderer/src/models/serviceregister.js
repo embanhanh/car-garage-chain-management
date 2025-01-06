@@ -27,7 +27,8 @@ export class ServiceRegister {
         repairRegisterIds = [],
         repairRegisters = [],
         expectedCompletionDate = null,
-        createdAt = new Date()
+        createdAt = new Date(),
+        garageId = ''
     } = {}) {
         this.id = id
         this.employeeId = employeeId
@@ -39,6 +40,7 @@ export class ServiceRegister {
         this.repairRegisters = repairRegisters
         this.expectedCompletionDate = expectedCompletionDate
         this.createdAt = createdAt
+        this.garageId = garageId
     }
 
     toFirestore() {
@@ -49,7 +51,8 @@ export class ServiceRegister {
             status: this.status,
             expectedCompletionDate: this.expectedCompletionDate,
             repairRegisterIds: this.repairRegisterIds,
-            createdAt: this.createdAt
+            createdAt: this.createdAt,
+            garageId: this.garageId
         }
     }
 

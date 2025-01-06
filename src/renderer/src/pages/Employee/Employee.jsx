@@ -141,7 +141,10 @@ function Employee() {
     }
 
     const fetchData = async () => {
-        const data = await dbService.getAll('employees')
+        const data = await dbService.getAll(
+            'employees',
+            JSON.parse(localStorage.getItem('currentGarage'))?.id
+        )
         const users = await dbService.getAll('users')
         const newdata = data.map((nv) => ({
             ...nv,
@@ -162,9 +165,12 @@ function Employee() {
         <div className="main-container">
             <div className="headerr">
                 <div className="btn-area">
-                    <button className="primary-button" onClick={addEmployee}>
-                        Thêm Nhân Viên
-                    </button>
+                    {JSON.parse(localStorage.getItem('currentUser'))?.role == 'admin' ||
+                        (JSON.parse(localStorage.getItem('currentUser'))?.role == 'Quản lý' && (
+                            <button className="primary-button" onClick={addEmployee}>
+                                Thêm Nhân Viên
+                            </button>
+                        ))}
                 </div>
 
                 <div className="filter-area">
@@ -259,6 +265,10 @@ function Employee() {
                             deleteAction={deleteEmployee}
                             columns={columns}
                             data={currentData}
+                            isAdmin={
+                                JSON.parse(localStorage.getItem('currentUser'))?.role == 'admin' ||
+                                JSON.parse(localStorage.getItem('currentUser'))?.role == 'Quản lý'
+                            }
                         />
                     </div>
                 </div>

@@ -4,10 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, Pagination, Navigation } from 'swiper/modules'
-import { db } from '../../firebase.config'
-import { dbService } from '../../services/DatabaseService'
 import { authService } from '../../services/AuthService'
-import { collection, getDocs, query, where } from 'firebase/firestore'
 import Swal from 'sweetalert2'
 import login1 from '../../assets/images/login/login_1.png'
 import login2 from '../../assets/images/login/login_2.png'
@@ -40,9 +37,13 @@ function Auth() {
 
             if (user) {
                 localStorage.setItem('currentUser', JSON.stringify(user))
-
                 window.api.send('resize-window')
-                navigate('/dashboard')
+                if (user.role == 'admin') {
+                    navigate('/garage-list')
+                } else {
+                    localStorage.setItem('currentGarage', JSON.stringify(user.employee?.garage))
+                    navigate('/dashboard')
+                }
             } else {
                 Swal.fire({
                     title: 'Thất bại!',

@@ -30,14 +30,16 @@ function Regulation() {
     }
     return (
         <div className="regulation-page">
-            <div className="regulation-page__header">
-                <button className="primary-button" onClick={handleAddService}>
-                    Thêm dịch vụ
-                </button>
-                <button className="primary-button" onClick={handleAddBrand}>
-                    Thêm hãng xe
-                </button>
-            </div>
+            {JSON.parse(localStorage.getItem('currentUser'))?.role == 'admin' && (
+                <div className="regulation-page__header">
+                    <button className="primary-button" onClick={handleAddService}>
+                        Thêm dịch vụ
+                    </button>
+                    <button className="primary-button" onClick={handleAddBrand}>
+                        Thêm hãng xe
+                    </button>
+                </div>
+            )}
             <div className="regulation-page__content">
                 <div className="regulation-page__body">
                     <div className="regulation-page__header-service col-8">

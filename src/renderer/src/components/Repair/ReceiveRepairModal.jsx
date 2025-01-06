@@ -24,7 +24,7 @@ export default function ReceiveRepairModal({ onClose }) {
                 birthday: new Date()
             }
         },
-        employeeId: JSON.parse(localStorage.getItem('currentUser'))?.employeeId,
+        employeeId: JSON.parse(localStorage.getItem('currentUser'))?.employeeId || 'admin',
         status: 'Đang sửa chữa',
         expectedCompletionDate: new Date(),
         repairRegisters: []
@@ -106,7 +106,8 @@ export default function ReceiveRepairModal({ onClose }) {
                 expectedCompletionDate: new Date(
                     serviceRegisterData.expectedCompletionDate
                 ).toISOString(),
-                repairRegisterIds: []
+                repairRegisterIds: [],
+                garageId: JSON.parse(localStorage.getItem('currentGarage'))?.id
             }
 
             if (serviceRegisterData.repairRegisters.length > 0) {

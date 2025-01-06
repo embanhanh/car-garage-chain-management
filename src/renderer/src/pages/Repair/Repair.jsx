@@ -41,7 +41,10 @@ const Repair = () => {
     const [searchTerm, setSearchTerm] = useState('')
 
     const fetchData = async () => {
-        const data = await dbService.getAll('serviceregisters')
+        const data = await dbService.getAll(
+            'serviceregisters',
+            JSON.parse(localStorage.getItem('currentGarage'))?.id
+        )
         setRepairRegisterData(data)
     }
 

@@ -27,6 +27,7 @@ export class Bill {
         serviceRegister = null,
         status = '',
         type = '',
+        garageId = '',
         createdAt = new Date()
     } = {}) {
         this.id = id
@@ -40,6 +41,7 @@ export class Bill {
         this.status = status
         this.type = type
         this.createdAt = createdAt
+        this.garageId = garageId
     }
 
     toFirestore() {
@@ -51,7 +53,8 @@ export class Bill {
             serviceRegisterId: this.serviceRegisterId,
             status: this.status,
             type: this.type,
-            createdAt: this.createdAt
+            createdAt: this.createdAt,
+            garageId: this.garageId
         }
     }
 

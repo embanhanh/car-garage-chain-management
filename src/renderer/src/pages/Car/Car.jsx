@@ -188,14 +188,22 @@ const Car = () => {
                                             >
                                                 Cập nhật
                                             </div>
-                                            <div
-                                                className="table__action-item"
-                                                onClick={async () => {
-                                                    await dbService.softDelete('cars', car.id)
-                                                }}
-                                            >
-                                                Xóa
-                                            </div>
+                                            {JSON.parse(localStorage.getItem('currentUser'))
+                                                ?.role == 'admin' ||
+                                                (JSON.parse(localStorage.getItem('currentUser'))
+                                                    ?.role == 'Quản lý' && (
+                                                    <div
+                                                        className="table__action-item"
+                                                        onClick={async () => {
+                                                            await dbService.softDelete(
+                                                                'cars',
+                                                                car.id
+                                                            )
+                                                        }}
+                                                    >
+                                                        Xóa
+                                                    </div>
+                                                ))}
                                         </div>
                                     </div>
                                 </td>

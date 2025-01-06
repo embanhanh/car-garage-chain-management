@@ -9,14 +9,14 @@ import Component from './pages/Component/Component'
 import Car from './pages/Car/Car'
 import Repair from './pages/Repair/Repair'
 import Regulation from './pages/Regulation/Regulation'
+import GarageList from './pages/GarageList/GarageList'
 function App() {
-    const ipcHandle = () => window.electron.ipcRenderer.send('ping')
-
     return (
         <>
             <HashRouter>
                 <Routes>
                     <Route path="/" element={<Auth />} />
+                    <Route path="/garage-list" element={<GarageList />} />
                     <Route path="/dashboard" element={<MainLayout />}>
                         <Route index element={<Home />} />
                         <Route path="report" element={<Report />} />
