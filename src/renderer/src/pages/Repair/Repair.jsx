@@ -31,7 +31,10 @@ const Repair = () => {
         data: null
     })
     const [openReceiveRepairModal, setOpenReceiveRepairModal] = useState(false)
-    const [openInvoiceModal, setOpenInvoiceModal] = useState(false)
+    const [openInvoiceModal, setOpenInvoiceModal] = useState({
+        show: false,
+        data: null
+    })
     const [repairRegisterData, setRepairRegisterData] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const itemsPerPage = 8
@@ -43,7 +46,7 @@ const Repair = () => {
     }
 
     useEffect(() => {
-        const unsubscribe = onSnapshot(collection(db, 'serviceregisters'), async (snapshot) => {
+        const unsubscribe = onSnapshot(collection(db, 'serviceregisters'), async () => {
             try {
                 setIsLoading(true)
                 await fetchData()
@@ -134,10 +137,7 @@ const Repair = () => {
                         <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
                         Sắp xếp
                     </button>
-                    <button
-                        className="page__header-button"
-                        onClick={() => setOpenInvoiceModal(true)}
-                    >
+                    <button className="page__header-button">
                         <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
                         Lọc
                     </button>
@@ -229,6 +229,19 @@ const Repair = () => {
                                                 >
                                                     Xóa
                                                 </div>
+                                                {repair.status === 'Đã hoàn thành' && (
+                                                    <div
+                                                        className="table__action-item"
+                                                        onClick={() => {
+                                                            setOpenInvoiceModal({
+                                                                show: true,
+                                                                data: repair
+                                                            })
+                                                        }}
+                                                    >
+                                                        Xem hóa đơn
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </td>
@@ -278,12 +291,25 @@ const Repair = () => {
                 />
             </Modal>
             <Modal
-                isOpen={openInvoiceModal}
-                onClose={() => setOpenInvoiceModal(false)}
+                isOpen={openInvoiceModal.show}
+                onClose={() =>
+                    setOpenInvoiceModal({
+                        show: false,
+                        data: null
+                    })
+                }
                 showHeader={false}
                 width="550px"
             >
-                <DetailInvoiceModal onClose={() => setOpenDetailRepairModal(false)} />
+                <DetailInvoiceModal
+                    onClose={() =>
+                        setOpenInvoiceModal({
+                            show: false,
+                            data: null
+                        })
+                    }
+                    data={openInvoiceModal.data}
+                />
             </Modal>
         </div>
     )

@@ -447,11 +447,10 @@ function Component() {
                                 expectedCompletionDate: new Date().toISOString(),
                                 repairRegisterIds: [newRepairRegister.id]
                             }
-                            // const newServiceRegister = await dbService.add(
-                            //     'serviceregisters',
-                            //     serviceRegister
-                            // )
-                            const newServiceRegister = await addServiceRegister(serviceRegister)
+                            const newServiceRegister = await dbService.add(
+                                'serviceregisters',
+                                serviceRegister
+                            )
                             data.forEach(async (item) => {
                                 await dbService.update('components', item.component.id, {
                                     inventory: increment(Number(item.quantity) * -1)

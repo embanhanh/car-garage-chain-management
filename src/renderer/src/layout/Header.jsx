@@ -54,7 +54,10 @@ export default function Header() {
             <div className="header">
                 <div className="header__garage-name">
                     <img src={garageIcon} alt="Garage Icon" className="header__garage-name-icon" />
-                    <p className="header__garage-name-text"> Gagare Bình Dương</p>
+                    <p className="header__garage-name-text">
+                        {' '}
+                        {currentUser?.employee?.garage?.name}
+                    </p>
                 </div>
                 <div className="header__time">
                     <FontAwesomeIcon icon={faCalendar} />
@@ -63,7 +66,9 @@ export default function Header() {
                 <div className="header__actions">
                     <FontAwesomeIcon icon={faBell} className="header__action-icon" />
                     <div className="header__user">
-                        <div className="header__user-name">{currentUser?.employee?.name}</div>
+                        <div className="header__user-name">
+                            {currentUser?.role == 'admin' ? 'admin' : currentUser?.employee?.name}
+                        </div>
                         <div className="header__user-avatar">
                             <img
                                 src={currentUser?.employee?.avatar || userImage}

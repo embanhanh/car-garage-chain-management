@@ -245,18 +245,6 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
                                     return
                                 }
                                 if (!isEdit) {
-                                    // await dbService.add('employees', {
-                                    //     name: conName,
-                                    //     email: conEmail,
-                                    //     identifyCard: conCCCD,
-                                    //     address: conAddress,
-                                    //     gender: conSex,
-                                    //     phone: conPhone,
-                                    //     birthday: conBirthDay,
-                                    //     salary: conSalary,
-                                    //     position: conPosition,
-                                    //     workHours: conWorkingTime
-                                    // })
                                     await addEmployee({
                                         name: conName,
                                         email: conEmail,
@@ -267,7 +255,9 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
                                         birthday: conBirthDay,
                                         salary: conSalary,
                                         position: conPosition,
-                                        workHours: conWorkingTime
+                                        workHours: conWorkingTime,
+                                        garageId: JSON.parse(localStorage.getItem('currentUser'))
+                                            .employee?.garageId
                                     })
                                 } else {
                                     await updateEmployee(nv.id, {
