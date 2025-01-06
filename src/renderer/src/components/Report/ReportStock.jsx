@@ -178,7 +178,7 @@ function ReportStock({ dateRange = 'week', selectedDate = new Date() }) {
     return (
         <div className="report-stock">
             <>
-                <div className="report-stock__table-container">
+                {/* <div className="report-stock__table-container">
                     <p className="report__table-title">
                         Danh sách phụ tùng đã nhập {getDateRangeText(dateRange, selectedDate)}
                     </p>
@@ -212,7 +212,7 @@ function ReportStock({ dateRange = 'week', selectedDate = new Date() }) {
                             </tbody>
                         </table>
                     )}
-                </div>
+                </div> */}
 
                 <div className="report-stock__charts">
                     <div

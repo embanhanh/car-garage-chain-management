@@ -18,11 +18,32 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 function ReportRevenue({ dateRange = 'week', selectedDate = new Date() }) {
     const [revenueData, setRevenueData] = useState([
         {
-            serviceName: '',
-            customerName: '',
-            totalRevenue: 0,
-            totalCost: 0,
-            profit: 0
+            serviceName: 'Rửa xe cơ bản',
+            customerName: 'Khách lẻ',
+            totalRevenue: 2500000,
+            totalCost: 1200000,
+            profit: 1300000
+        },
+        {
+            serviceName: 'Thay nhớt',
+            customerName: 'Công ty ABC',
+            totalRevenue: 4800000,
+            totalCost: 3200000,
+            profit: 1600000
+        },
+        {
+            serviceName: 'Bảo dưỡng định kỳ',
+            customerName: 'Khách VIP',
+            totalRevenue: 8500000,
+            totalCost: 5500000,
+            profit: 3000000
+        },
+        {
+            serviceName: 'Sửa chữa động cơ',
+            customerName: 'Công ty XYZ',
+            totalRevenue: 12000000,
+            totalCost: 7000000,
+            profit: 5000000
         }
     ])
     const [isLoading, setIsLoading] = useState(false)

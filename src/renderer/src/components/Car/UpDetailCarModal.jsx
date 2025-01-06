@@ -237,8 +237,9 @@ export default function UpDetailCarModal({ onClose, data, type }) {
             <Modal
                 isOpen={isOpenAddNewCustomer}
                 onClose={() => setIsOpenAddNewCustomer(false)}
-                showHeader={false}
+                showHeader={true}
                 width="600px"
+                title="Thêm khách hàng mới"
             >
                 <AddNewCustomer
                     onClose={() => setIsOpenAddNewCustomer(false)}

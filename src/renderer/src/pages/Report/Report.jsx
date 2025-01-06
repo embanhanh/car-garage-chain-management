@@ -95,6 +95,9 @@ const Report = () => {
                     locale={vi}
                     className="report-page__header-date w-auto"
                 />
+                {/* <button className="btn btn-primary" onClick={handleExportExcel}>
+                    Xuất Excel
+                </button> */}
             </div>
             {tab === 'revenue' && (
                 <ReportRevenue dateRange={dateRange} selectedDate={selectedDate} />

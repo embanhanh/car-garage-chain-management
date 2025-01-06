@@ -26,6 +26,7 @@ import { Supplier } from '../models/supplier'
 import { ServiceRegister } from '../models/serviceregister'
 import { ServiceType } from '../models/servicetype'
 import { TrackingRegister } from '../models/trackingregister'
+import { Parameter } from '../models/paramater'
 
 class DatabaseService {
     static instance = null
@@ -97,6 +98,10 @@ class DatabaseService {
             trackingregisters: {
                 name: 'trackingregisters',
                 model: TrackingRegister
+            },
+            parameters: {
+                name: 'parameters',
+                model: Parameter
             }
         }
     }

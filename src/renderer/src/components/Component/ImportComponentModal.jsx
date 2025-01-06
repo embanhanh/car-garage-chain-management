@@ -432,7 +432,8 @@ const ImportComponentModal = ({ onClose, data }) => {
                 isOpen={openAddComponent}
                 onClose={() => setOpenAddComponent(false)}
                 width="700px"
-                showHeader={false}
+                showHeader={true}
+                title="Thêm phụ tùng mới"
             >
                 <AddComponentModal onClose={() => setOpenAddComponent(false)}></AddComponentModal>
             </Modal>

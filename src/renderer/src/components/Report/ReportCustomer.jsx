@@ -244,9 +244,58 @@ function ReportCustomer({ dateRange = 'week', selectedDate = new Date() }) {
         [totalPages]
     )
 
+    const handleExportExcel = async () => {
+        const columns = [
+            { header: 'STT', key: 'stt', width: 10 },
+            { header: 'Tên khách hàng', key: 'customerName', width: 30 },
+            { header: 'Số lần sử dụng dịch vụ', key: 'visitCount', width: 25 },
+            { header: 'Tỷ lệ (%)', key: 'percentage', width: 15 }
+        ]
+
+        const totalVisits = customerData.reduce((sum, c) => sum + c.visitCount, 0)
+
+        const excelData = customerData.map((customer, index) => ({
+            stt: index + 1,
+            customerName: customer.name,
+            visitCount: customer.visitCount,
+            percentage: ((customer.visitCount / totalVisits) * 100).toFixed(1)
+        }))
+
+        // Thêm dòng tổng cộng
+        excelData.push({
+            stt: '',
+            customerName: 'Tổng cộng',
+            visitCount: totalVisits,
+            percentage: '100.0'
+        })
+
+        const filename = `thong_ke_khach_hang_${dateRange}_${format(selectedDate, 'dd-MM-yyyy')}.xlsx`
+
+        try {
+            const result = await exportExcel(columns, excelData, filename)
+            if (result.success) {
+                console.log('Xuất Excel thành công!')
+            } else {
+                console.error('Lỗi khi xuất Excel:', result.error)
+            }
+        } catch (error) {
+            console.error('Lỗi khi xuất Excel:', error)
+        }
+    }
+
     return (
         <div className="report-stock">
-            <div className="report-stock__table">
+            <div className="d-flex justify-content-end mb-3">
+                <button
+                    className="btn btn-primary"
+                    onClick={handleExportExcel}
+                    disabled={isLoading || customerData.length <= 1}
+                >
+                    Xuất Excel
+                </button>
+            </div>
+
+            {/* <div className="report-stock__table">
                 <p className="report__table-title">
                     Danh sách khách hàng từ {getDateRangeText(dateRange, selectedDate)}
                 </p>
@@ -322,7 +371,7 @@ function ReportCustomer({ dateRange = 'week', selectedDate = new Date() }) {
                         </div>
                     </>
                 )}
-            </div>
+            </div> */}
 
             <div className="report-stock__charts">
                 <div className="report-stock__chart-container" style={{ height: '500px' }}>

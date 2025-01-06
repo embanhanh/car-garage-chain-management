@@ -125,7 +125,7 @@ export default function AddServiceModal({
                     </div>
                 </div>
 
-                <div className="page-btns end">
+                <div className="page-btns end mt-3">
                     <button
                         className="repair-modal__button cancel-button"
                         onClick={() => onClose()}

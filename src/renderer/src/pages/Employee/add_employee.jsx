@@ -278,7 +278,7 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
                                         gender: conSex,
                                         phone: conPhone,
                                         birthday: conBirthDay,
-                                        salary: conSalary,
+                                        salary: conSalary.replace(/[.,]/g, ''),
                                         position: conPosition,
                                         workHours: conWorkingTime
                                     })
