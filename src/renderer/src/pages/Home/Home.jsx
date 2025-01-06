@@ -300,8 +300,9 @@ function Home() {
                     <div className="home-page__content-notification col-4 p-3 d-flex flex-column gap-3">
                         <div className="d-flex justify-content-between align-items-center">
                             <h1 className="home-page__title">Thông báo</h1>
-                            {JSON.parse(localStorage.getItem('currentUser'))?.role ===
-                                'Quản lý' && (
+                            {(JSON.parse(localStorage.getItem('currentUser'))?.role === 'Quản lý' ||
+                                JSON.parse(localStorage.getItem('currentUser'))?.role ===
+                                    'admin') && (
                                 <FontAwesomeIcon
                                     onClick={() => {
                                         setAddNotification(true)
