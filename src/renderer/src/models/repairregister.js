@@ -28,6 +28,7 @@ export class RepairRegister {
         employeeIds = [],
         employees = [],
         repairRegisterComponents = [],
+        price = 0,
         createdAt = new Date()
     } = {}) {
         this.id = id
@@ -38,6 +39,7 @@ export class RepairRegister {
         this.employees = employees
         this.repairRegisterComponents = repairRegisterComponents
         this.createdAt = createdAt
+        this.price = price
     }
 
     toFirestore() {
@@ -47,6 +49,7 @@ export class RepairRegister {
             serviceId: this.serviceId,
             employeeIds: this.employeeIds,
             createdAt: this.createdAt,
+            price: this.price,
             repairRegisterComponents: this.repairRegisterComponents.map(
                 ({ componentId, quantity }) => ({
                     componentId,

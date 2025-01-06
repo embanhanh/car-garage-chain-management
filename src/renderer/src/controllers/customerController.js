@@ -38,3 +38,13 @@ export const addCustomer = async (customerData) => {
         throw new Error('Không thể thêm khách hàng mới')
     }
 }
+
+export const getCustomerByRepairRegister = async (date) => {
+    const repairRegisters = await dbService.getAll('repairregisters')
+    const parsedDate = new Date(date)
+    const filteredRepairRegisters = repairRegisters.filter((register) => {
+        const registerDate = parseISO(register.createdAt)
+        return isWithinInterval(registerDate, { start: parsedDate, end: parsedDate })
+    })
+    return filteredRepairRegisters.map((register) => register.car?.customer)
+}

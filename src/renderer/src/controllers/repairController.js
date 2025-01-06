@@ -138,3 +138,9 @@ export const getRepairRegisterByDate = async (startDate, endDate) => {
     })
     return filteredData
 }
+
+export const getRecentRepairRegisters = async () => {
+    const repairRegisters = await dbService.getAll('repairregisters')
+    console.log('check repairRegisters:', repairRegisters)
+    return repairRegisters.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5)
+}
