@@ -165,12 +165,12 @@ function Employee() {
         <div className="main-container">
             <div className="headerr">
                 <div className="btn-area">
-                    {JSON.parse(localStorage.getItem('currentUser'))?.role == 'admin' ||
-                        (JSON.parse(localStorage.getItem('currentUser'))?.role == 'Quản lý' && (
-                            <button className="primary-button" onClick={addEmployee}>
-                                Thêm Nhân Viên
-                            </button>
-                        ))}
+                    {(JSON.parse(localStorage.getItem('currentUser'))?.role == 'admin' ||
+                        JSON.parse(localStorage.getItem('currentUser'))?.role == 'Quản lý') && (
+                        <button className="primary-button" onClick={addEmployee}>
+                            Thêm Nhân Viên
+                        </button>
+                    )}
                 </div>
 
                 <div className="filter-area">

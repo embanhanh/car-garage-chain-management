@@ -138,7 +138,7 @@ function DetailInvoiceModal({ onClose, data }) {
 
                 <div className="col-6">
                     <h3 className="detail-invoice-modal__label">
-                        Nhân viên: {invoiceData?.employee?.name}
+                        Nhân viên: {invoiceData?.employee?.name || 'admin'}
                     </h3>
                 </div>
                 <div className="col-6">
