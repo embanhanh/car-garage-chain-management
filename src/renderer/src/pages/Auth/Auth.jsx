@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
@@ -25,6 +25,10 @@ function Auth() {
     const handleShowPassword = () => {
         setShowPassword(!showPassword)
     }
+
+    useEffect(() => {
+        localStorage.removeItem('currentGarage')
+    }, [])
 
     const handleLogin = async () => {
         try {
