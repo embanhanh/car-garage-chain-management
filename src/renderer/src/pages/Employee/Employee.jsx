@@ -4,7 +4,11 @@ import {
     faArrowUpWideShort,
     faFilter,
     faSearch,
-    faEllipsisVertical
+    faEllipsisVertical,
+    faCaretDown,
+    faCheck,
+    faArrowUp,
+    faArrowDown
 } from '@fortawesome/free-solid-svg-icons'
 import Pagination from '../../components/Pagination'
 import { useState, useEffect, useMemo, useCallback } from 'react'
@@ -58,6 +62,14 @@ function Employee() {
     const [listEmployees, setListEmployees] = useState([])
 
     const [searchTerm, setSearchTerm] = useState('')
+
+    const [sortField, setSortField] = useState(null);
+    const [sortDirection, setSortDirection] = useState('desc'); // Mặc định desc
+    const [filters, setFilters] = useState({
+        gender: 'all',
+        position: 'all'
+    });
+    const [originalEmployees, setOriginalEmployees] = useState([]);
 
     const searchEmployees = useMemo(() => {
         if (!searchTerm) return listEmployees
@@ -148,6 +160,7 @@ function Employee() {
             hasAccount: users.some((user) => user.employeeId === nv.id)
         }))
         setListEmployees(newdata)
+        setOriginalEmployees(newdata)
         console.log('check data employees:', newdata)
     }
 
@@ -157,6 +170,77 @@ function Employee() {
         })
         return () => unsubscribe()
     }, [])
+
+    const handleSort = (field) => {
+        let newDirection;
+
+        // Nếu click vào field đang được sắp xếp
+        if (field === sortField) {
+            if (sortDirection === 'desc') {
+                // Click lần 2: chuyển sang sort asc
+                newDirection = 'asc';
+            } else {
+                // Click lần 3: bỏ sort và trở về dữ liệu gốc
+                setSortField(null);
+                setSortDirection('desc'); // Reset về desc cho lần sort tiếp theo
+                setListEmployees([...originalEmployees]);
+                return;
+            }
+        } else {
+            // Click field mới: sort desc trước
+            newDirection = 'desc';
+        }
+
+        // Cập nhật state sort trước
+        setSortField(field);
+        setSortDirection(newDirection);
+
+        const sorted = [...listEmployees].sort((a, b) => {
+            if (!a[field] || !b[field]) return 0;
+
+            if (field === 'id') {
+                const numA = parseInt(a[field].substring(2)) || 0;
+                const numB = parseInt(b[field].substring(2)) || 0;
+                return newDirection === 'desc' ? numB - numA : numA - numB;
+            }
+
+            if (field === 'salary') {
+                const salaryA = parseFloat(a[field].replace(/[^0-9.-]+/g, '')) || 0;
+                const salaryB = parseFloat(b[field].replace(/[^0-9.-]+/g, '')) || 0;
+                return newDirection === 'desc' ? salaryB - salaryA : salaryA - salaryB;
+            }
+
+            const valueA = String(a[field] || '').toLowerCase();
+            const valueB = String(b[field] || '').toLowerCase();
+            return newDirection === 'desc' 
+                ? valueB.localeCompare(valueA)
+                : valueA.localeCompare(valueB);
+        });
+
+        setListEmployees(sorted);
+    };
+
+    const handleFilter = (type, value) => {
+        setFilters(prev => ({ ...prev, [type]: value }));
+
+        if (value === 'all') {
+            setListEmployees([...originalEmployees]);
+            return;
+        }
+
+        const filtered = originalEmployees.filter((employee) => {
+            switch (type) {
+                case 'gender':
+                    return employee.gender === value;
+                case 'position':
+                    return employee.position === value;
+                default:
+                    return true;
+            }
+        });
+
+        setListEmployees(filtered);
+    };
 
     return (
         <div className="main-container">
@@ -168,14 +252,135 @@ function Employee() {
                 </div>
 
                 <div className="filter-area">
-                    <button className="page__header-button">
-                        <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
-                        Sắp xếp
-                    </button>
-                    <button className="page__header-button">
-                        <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
-                        Lọc
-                    </button>
+                    <div className="dropdown">
+                        <button className={`page__header-button ${sortField ? 'active' : ''}`}>
+                            <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
+                            Sắp xếp{' '}
+                            {sortField && 
+                                `(${sortField === 'id' ? 'Mã NV' : 'Lương'} ${sortDirection === 'asc' ? '↑' : '↓'})`}
+                            <FontAwesomeIcon 
+                                icon={faCaretDown} 
+                                className={`page__header-icon ${sortField ? 'active' : ''}`} 
+                            />
+                        </button>
+                        <div className="dropdown-content">
+                            <div>
+                                <h4>Sắp xếp theo</h4>
+                                <button onClick={() => handleSort('id')}>
+                                    Mã nhân viên
+                                    {sortField === 'id' && (
+                                        <>
+                                            <FontAwesomeIcon 
+                                                icon={sortDirection === 'asc' ? faArrowUp : faArrowDown} 
+                                                className="sort-direction-icon" 
+                                            />
+                                            <span className="selected-text">
+                                                {sortDirection === 'asc' ? 'Tăng dần' : 'Giảm dần'}
+                                            </span>
+                                        </>
+                                    )}
+                                </button>
+                                <button onClick={() => handleSort('salary')}>
+                                    Lương
+                                    {sortField === 'salary' && (
+                                        <>
+                                            <FontAwesomeIcon 
+                                                icon={sortDirection === 'asc' ? faArrowUp : faArrowDown} 
+                                                className="sort-direction-icon" 
+                                            />
+                                            <span className="selected-text">
+                                                {sortDirection === 'asc' ? 'Tăng dần' : 'Giảm dần'}
+                                            </span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="dropdown">
+                        <button className={`page__header-button ${(filters.gender !== 'all' || filters.position !== 'all') ? 'active' : ''}`}>
+                            <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
+                            Lọc{' '}
+                            {filters.gender !== 'all' && `(${filters.gender})`}
+                            {filters.position !== 'all' && 
+                                `${filters.gender !== 'all' ? ', ' : '('}${filters.position}${filters.gender === 'all' ? ')' : ')'}`}
+                            <FontAwesomeIcon 
+                                icon={faCaretDown} 
+                                className={`page__header-icon ${(filters.gender !== 'all' || filters.position !== 'all') ? 'active' : ''}`} 
+                            />
+                        </button>
+                        <div className="dropdown-content">
+                            <div>
+                                <h4>Giới tính</h4>
+                                <button onClick={() => handleFilter('gender', 'all')}>
+                                    Tất cả
+                                    {filters.gender === 'all' && (
+                                        <FontAwesomeIcon 
+                                            icon={faFilter}
+                                            className="filter-icon" 
+                                        />
+                                    )}
+                                </button>
+                                <button onClick={() => handleFilter('gender', 'Nam')}>
+                                    Nam
+                                    {filters.gender === 'Nam' && (
+                                        <FontAwesomeIcon 
+                                            icon={faFilter}
+                                            className="filter-icon" 
+                                        />
+                                    )}
+                                </button>
+                                <button onClick={() => handleFilter('gender', 'Nữ')}>
+                                    Nữ
+                                    {filters.gender === 'Nữ' && (
+                                        <FontAwesomeIcon 
+                                            icon={faFilter}
+                                            className="filter-icon" 
+                                        />
+                                    )}
+                                </button>
+                            </div>
+                            <div>
+                                <h4>Vị trí</h4>
+                                <button onClick={() => handleFilter('position', 'all')}>
+                                    Tất cả
+                                    {filters.position === 'all' && (
+                                        <FontAwesomeIcon 
+                                            icon={faFilter}
+                                            className="filter-icon" 
+                                        />
+                                    )}
+                                </button>
+                                <button onClick={() => handleFilter('position', 'Quản lý')}>
+                                    Quản lý
+                                    {filters.position === 'Quản lý' && (
+                                        <FontAwesomeIcon 
+                                            icon={faFilter}
+                                            className="filter-icon" 
+                                        />
+                                    )}
+                                </button>
+                                <button onClick={() => handleFilter('position', 'Nhân viên')}>
+                                    Nhân viên
+                                    {filters.position === 'Nhân viên' && (
+                                        <FontAwesomeIcon 
+                                            icon={faFilter}
+                                            className="filter-icon" 
+                                        />
+                                    )}
+                                </button>
+                                <button onClick={() => handleFilter('position', 'Kỹ thuật viên')}>
+                                    Kỹ thuật viên
+                                    {filters.position === 'Kỹ thuật viên' && (
+                                        <FontAwesomeIcon 
+                                            icon={faFilter}
+                                            className="filter-icon" 
+                                        />
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <div className="page__header-search">
                         <FontAwesomeIcon icon={faSearch} className="page__header-icon" />
                         <input

@@ -4,7 +4,10 @@ import {
     faArrowUpWideShort,
     faFilter,
     faSearch,
-    faEllipsisVertical
+    faEllipsisVertical,
+    faCaretDown,
+    faArrowUp,
+    faArrowDown
 } from '@fortawesome/free-solid-svg-icons'
 import Pagination from '../../components/Pagination'
 import { useState, useMemo, useCallback, useEffect } from 'react'
@@ -309,50 +312,101 @@ function Customer() {
 
                 <div className="filter-area">
                     <div className="dropdown">
-                        <button className="page__header-button">
-                            <FontAwesomeIcon
-                                icon={faArrowUpWideShort}
-                                className="page__header-icon"
-                            />
+                        <button className={`page__header-button ${sortField ? 'active' : ''}`}>
+                            <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
                             Sắp xếp{' '}
-                            {sortField &&
-                                `(${sortField === 'id' ? 'Mã' : 'Ngày sinh'} ${sortDirection === 'asc' ? '↑' : '↓'})`}
+                            {sortField && 
+                                `(${sortField === 'id' ? 'Mã KH' : 'Ngày sinh'} ${sortDirection === 'asc' ? '↑' : '↓'})`}
+                            <FontAwesomeIcon 
+                                icon={faCaretDown} 
+                                className={`page__header-icon ${sortField ? 'active' : ''}`} 
+                            />
                         </button>
                         <div className="dropdown-content">
-                            <button onClick={() => handleSort('id')}>
-                                <FontAwesomeIcon icon={faArrowUpWideShort} />
-                                Theo mã{' '}
-                                {sortField === 'id' && (sortDirection === 'asc' ? '↑' : '↓')}
-                            </button>
-                            <button onClick={() => handleSort('birthday')}>
-                                <FontAwesomeIcon icon={faArrowUpWideShort} />
-                                Theo ngày sinh{' '}
-                                {sortField === 'birthday' && (sortDirection === 'asc' ? '↑' : '↓')}
-                            </button>
+                            <div>
+                                <h4>Sắp xếp theo</h4>
+                                <button onClick={() => handleSort('id')}>
+                                    Mã khách hàng
+                                    {sortField === 'id' && (
+                                        <>
+                                            <FontAwesomeIcon 
+                                                icon={sortDirection === 'asc' ? faArrowUp : faArrowDown} 
+                                                className="sort-direction-icon" 
+                                            />
+                                            <span className="selected-text">
+                                                {sortDirection === 'asc' ? 'Tăng dần' : 'Giảm dần'}
+                                            </span>
+                                        </>
+                                    )}
+                                </button>
+                                <button onClick={() => handleSort('birthday')}>
+                                    Ngày sinh
+                                    {sortField === 'birthday' && (
+                                        <>
+                                            <FontAwesomeIcon 
+                                                icon={sortDirection === 'asc' ? faArrowUp : faArrowDown} 
+                                                className="sort-direction-icon" 
+                                            />
+                                            <span className="selected-text">
+                                                {sortDirection === 'asc' ? 'Tăng dần' : 'Giảm dần'}
+                                            </span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div className="dropdown">
-                        <button className="page__header-button">
+                        <button className={`page__header-button ${filters.ageRange !== 'all' ? 'active' : ''}`}>
                             <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
-                            Lọc
+                            Lọc{' '}
+                            {filters.ageRange !== 'all' && 
+                                `(${filters.ageRange === 'under18' ? 'Dưới 18' : 
+                                    filters.ageRange === '18to30' ? '18-30' : 
+                                    'Trên 30'})`}
+                            <FontAwesomeIcon 
+                                icon={faCaretDown} 
+                                className={`page__header-icon ${filters.ageRange !== 'all' ? 'active' : ''}`} 
+                            />
                         </button>
                         <div className="dropdown-content">
-                            <div className="filter-section">
+                            <div>
+                                <h4>Độ tuổi</h4>
                                 <button onClick={() => handleFilter('ageRange', 'all')}>
-                                    <FontAwesomeIcon icon={faFilter} />
                                     Tất cả
+                                    {filters.ageRange === 'all' && (
+                                        <FontAwesomeIcon 
+                                            icon={faFilter}
+                                            className="filter-icon" 
+                                        />
+                                    )}
                                 </button>
                                 <button onClick={() => handleFilter('ageRange', 'under18')}>
-                                    <FontAwesomeIcon icon={faFilter} />
                                     Dưới 18 tuổi
+                                    {filters.ageRange === 'under18' && (
+                                        <FontAwesomeIcon 
+                                            icon={faFilter}
+                                            className="filter-icon" 
+                                        />
+                                    )}
                                 </button>
                                 <button onClick={() => handleFilter('ageRange', '18to30')}>
-                                    <FontAwesomeIcon icon={faFilter} />
                                     18-30 tuổi
+                                    {filters.ageRange === '18to30' && (
+                                        <FontAwesomeIcon 
+                                            icon={faFilter}
+                                            className="filter-icon" 
+                                        />
+                                    )}
                                 </button>
                                 <button onClick={() => handleFilter('ageRange', 'over30')}>
-                                    <FontAwesomeIcon icon={faFilter} />
                                     Trên 30 tuổi
+                                    {filters.ageRange === 'over30' && (
+                                        <FontAwesomeIcon 
+                                            icon={faFilter}
+                                            className="filter-icon" 
+                                        />
+                                    )}
                                 </button>
                             </div>
                         </div>
