@@ -9,6 +9,7 @@ import Dropdown from '../Dropdown'
 import ComboBox from '../Combobox'
 import { dbService } from '../../services/DatabaseService'
 import { increment } from 'firebase/firestore'
+import { addInputComponentRegister } from '../../controllers/inputComponentRegisterController'
 
 const ImportComponentModal = ({ onClose, data }) => {
     const [componentName, setComponentName] = useState('')
@@ -84,7 +85,8 @@ const ImportComponentModal = ({ onClose, data }) => {
                 })),
                 supplierId: inputComponentRegister.supplierId
             }
-            await dbService.add('inputcomponentregisters', componentRegister)
+            // await dbService.add('inputcomponentregisters', componentRegister)
+            await addInputComponentRegister(componentRegister)
             inputComponentRegister.details.forEach(async (item) => {
                 const component = await dbService.getById('components', item.component.id)
                 if (component) {
@@ -202,6 +204,12 @@ const ImportComponentModal = ({ onClose, data }) => {
         }
     }
 
+    useEffect(() => {
+        if (selectedComponent) {
+            console.log(selectedComponent)
+        }
+    }, [selectedComponent])
+
     return (
         <>
             <div className="component-used-modal">
@@ -251,7 +259,7 @@ const ImportComponentModal = ({ onClose, data }) => {
                                 id="componentType"
                                 placeholder="Phụ tùng động cơ"
                                 disabled
-                                value={selectedComponent?.serviceType?.name || ''}
+                                value={selectedComponent?.category?.name || ''}
                             />
                         </div>
                     </div>
@@ -361,8 +369,12 @@ const ImportComponentModal = ({ onClose, data }) => {
                                         <td>{item.component.id}</td>
                                         <td>{item.component.name}</td>
                                         <td>{item.quantity}</td>
-                                        <td>{item.inputPrice}</td>
-                                        <td>{item.quantity * item.inputPrice}</td>
+                                        <td>{Number(item.inputPrice).toLocaleString('vi-VN')}</td>
+                                        <td>
+                                            {(item.quantity * item.inputPrice).toLocaleString(
+                                                'vi-VN'
+                                            )}
+                                        </td>
                                         <td>
                                             <div className="table__actions">
                                                 <FontAwesomeIcon

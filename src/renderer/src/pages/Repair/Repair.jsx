@@ -31,10 +31,14 @@ const Repair = () => {
         data: null
     })
     const [openReceiveRepairModal, setOpenReceiveRepairModal] = useState(false)
-    const [openInvoiceModal, setOpenInvoiceModal] = useState(false)
+    const [openInvoiceModal, setOpenInvoiceModal] = useState({
+        show: false,
+        data: null
+    })
     const [repairRegisterData, setRepairRegisterData] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const itemsPerPage = 8
+    const [searchTerm, setSearchTerm] = useState('')
 
     const fetchData = async () => {
         const data = await dbService.getAll('serviceregisters')
@@ -42,7 +46,7 @@ const Repair = () => {
     }
 
     useEffect(() => {
-        const unsubscribe = onSnapshot(collection(db, 'serviceregisters'), async (snapshot) => {
+        const unsubscribe = onSnapshot(collection(db, 'serviceregisters'), async () => {
             try {
                 setIsLoading(true)
                 await fetchData()
@@ -55,14 +59,30 @@ const Repair = () => {
         return () => unsubscribe()
     }, [])
 
-    const totalPages = Math.ceil(
-        repairRegisterData.filter((item) => item.car).length / itemsPerPage
-    )
+    const searchedRepairs = useMemo(() => {
+        if (!searchTerm) return repairRegisterData
+
+        const searchLower = searchTerm.toLowerCase().trim()
+
+        return repairRegisterData.filter((repair) => {
+            if (repair.id.toLowerCase().includes(searchLower)) return true
+
+            if (repair.car?.customer?.name.toLowerCase().includes(searchLower)) return true
+
+            if (repair.car?.licensePlate.toLowerCase().includes(searchLower)) return true
+
+            if (repair.employee?.name.toLowerCase().includes(searchLower)) return true
+
+            return false
+        })
+    }, [repairRegisterData, searchTerm])
+
+    const totalPages = Math.ceil(searchedRepairs.filter((item) => item.car).length / itemsPerPage)
 
     const currentData = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage
-        return repairRegisterData.filter((item) => item.car).slice(start, start + itemsPerPage)
-    }, [currentPage, repairRegisterData])
+        return searchedRepairs.filter((item) => item.car).slice(start, start + itemsPerPage)
+    }, [currentPage, searchedRepairs])
 
     const handlePageChange = useCallback(
         (page) => {
@@ -117,16 +137,18 @@ const Repair = () => {
                         <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
                         Sắp xếp
                     </button>
-                    <button
-                        className="page__header-button"
-                        onClick={() => setOpenInvoiceModal(true)}
-                    >
+                    <button className="page__header-button">
                         <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
                         Lọc
                     </button>
                     <div className="page__header-search">
                         <FontAwesomeIcon icon={faSearch} className="page__header-icon" />
-                        <input type="text" placeholder="Tìm kiếm" />
+                        <input
+                            type="text"
+                            placeholder="Tìm kiếm theo mã phiếu, tên khách hàng, biển số xe..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
                 </div>
             </div>
@@ -151,7 +173,7 @@ const Repair = () => {
                         </thead>
                         <tbody>
                             {currentData.map((repair, index) => (
-                                <tr key={repair.id}>
+                                <tr key={index}>
                                     <td>{repair.id}</td>
                                     <td>{repair.employee?.name}</td>
                                     <td>{repair.car?.customer?.name}</td>
@@ -207,6 +229,19 @@ const Repair = () => {
                                                 >
                                                     Xóa
                                                 </div>
+                                                {repair.status === 'Đã hoàn thành' && (
+                                                    <div
+                                                        className="table__action-item"
+                                                        onClick={() => {
+                                                            setOpenInvoiceModal({
+                                                                show: true,
+                                                                data: repair
+                                                            })
+                                                        }}
+                                                    >
+                                                        Xem hóa đơn
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </td>
@@ -256,12 +291,25 @@ const Repair = () => {
                 />
             </Modal>
             <Modal
-                isOpen={openInvoiceModal}
-                onClose={() => setOpenInvoiceModal(false)}
+                isOpen={openInvoiceModal.show}
+                onClose={() =>
+                    setOpenInvoiceModal({
+                        show: false,
+                        data: null
+                    })
+                }
                 showHeader={false}
                 width="550px"
             >
-                <DetailInvoiceModal onClose={() => setOpenDetailRepairModal(false)} />
+                <DetailInvoiceModal
+                    onClose={() =>
+                        setOpenInvoiceModal({
+                            show: false,
+                            data: null
+                        })
+                    }
+                    data={openInvoiceModal.data}
+                />
             </Modal>
         </div>
     )

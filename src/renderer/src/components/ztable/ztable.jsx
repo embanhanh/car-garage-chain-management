@@ -26,7 +26,7 @@ const ZTable = ({
             </thead>
             <tbody>
                 {data.map((item, rowIndex) => (
-                    <tr key={item.id || rowIndex}>
+                    <tr key={rowIndex}>
                         {columns.map((col, colIndex) => {
                             if (col.field === 'actions') {
                                 return (
@@ -97,6 +97,12 @@ const ZTable = ({
                                         <span className={`z-table__status ${item.statusClass}`}>
                                             {item[col.field]}
                                         </span>
+                                    </td>
+                                )
+                            } else if (col.field === 'salary') {
+                                return (
+                                    <td key={colIndex}>
+                                        {Number(item[col.field]).toLocaleString('vi-VN')} đ
                                     </td>
                                 )
                             } else {

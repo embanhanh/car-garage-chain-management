@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCalendar } from '@fortawesome/free-regular-svg-icons'
+import { faXmark } from '@fortawesome/free-solid-svg-icons'
 import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons'
 import Modal from '../Modal'
 import StaffInChargeModal from './StaffInChargeModal'
@@ -33,6 +34,12 @@ function DetailRepairModal({
     }, [data])
     return (
         <>
+            <div className="modal-header">
+                <h2 className="modal-title">Chi tiết phiếu dịch vụ</h2>
+                <button className="modal-close" onClick={onClose}>
+                    <FontAwesomeIcon icon={faXmark} />
+                </button>
+            </div>
             <div className="detail-repair-modal w-100 h-100">
                 <div className="detail-repair-modal__car-info">
                     <div className="repair-modal__input-item mb-3">
@@ -211,7 +218,8 @@ function DetailRepairModal({
             </div>
             <Modal
                 isOpen={openStaffInChargeModal.show}
-                showHeader={false}
+                showHeader={true}
+                title="Chi tiết nhân viên phụ trách"
                 width="720px"
                 onClose={() => setOpenStaffInChargeModal({ show: false, data: null })}
             >
@@ -223,7 +231,8 @@ function DetailRepairModal({
             </Modal>
             <Modal
                 isOpen={openComponentUsedModal.show}
-                showHeader={false}
+                showHeader={true}
+                title="Chi tiết phụ tùng sử dụng"
                 width="900px"
                 onClose={() =>
                     setOpenComponentUsedModal({
@@ -245,7 +254,8 @@ function DetailRepairModal({
             </Modal>
             <Modal
                 isOpen={openAddRepairRegisterModal}
-                showHeader={false}
+                showHeader={true}
+                title="Thêm loại hình dịch vụ"
                 onClose={() => setOpenAddRepairRegisterModal(false)}
                 width="700px"
             >

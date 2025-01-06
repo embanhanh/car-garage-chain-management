@@ -31,7 +31,7 @@ const Report = () => {
         <div className="report-page">
             <div className="report-page__header">
                 <button
-                    className={`report-page__header-button ${tab === 'revenue' ? 'active' : ''}`}
+                    className={`tab-btn ${tab === 'revenue' ? 'active' : ''}`}
                     onClick={() => setTab('revenue')}
                 >
                     Doanh thu
@@ -49,19 +49,19 @@ const Report = () => {
                     Lợi nhuận
                 </button> */}
                 <button
-                    className={`report-page__header-button ${tab === 'stock' ? 'active' : ''}`}
+                    className={`tab-btn ${tab === 'stock' ? 'active' : ''}`}
                     onClick={() => setTab('stock')}
                 >
                     Nhập kho
                 </button>
                 <button
-                    className={`report-page__header-button ${tab === 'customer' ? 'active' : ''}`}
+                    className={`tab-btn ${tab === 'customer' ? 'active' : ''}`}
                     onClick={() => setTab('customer')}
                 >
                     Khách hàng
                 </button>
                 <button
-                    className={`report-page__header-button ${tab === 'repair' ? 'active' : ''}`}
+                    className={`tab-btn ${tab === 'repair' ? 'active' : ''}`}
                     onClick={() => setTab('repair')}
                 >
                     Phiếu sửa chữa

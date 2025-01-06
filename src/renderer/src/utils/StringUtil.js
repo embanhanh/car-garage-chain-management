@@ -1,3 +1,13 @@
+import {
+    startOfWeek,
+    endOfWeek,
+    startOfMonth,
+    endOfMonth,
+    startOfYear,
+    endOfYear,
+    format
+} from 'date-fns'
+
 export const convertMoney = (number) => {
     if (number) {
         return number.toLocaleString('vi-VN') + 'đ'
@@ -41,4 +51,24 @@ export function validateResult(result) {
 export const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return emailRegex.test(email)
+}
+
+export const getDateRangeText = (dateRange, selectedDate) => {
+    const now = selectedDate || new Date()
+    switch (dateRange) {
+        case 'week':
+            const weekStart = startOfWeek(now, { weekStartsOn: 1 })
+            const weekEnd = endOfWeek(now, { weekStartsOn: 1 })
+            return `từ ${format(weekStart, 'dd/MM/yyyy')} đến ${format(weekEnd, 'dd/MM/yyyy')}`
+        case 'month':
+            const monthStart = startOfMonth(now)
+            const monthEnd = endOfMonth(now)
+            return `từ ${format(monthStart, 'dd/MM/yyyy')} đến ${format(monthEnd, 'dd/MM/yyyy')}`
+        case 'year':
+            const yearStart = startOfYear(now)
+            const yearEnd = endOfYear(now)
+            return `từ ${format(yearStart, 'dd/MM/yyyy')} đến ${format(yearEnd, 'dd/MM/yyyy')}`
+        default:
+            return ''
+    }
 }

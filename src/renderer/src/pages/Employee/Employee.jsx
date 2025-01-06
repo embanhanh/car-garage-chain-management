@@ -22,8 +22,8 @@ function Employee() {
     const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 9
     const columns = [
-        { name: 'Mã NV', field: 'id', width: '8%' },
-        { name: 'Họ tên', field: 'name', width: '20%' },
+        { name: 'Mã NV', field: 'id', width: '10%' },
+        { name: 'Họ tên', field: 'name', width: '18%' },
         { name: 'Email', field: 'email', width: '25%' },
         { name: 'CCCD', field: 'identifyCard', width: '15%' },
         { name: 'Giới tính', field: 'gender', width: '10%' },
@@ -57,12 +57,52 @@ function Employee() {
     })
     const [listEmployees, setListEmployees] = useState([])
 
-    const totalPages = Math.ceil(listEmployees.length / itemsPerPage)
+    const [searchTerm, setSearchTerm] = useState('')
+
+    const searchEmployees = useMemo(() => {
+        if (!searchTerm) return listEmployees
+
+        const searchLower = searchTerm.toLowerCase().trim()
+
+        return listEmployees.filter((employee) => {
+            // Kiểm tra xem searchTerm có phải là mã nhân viên không (format NVxxxx)
+            if (searchLower.startsWith('nv')) {
+                return employee.id.toLowerCase().includes(searchLower)
+            }
+
+            // Kiểm tra CCCD (chuỗi 12 số)
+            if (/^\d+$/.test(searchLower) && searchLower.length >= 9) {
+                return employee.identifyCard.includes(searchLower)
+            }
+
+            // Kiểm tra email
+            if (searchLower.includes('@')) {
+                return employee.email.toLowerCase().includes(searchLower)
+            }
+
+            // Kiểm tra vị trí công việc
+            const positions = ['quản lý', 'nhân viên', 'kỹ thuật viên', 'thủ kho']
+            if (positions.some((pos) => searchLower.includes(pos.toLowerCase()))) {
+                return employee.position.toLowerCase().includes(searchLower)
+            }
+
+            // Mặc định tìm theo tên
+            return (
+                employee.name.toLowerCase().includes(searchLower) ||
+                employee.id.toLowerCase().includes(searchLower) ||
+                employee.email.toLowerCase().includes(searchLower) ||
+                employee.identifyCard.includes(searchLower) ||
+                employee.position.toLowerCase().includes(searchLower)
+            )
+        })
+    }, [listEmployees, searchTerm])
+
+    const totalPages = Math.ceil(searchEmployees.length / itemsPerPage)
 
     const currentData = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage
-        return listEmployees.slice(start, start + itemsPerPage)
-    }, [currentPage, listEmployees])
+        return searchEmployees.slice(start, start + itemsPerPage)
+    }, [currentPage, searchEmployees])
 
     const handlePageChange = useCallback(
         (page) => {
@@ -138,14 +178,20 @@ function Employee() {
                     </button>
                     <div className="page__header-search">
                         <FontAwesomeIcon icon={faSearch} className="page__header-icon" />
-                        <input type="text" placeholder="Tìm kiếm" />
+                        <input
+                            type="text"
+                            placeholder="Tìm kiếm theo mã NV, tên, email, CCCD, vị trí..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
                 </div>
             </div>
             <Modal
                 isOpen={isOpenAddDialog}
                 onClose={() => setIsOpenAddDialog(false)}
-                showHeader={false}
+                showHeader={true}
+                title="Thêm nhân viên mới"
                 width="680px"
             >
                 <AddEmployee onClose={() => setIsOpenAddDialog(false)}></AddEmployee>
@@ -153,7 +199,8 @@ function Employee() {
             <Modal
                 isOpen={isOpenEditEmployee}
                 onClose={() => setIsOpenEditEmployee(false)}
-                showHeader={false}
+                showHeader={true}
+                title="Cập nhật nhân viên"
                 width="680px"
             >
                 <AddEmployee
@@ -165,8 +212,9 @@ function Employee() {
             <Modal
                 isOpen={isOpenAddAccount}
                 onClose={() => setIsOpenAddAccount(false)}
-                showHeader={false}
+                showHeader={true}
                 width="300px"
+                title="Thêm tài khoản nhân viên"
             >
                 <AddAccount
                     onClose={() => setIsOpenAddAccount(false)}
@@ -177,8 +225,9 @@ function Employee() {
             <Modal
                 isOpen={isOpenDetailEmployee}
                 onClose={() => setIsOpenDetailEmployee(false)}
-                showHeader={false}
+                showHeader={true}
                 width="680px"
+                title="Chi tiết nhân viên"
             >
                 <DetailEmployee
                     onClose={() => setIsOpenDetailEmployee(false)}

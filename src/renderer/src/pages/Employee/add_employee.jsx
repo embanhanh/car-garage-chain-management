@@ -4,6 +4,8 @@ import { useState } from 'react'
 import ComboBox from '../../components/Combobox.jsx'
 import { dbService } from '../../services/DatabaseService.js'
 import Modal from '../../components/Modal.jsx'
+import { addEmployee, updateEmployee } from '../../controllers/emplyeeController'
+import { format, parse, isValid } from 'date-fns'
 
 function AddEmployee({ onClose, nv = {}, isEdit = false }) {
     const [conName, setConName] = useState(isEdit ? nv.name : '')
@@ -11,32 +13,65 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
     const [conCCCD, setConCCCD] = useState(isEdit ? nv.identifyCard : '')
     const [conAddress, setConAddress] = useState(isEdit ? nv.address : '')
     const [conPhone, setConPhone] = useState(isEdit ? nv.phone : '')
-    const [conSalary, setConSalary] = useState(isEdit ? nv.salary : '')
+    const [conSalary, setConSalary] = useState(
+        isEdit ? Number(nv.salary).toLocaleString('vi-VN') : ''
+    )
     const [conSex, setConSex] = useState(isEdit ? nv.gender : 'Nam')
     const [conPosition, setConPosition] = useState(isEdit ? nv.position : '')
     const [conWorkingTime, setConWorkingTime] = useState(isEdit ? nv.workHours : '')
 
     const [isShowAlertlog, setIsShowAlertlog] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
-    const formatDate = (date) => {
-        const [year, month, day] = date.split('-')
-        return `${day}/${month}/${year}`
+
+    // Hàm chuyển đổi từ yyyy-MM-dd sang dd/MM/yyyy
+    const formatDate = (dateStr) => {
+        try {
+            const date = parse(dateStr, 'yyyy-MM-dd', new Date())
+            if (!isValid(date)) return format(new Date(), 'dd/MM/yyyy')
+            return format(date, 'dd/MM/yyyy')
+        } catch (error) {
+            console.error('Error formatting date:', error)
+            return format(new Date(), 'dd/MM/yyyy')
+        }
     }
 
     // Hàm chuyển đổi từ dd/MM/yyyy sang yyyy-MM-dd
-    const parseDate = (date) => {
-        const [day, month, year] = date.split('/')
-        return `${year}-${month}-${day}`
+    const parseDate = (dateStr) => {
+        try {
+            const date = parse(dateStr, 'dd/MM/yyyy', new Date())
+            if (!isValid(date)) return format(new Date(), 'yyyy-MM-dd')
+            return format(date, 'yyyy-MM-dd')
+        } catch (error) {
+            console.error('Error parsing date:', error)
+            return format(new Date(), 'yyyy-MM-dd')
+        }
     }
 
-    // Khởi tạo state với ngày hiện tại
     const [conBirthDay, setConBirthDay] = useState(() => {
-        const today = isEdit ? new Date(nv.birthday) : new Date()
-        const yyyyMMdd = today.toISOString().split('T')[0]
-        return formatDate(yyyyMMdd) // Định dạng dd/MM/yyyy
+        try {
+            if (isEdit && nv.birthday) {
+                // Kiểm tra nếu đã là định dạng dd/MM/yyyy
+                if (nv.birthday.includes('/')) {
+                    return nv.birthday
+                }
+
+                // Nếu là định dạng khác, parse và format lại
+                const date = new Date(nv.birthday)
+                if (isValid(date)) {
+                    return format(date, 'dd/MM/yyyy')
+                }
+            }
+
+            // Mặc định hoặc nếu có lỗi, dùng ngày hiện tại
+            return format(new Date(), 'dd/MM/yyyy')
+        } catch (error) {
+            console.error('Error setting birthday:', error)
+            return format(new Date(), 'dd/MM/yyyy')
+        }
     })
+
     return (
-        <div>
+        <>
             <div className="z-ae-container w-100">
                 <Modal
                     isOpen={isShowAlertlog}
@@ -46,7 +81,7 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
                 >
                     <div className="center">
                         <p className="text-center fw-bold fs-20 text-danger error-message">Lỗi</p>
-                        <p className='text-center fw-bold fs-20 text-danger'>{errorMessage}</p>
+                        <p className="text-center fw-bold fs-20 text-danger">{errorMessage}</p>
                     </div>
                 </Modal>
                 <div className="z-ae-row-data row w-100">
@@ -126,10 +161,9 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
                                 className="w-100"
                                 type="date"
                                 id="birthday"
-                                value={parseDate(conBirthDay)} // Chuyển về yyyy-MM-dd để hiển thị đúng
-                                onChange={(e) => setConBirthDay(formatDate(e.target.value))} // Chuyển thành dd/MM/yyyy khi lưu
+                                value={parseDate(conBirthDay)}
+                                onChange={(e) => setConBirthDay(formatDate(e.target.value))}
                             />
-                            {/* <FontAwesomeIcon icon={faCalendar} className="input-form__icon" /> */}
                         </div>
                     </div>
                     <TextFieldForm
@@ -206,12 +240,24 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
                                     !conPosition ||
                                     !conWorkingTime
                                 ) {
-                                    setErrorMessage("Vui lòng nhập đầy đủ thông tin")
+                                    setErrorMessage('Vui lòng nhập đầy đủ thông tin')
                                     setIsShowAlertlog(true)
                                     return
                                 }
                                 if (!isEdit) {
-                                    await dbService.add('employees', {
+                                    // await dbService.add('employees', {
+                                    //     name: conName,
+                                    //     email: conEmail,
+                                    //     identifyCard: conCCCD,
+                                    //     address: conAddress,
+                                    //     gender: conSex,
+                                    //     phone: conPhone,
+                                    //     birthday: conBirthDay,
+                                    //     salary: conSalary,
+                                    //     position: conPosition,
+                                    //     workHours: conWorkingTime
+                                    // })
+                                    await addEmployee({
                                         name: conName,
                                         email: conEmail,
                                         identifyCard: conCCCD,
@@ -224,7 +270,7 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
                                         workHours: conWorkingTime
                                     })
                                 } else {
-                                    await dbService.update('employees', nv.id, {
+                                    await updateEmployee(nv.id, {
                                         name: conName,
                                         email: conEmail,
                                         identifyCard: conCCCD,
@@ -250,7 +296,7 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
                     </button>
                 </div>
             </div>
-        </div>
+        </>
     )
 }
 
