@@ -24,9 +24,21 @@ function Customer() {
     const [isOpenDelete, setIsOpenDelete] = useState(false)
 
     const [customer, selecteCustomer] = useState({})
+    const [originalCustomers, setOriginalCustomers] = useState([])
     const [listCustomers, setListCustomers] = useState([])
     const [currentPage, setCurrentPage] = useState(1)
-    const itemsPerPage = 9
+    const itemsPerPage = 8
+
+    const [sortField, setSortField] = useState(null)
+    const [sortDirection, setSortDirection] = useState('asc')
+
+    const [filters, setFilters] = useState({
+        gender: 'all',
+        ageRange: 'all',
+        status: 'all'
+    });
+
+    const [searchTerm, setSearchTerm] = useState('');
 
     const columns = [
         { name: 'Mã KH', field: 'id', width: '8%' },
@@ -60,7 +72,7 @@ function Customer() {
 
     const fetchData = async () => {
         const data = await dbService.getAll('customers')
-
+        setOriginalCustomers(data)
         setListCustomers(data)
         console.log('check data customers:', data)
     }
@@ -93,23 +105,170 @@ function Customer() {
         selecteCustomer(kh)
         setIsOpenDelete(true)
     }
+
+    const handleSort = (field) => {
+        // Nếu click vào field đang được sắp xếp, đảo chiều
+        // Nếu click lần thứ 3, hủy sắp xếp
+        if (field === sortField) {
+            if (sortDirection === 'asc') {
+                setSortDirection('desc');
+            } else {
+                // Hủy sắp xếp
+                setSortField(null);
+                setSortDirection('asc');
+                setListCustomers([...originalCustomers]);
+                return;
+            }
+        } else {
+            setSortField(field);
+            setSortDirection('asc');
+        }
+        
+        const sortedCustomers = [...listCustomers].sort((a, b) => {
+            if (!a[field]) return 1;
+            if (!b[field]) return -1;
+            
+            if (field === 'birthday') {
+                const dateA = new Date(a[field]);
+                const dateB = new Date(b[field]);
+                return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+            }
+            
+            if (typeof a[field] === 'string') {
+                return sortDirection === 'asc' 
+                    ? a[field].localeCompare(b[field])
+                    : b[field].localeCompare(a[field]);
+            }
+            
+            return sortDirection === 'asc' ? a[field] - b[field] : b[field] - a[field];
+        });
+        
+        setListCustomers(sortedCustomers);
+    };
+
+    const handleFilter = (type, value) => {
+        setFilters(prev => ({ ...prev, [type]: value }));
+        
+        // Fetch lại toàn bộ dữ liệu khi chọn "Tất cả"
+        if (value === 'all') {
+            setListCustomers(originalCustomers);
+            return;
+        }
+        
+        // Lọc từ danh sách gốc thay vì danh sách đã lọc
+        let filteredCustomers = [...originalCustomers];
+        
+        // Lọc theo độ tuổi
+        if (value === 'under18') {
+            filteredCustomers = filteredCustomers.filter(customer => {
+                const age = new Date().getFullYear() - new Date(customer.birthday).getFullYear();
+                return age < 18;
+            });
+        } else if (value === '18to30') {
+            filteredCustomers = filteredCustomers.filter(customer => {
+                const age = new Date().getFullYear() - new Date(customer.birthday).getFullYear();
+                return age >= 18 && age <= 30;
+            });
+        } else if (value === 'over30') {
+            filteredCustomers = filteredCustomers.filter(customer => {
+                const age = new Date().getFullYear() - new Date(customer.birthday).getFullYear();
+                return age > 30;
+            });
+        }
+        
+        setListCustomers(filteredCustomers);
+    }
+
+    const handleSearch = (event) => {
+        const value = event.target.value;
+        setSearchTerm(value);
+        
+        if (value.trim() === '') {
+            setListCustomers(originalCustomers);
+            return;
+        }
+        
+        // Tìm kiếm từ danh sách gốc thay vì danh sách đã lọc
+        const searchResults = originalCustomers.filter(customer => {
+            if (!customer.name) return false;
+            
+            // Chuyển cả tên khách hàng và từ khóa tìm kiếm về chữ thường và bỏ dấu
+            const normalizedName = customer.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const normalizedSearch = value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            
+            return normalizedName.includes(normalizedSearch);
+        });
+        
+        setListCustomers(searchResults);
+    };
+
     return (
         <div className="main-container">
             <div className="headerr">
                 <div className="btn-area"></div>
 
                 <div className="filter-area">
-                    <button className="page__header-button">
-                        <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
-                        Sắp xếp
-                    </button>
-                    <button className="page__header-button">
-                        <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
-                        Lọc
-                    </button>
+                    <div className="dropdown">
+                        <button className="page__header-button">
+                            <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
+                            Sắp xếp {sortField && `(${sortField === 'id' ? 'Mã' : 'Ngày sinh'} ${sortDirection === 'asc' ? '↑' : '↓'})`}
+                        </button>
+                        <div className="dropdown-content">
+                            <button onClick={() => handleSort('id')}>
+                                <FontAwesomeIcon icon={faArrowUpWideShort} />
+                                Theo mã {sortField === 'id' && (sortDirection === 'asc' ? '↑' : '↓')}
+                            </button>
+                            <button onClick={() => handleSort('birthday')}>
+                                <FontAwesomeIcon icon={faArrowUpWideShort} />
+                                Theo ngày sinh {sortField === 'birthday' && (sortDirection === 'asc' ? '↑' : '↓')}
+                            </button>
+                            {sortField && (
+                                <button onClick={() => {
+                                    setSortField(null);
+                                    setSortDirection('asc');
+                                    setListCustomers([...originalCustomers]);
+                                }}>
+                                    <FontAwesomeIcon icon={faArrowUpWideShort} />
+                                    Hủy sắp xếp
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    <div className="dropdown">
+                        <button className="page__header-button">
+                            <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
+                            Lọc
+                        </button>
+                        <div className="dropdown-content">
+                            <div className="filter-section">
+                                <button onClick={() => handleFilter('ageRange', 'all')}>
+                                    <FontAwesomeIcon icon={faFilter} />
+                                    Tất cả
+                                </button>
+                                <button onClick={() => handleFilter('ageRange', 'under18')}>
+                                    <FontAwesomeIcon icon={faFilter} />
+                                    Dưới 18 tuổi
+                                </button>
+                                <button onClick={() => handleFilter('ageRange', '18to30')}>
+                                    <FontAwesomeIcon icon={faFilter} />
+                                    18-30 tuổi
+                                </button>
+                                <button onClick={() => handleFilter('ageRange', 'over30')}>
+                                    <FontAwesomeIcon icon={faFilter} />
+                                    Trên 30 tuổi
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <div className="page__header-search">
                         <FontAwesomeIcon icon={faSearch} className="page__header-icon" />
-                        <input type="text" placeholder="Tìm kiếm" />
+                        <input 
+                            className="input-form"
+                            type="text" 
+                            placeholder="Tìm kiếm theo tên..." 
+                            value={searchTerm}
+                            onChange={handleSearch}
+                        />
                     </div>
                 </div>
             </div>
