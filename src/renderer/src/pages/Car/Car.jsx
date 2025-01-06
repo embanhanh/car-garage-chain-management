@@ -4,7 +4,10 @@ import {
     faArrowUpWideShort,
     faFilter,
     faSearch,
-    faEllipsisVertical
+    faEllipsisVertical,
+    faCaretDown,
+    faArrowUp,
+    faArrowDown
 } from '@fortawesome/free-solid-svg-icons'
 import { onSnapshot, collection } from 'firebase/firestore'
 import { dbService } from '../../services/DatabaseService'
@@ -24,10 +27,18 @@ const Car = () => {
     const [carData, setCarData] = useState([])
     const [searchTerm, setSearchTerm] = useState('')
     const itemsPerPage = 8
+    const [sortField, setSortField] = useState(null);
+    const [sortDirection, setSortDirection] = useState('desc');
+    const [filters, setFilters] = useState({
+        brand: 'all',
+        year: 'all'
+    });
+    const [originalCars, setOriginalCars] = useState([]);
 
     const fetchData = async () => {
         const data = await dbService.getAll('cars')
         setCarData(data)
+        setOriginalCars(data)
     }
     useEffect(() => {
         const unsub = onSnapshot(collection(db, 'cars'), async (snapshot) => {
@@ -102,17 +113,162 @@ const Car = () => {
         [totalPages]
     )
 
+    const handleSort = (field) => {
+        let newDirection;
+        if (field === sortField) {
+            if (sortDirection === 'desc') {
+                newDirection = 'asc';
+            } else {
+                setSortField(null);
+                setSortDirection('desc');
+                setCarData([...originalCars]);
+                return;
+            }
+        } else {
+            newDirection = 'desc';
+        }
+
+        setSortField(field);
+        setSortDirection(newDirection);
+
+        const sorted = [...carData].sort((a, b) => {
+            if (!a[field] || !b[field]) return 0;
+
+            if (field === 'manufacturingYear') {
+                return newDirection === 'desc' 
+                    ? b[field] - a[field] 
+                    : a[field] - b[field];
+            }
+
+            const valueA = String(a[field] || '').toLowerCase();
+            const valueB = String(b[field] || '').toLowerCase();
+            return newDirection === 'desc' 
+                ? valueB.localeCompare(valueA)
+                : valueA.localeCompare(valueB);
+        });
+
+        setCarData(sorted);
+    };
+
+    const handleFilter = (type, value) => {
+        setFilters(prev => ({ ...prev, [type]: value }));
+
+        if (value === 'all') {
+            setCarData([...originalCars]);
+            return;
+        }
+
+        const filtered = originalCars.filter((car) => {
+            switch (type) {
+                case 'brand':
+                    return car.brand === value;
+                case 'year':
+                    const currentYear = new Date().getFullYear();
+                    const age = currentYear - car.manufacturingYear;
+                    switch (value) {
+                        case 'under3':
+                            return age < 3;
+                        case '3to7':
+                            return age >= 3 && age <= 7;
+                        case 'over7':
+                            return age > 7;
+                        default:
+                            return true;
+                    }
+                default:
+                    return true;
+            }
+        });
+
+        setCarData(filtered);
+    };
+
     return (
         <div className="car-page d-flex flex-column gap-3 pb-3">
             <div className="car-page__header">
-                <button className="page__header-button">
-                    <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
-                    Sắp xếp
-                </button>
-                <button className="page__header-button">
-                    <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
-                    Lọc
-                </button>
+                <div className="dropdown">
+                    <button className={`page__header-button ${sortField ? 'active' : ''}`}>
+                        <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
+                        Sắp xếp{' '}
+                        {sortField && 
+                            `(${sortField === 'manufacturingYear' ? 'Năm SX' : 'STT'} ${sortDirection === 'asc' ? '↑' : '↓'})`}
+                        <FontAwesomeIcon icon={faCaretDown} className="page__header-icon" />
+                    </button>
+                    <div className="dropdown-content">
+                        <div>
+                            <h4 className="filter-title">Sắp xếp theo</h4>
+                            <button onClick={() => handleSort('manufacturingYear')}>
+                                Năm sản xuất
+                                {sortField === 'manufacturingYear' && (
+                                    <FontAwesomeIcon 
+                                        icon={sortDirection === 'asc' ? faArrowUp : faArrowDown} 
+                                        className="sort-direction-icon" 
+                                    />
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div className="dropdown">
+                    <button className={`page__header-button ${(filters.brand !== 'all' || filters.year !== 'all') ? 'active' : ''}`}>
+                        <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
+                        Lọc{' '}
+                        {filters.brand !== 'all' && `(${filters.brand})`}
+                        {filters.year !== 'all' && 
+                            `${filters.brand !== 'all' ? ', ' : '('}${
+                                filters.year === 'under3' ? '2021-2024' :
+                                filters.year === '3to7' ? '2017-2020' :
+                                'Trước 2017'
+                            }${filters.brand === 'all' ? ')' : ')'}`}
+                        <FontAwesomeIcon icon={faCaretDown} className="page__header-icon" />
+                    </button>
+                    <div className="dropdown-content">
+                        <div className="filter-section">
+                            <h4 className="filter-title">Hãng xe</h4>
+                            <button onClick={() => handleFilter('brand', 'all')}>
+                                Tất cả
+                                {filters.brand === 'all' && (
+                                    <FontAwesomeIcon icon={faFilter} className="filter-icon" />
+                                )}
+                            </button>
+                            {['Toyota', 'Honda', 'Ford', 'Hyundai'].map(brand => (
+                                <button key={brand} onClick={() => handleFilter('brand', brand)}>
+                                    {brand}
+                                    {filters.brand === brand && (
+                                        <FontAwesomeIcon icon={faFilter} className="filter-icon" />
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="filter-section">
+                            <h4 className="filter-title">Năm sản xuất</h4>
+                            <button onClick={() => handleFilter('year', 'all')}>
+                                Tất cả
+                                {filters.year === 'all' && (
+                                    <FontAwesomeIcon icon={faFilter} className="filter-icon" />
+                                )}
+                            </button>
+                            <button onClick={() => handleFilter('year', 'under3')}>
+                                2021-2024
+                                {filters.year === 'under3' && (
+                                    <FontAwesomeIcon icon={faFilter} className="filter-icon" />
+                                )}
+                            </button>
+                            <button onClick={() => handleFilter('year', '3to7')}>
+                                2017-2020
+                                {filters.year === '3to7' && (
+                                    <FontAwesomeIcon icon={faFilter} className="filter-icon" />
+                                )}
+                            </button>
+                            <button onClick={() => handleFilter('year', 'over7')}>
+                                Trước 2017
+                                {filters.year === 'over7' && (
+                                    <FontAwesomeIcon icon={faFilter} className="filter-icon" />
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div className="page__header-search">
                     <FontAwesomeIcon icon={faSearch} className="page__header-icon" />
                     <input
