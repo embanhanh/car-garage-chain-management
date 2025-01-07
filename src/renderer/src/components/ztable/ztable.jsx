@@ -11,7 +11,8 @@ const ZTable = ({
     detailAction = () => {},
     editAction = () => {},
     deleteAction = () => {},
-    isAdmin = false
+    isAdmin = false,
+    isEdit = true
 }) => {
     const itemsPerPage = 12
     return (
@@ -72,14 +73,16 @@ const ZTable = ({
                                                 >
                                                     Chi tiết
                                                 </div>
-                                                <div
-                                                    className="table__action-item"
-                                                    onClick={() => {
-                                                        editAction(item)
-                                                    }}
-                                                >
-                                                    Cập nhật
-                                                </div>
+                                                {isEdit && (
+                                                    <div
+                                                        className="table__action-item"
+                                                        onClick={() => {
+                                                            editAction(item)
+                                                        }}
+                                                    >
+                                                        Cập nhật
+                                                    </div>
+                                                )}
                                                 {isAdmin && (
                                                     <div
                                                         className="table__action-item"

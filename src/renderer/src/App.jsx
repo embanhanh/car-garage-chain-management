@@ -10,6 +10,7 @@ import Car from './pages/Car/Car'
 import Repair from './pages/Repair/Repair'
 import Regulation from './pages/Regulation/Regulation'
 import GarageList from './pages/GarageList/GarageList'
+import Bill from './pages/Bill/Bill'
 function App() {
     return (
         <>
@@ -26,6 +27,7 @@ function App() {
                         <Route path="repair" element={<Repair />} />
                         <Route path="component" element={<Component />} />
                         <Route path="regulation" element={<Regulation />} />
+                        <Route path="bill" element={<Bill />} />
                     </Route>
                 </Routes>
             </HashRouter>

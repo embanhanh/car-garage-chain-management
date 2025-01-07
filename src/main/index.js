@@ -44,7 +44,7 @@ function createWindow() {
     }
 
     ipcMain.on('resize-window', () => {
-        mainWindow.setSize(1200, 700)
+        mainWindow.setSize(1200, 720)
         mainWindow.center()
     })
 

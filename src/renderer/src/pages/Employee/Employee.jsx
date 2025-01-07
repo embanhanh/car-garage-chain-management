@@ -63,13 +63,13 @@ function Employee() {
 
     const [searchTerm, setSearchTerm] = useState('')
 
-    const [sortField, setSortField] = useState(null);
-    const [sortDirection, setSortDirection] = useState('desc'); // Mặc định desc
+    const [sortField, setSortField] = useState(null)
+    const [sortDirection, setSortDirection] = useState('desc') // Mặc định desc
     const [filters, setFilters] = useState({
         gender: 'all',
         position: 'all'
-    });
-    const [originalEmployees, setOriginalEmployees] = useState([]);
+    })
+    const [originalEmployees, setOriginalEmployees] = useState([])
 
     const searchEmployees = useMemo(() => {
         if (!searchTerm) return listEmployees
@@ -175,75 +175,75 @@ function Employee() {
     }, [])
 
     const handleSort = (field) => {
-        let newDirection;
+        let newDirection
 
         // Nếu click vào field đang được sắp xếp
         if (field === sortField) {
             if (sortDirection === 'desc') {
                 // Click lần 2: chuyển sang sort asc
-                newDirection = 'asc';
+                newDirection = 'asc'
             } else {
                 // Click lần 3: bỏ sort và trở về dữ liệu gốc
-                setSortField(null);
-                setSortDirection('desc'); // Reset về desc cho lần sort tiếp theo
-                setListEmployees([...originalEmployees]);
-                return;
+                setSortField(null)
+                setSortDirection('desc') // Reset về desc cho lần sort tiếp theo
+                setListEmployees([...originalEmployees])
+                return
             }
         } else {
             // Click field mới: sort desc trước
-            newDirection = 'desc';
+            newDirection = 'desc'
         }
 
         // Cập nhật state sort trước
-        setSortField(field);
-        setSortDirection(newDirection);
+        setSortField(field)
+        setSortDirection(newDirection)
 
         const sorted = [...listEmployees].sort((a, b) => {
-            if (!a[field] || !b[field]) return 0;
+            if (!a[field] || !b[field]) return 0
 
             if (field === 'id') {
-                const numA = parseInt(a[field].substring(2)) || 0;
-                const numB = parseInt(b[field].substring(2)) || 0;
-                return newDirection === 'desc' ? numB - numA : numA - numB;
+                const numA = parseInt(a[field].substring(2)) || 0
+                const numB = parseInt(b[field].substring(2)) || 0
+                return newDirection === 'desc' ? numB - numA : numA - numB
             }
 
             if (field === 'salary') {
-                const salaryA = parseFloat(a[field].replace(/[^0-9.-]+/g, '')) || 0;
-                const salaryB = parseFloat(b[field].replace(/[^0-9.-]+/g, '')) || 0;
-                return newDirection === 'desc' ? salaryB - salaryA : salaryA - salaryB;
+                const salaryA = parseFloat(a[field].replace(/[^0-9.-]+/g, '')) || 0
+                const salaryB = parseFloat(b[field].replace(/[^0-9.-]+/g, '')) || 0
+                return newDirection === 'desc' ? salaryB - salaryA : salaryA - salaryB
             }
 
-            const valueA = String(a[field] || '').toLowerCase();
-            const valueB = String(b[field] || '').toLowerCase();
-            return newDirection === 'desc' 
+            const valueA = String(a[field] || '').toLowerCase()
+            const valueB = String(b[field] || '').toLowerCase()
+            return newDirection === 'desc'
                 ? valueB.localeCompare(valueA)
-                : valueA.localeCompare(valueB);
-        });
+                : valueA.localeCompare(valueB)
+        })
 
-        setListEmployees(sorted);
-    };
+        setListEmployees(sorted)
+    }
 
     const handleFilter = (type, value) => {
-        setFilters(prev => ({ ...prev, [type]: value }));
+        setFilters((prev) => ({ ...prev, [type]: value }))
 
         if (value === 'all') {
-            setListEmployees([...originalEmployees]);
-            return;
+            setListEmployees([...originalEmployees])
+            return
         }
 
         const filtered = originalEmployees.filter((employee) => {
             switch (type) {
                 case 'gender':
-                    return employee.gender === value;
+                    return employee.gender === value
                 case 'position':
-                    return employee.position === value;
+                    return employee.position === value
                 default:
-                    return true;
+                    return true
             }
-        });
+        })
 
-        setListEmployees(filtered);
-    };
+        setListEmployees(filtered)
+    }
 
     return (
         <div className="main-container">
@@ -260,13 +260,16 @@ function Employee() {
                 <div className="filter-area">
                     <div className="dropdown">
                         <button className={`page__header-button ${sortField ? 'active' : ''}`}>
-                            <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
+                            <FontAwesomeIcon
+                                icon={faArrowUpWideShort}
+                                className="page__header-icon"
+                            />
                             Sắp xếp{' '}
-                            {sortField && 
+                            {sortField &&
                                 `(${sortField === 'id' ? 'Mã NV' : 'Lương'} ${sortDirection === 'asc' ? '↑' : '↓'})`}
-                            <FontAwesomeIcon 
-                                icon={faCaretDown} 
-                                className={`page__header-icon ${sortField ? 'active' : ''}`} 
+                            <FontAwesomeIcon
+                                icon={faCaretDown}
+                                className={`page__header-icon ${sortField ? 'active' : ''}`}
                             />
                         </button>
                         <div className="dropdown-content">
@@ -276,9 +279,13 @@ function Employee() {
                                     Mã nhân viên
                                     {sortField === 'id' && (
                                         <>
-                                            <FontAwesomeIcon 
-                                                icon={sortDirection === 'asc' ? faArrowUp : faArrowDown} 
-                                                className="sort-direction-icon" 
+                                            <FontAwesomeIcon
+                                                icon={
+                                                    sortDirection === 'asc'
+                                                        ? faArrowUp
+                                                        : faArrowDown
+                                                }
+                                                className="sort-direction-icon"
                                             />
                                             <span className="selected-text">
                                                 {sortDirection === 'asc' ? 'Tăng dần' : 'Giảm dần'}
@@ -290,9 +297,13 @@ function Employee() {
                                     Lương
                                     {sortField === 'salary' && (
                                         <>
-                                            <FontAwesomeIcon 
-                                                icon={sortDirection === 'asc' ? faArrowUp : faArrowDown} 
-                                                className="sort-direction-icon" 
+                                            <FontAwesomeIcon
+                                                icon={
+                                                    sortDirection === 'asc'
+                                                        ? faArrowUp
+                                                        : faArrowDown
+                                                }
+                                                className="sort-direction-icon"
                                             />
                                             <span className="selected-text">
                                                 {sortDirection === 'asc' ? 'Tăng dần' : 'Giảm dần'}
@@ -304,15 +315,16 @@ function Employee() {
                         </div>
                     </div>
                     <div className="dropdown">
-                        <button className={`page__header-button ${(filters.gender !== 'all' || filters.position !== 'all') ? 'active' : ''}`}>
+                        <button
+                            className={`page__header-button ${filters.gender !== 'all' || filters.position !== 'all' ? 'active' : ''}`}
+                        >
                             <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
-                            Lọc{' '}
-                            {filters.gender !== 'all' && `(${filters.gender})`}
-                            {filters.position !== 'all' && 
+                            Lọc {filters.gender !== 'all' && `(${filters.gender})`}
+                            {filters.position !== 'all' &&
                                 `${filters.gender !== 'all' ? ', ' : '('}${filters.position}${filters.gender === 'all' ? ')' : ')'}`}
-                            <FontAwesomeIcon 
-                                icon={faCaretDown} 
-                                className={`page__header-icon ${(filters.gender !== 'all' || filters.position !== 'all') ? 'active' : ''}`} 
+                            <FontAwesomeIcon
+                                icon={faCaretDown}
+                                className={`page__header-icon ${filters.gender !== 'all' || filters.position !== 'all' ? 'active' : ''}`}
                             />
                         </button>
                         <div className="dropdown-content">
@@ -321,28 +333,19 @@ function Employee() {
                                 <button onClick={() => handleFilter('gender', 'all')}>
                                     Tất cả
                                     {filters.gender === 'all' && (
-                                        <FontAwesomeIcon 
-                                            icon={faFilter}
-                                            className="filter-icon" 
-                                        />
+                                        <FontAwesomeIcon icon={faFilter} className="filter-icon" />
                                     )}
                                 </button>
                                 <button onClick={() => handleFilter('gender', 'Nam')}>
                                     Nam
                                     {filters.gender === 'Nam' && (
-                                        <FontAwesomeIcon 
-                                            icon={faFilter}
-                                            className="filter-icon" 
-                                        />
+                                        <FontAwesomeIcon icon={faFilter} className="filter-icon" />
                                     )}
                                 </button>
                                 <button onClick={() => handleFilter('gender', 'Nữ')}>
                                     Nữ
                                     {filters.gender === 'Nữ' && (
-                                        <FontAwesomeIcon 
-                                            icon={faFilter}
-                                            className="filter-icon" 
-                                        />
+                                        <FontAwesomeIcon icon={faFilter} className="filter-icon" />
                                     )}
                                 </button>
                             </div>
@@ -351,37 +354,25 @@ function Employee() {
                                 <button onClick={() => handleFilter('position', 'all')}>
                                     Tất cả
                                     {filters.position === 'all' && (
-                                        <FontAwesomeIcon 
-                                            icon={faFilter}
-                                            className="filter-icon" 
-                                        />
+                                        <FontAwesomeIcon icon={faFilter} className="filter-icon" />
                                     )}
                                 </button>
                                 <button onClick={() => handleFilter('position', 'Quản lý')}>
                                     Quản lý
                                     {filters.position === 'Quản lý' && (
-                                        <FontAwesomeIcon 
-                                            icon={faFilter}
-                                            className="filter-icon" 
-                                        />
+                                        <FontAwesomeIcon icon={faFilter} className="filter-icon" />
                                     )}
                                 </button>
                                 <button onClick={() => handleFilter('position', 'Nhân viên')}>
                                     Nhân viên
                                     {filters.position === 'Nhân viên' && (
-                                        <FontAwesomeIcon 
-                                            icon={faFilter}
-                                            className="filter-icon" 
-                                        />
+                                        <FontAwesomeIcon icon={faFilter} className="filter-icon" />
                                     )}
                                 </button>
                                 <button onClick={() => handleFilter('position', 'Kỹ thuật viên')}>
                                     Kỹ thuật viên
                                     {filters.position === 'Kỹ thuật viên' && (
-                                        <FontAwesomeIcon 
-                                            icon={faFilter}
-                                            className="filter-icon" 
-                                        />
+                                        <FontAwesomeIcon icon={faFilter} className="filter-icon" />
                                     )}
                                 </button>
                             </div>
@@ -471,6 +462,10 @@ function Employee() {
                             columns={columns}
                             data={currentData}
                             isAdmin={
+                                JSON.parse(localStorage.getItem('currentUser'))?.role == 'admin' ||
+                                JSON.parse(localStorage.getItem('currentUser'))?.role == 'Quản lý'
+                            }
+                            isEdit={
                                 JSON.parse(localStorage.getItem('currentUser'))?.role == 'admin' ||
                                 JSON.parse(localStorage.getItem('currentUser'))?.role == 'Quản lý'
                             }

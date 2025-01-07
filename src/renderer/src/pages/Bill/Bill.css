@@ -1,0 +1,89 @@
+.bill-page {
+    padding: 20px;
+    height: calc(100vh - var(--header-height));
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.bill-page__header {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.bill-page__content {
+    flex: 1;
+    overflow: auto;
+}
+
+.bill-page__content .page-table {
+    width: 100%;
+}
+
+/* Kế thừa các style từ Car.css và Repair.css */
+.dropdown-content {
+    min-width: 200px;
+}
+
+.filter-section {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.filter-section:last-child {
+    border-bottom: none;
+}
+
+.filter-title {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.filter-section button {
+    width: 100%;
+    text-align: left;
+    padding: 8px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.filter-section button:hover {
+    background: #f5f5f5;
+}
+
+.filter-icon {
+    color: var(--primary-color);
+}
+
+.sort-direction-icon {
+    margin-left: 5px;
+}
+
+.table__status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.car-completed {
+    background: #e6f4ea;
+    color: #1e7e34;
+}
+
+.car-normal {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.bill-table td:nth-child(7) {
+    overflow: visible;
+}

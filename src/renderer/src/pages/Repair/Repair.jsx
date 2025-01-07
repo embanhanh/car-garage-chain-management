@@ -42,12 +42,12 @@ const Repair = () => {
     const [isLoading, setIsLoading] = useState(false)
     const itemsPerPage = 8
     const [searchTerm, setSearchTerm] = useState('')
-    const [sortField, setSortField] = useState(null);
-    const [sortDirection, setSortDirection] = useState('desc');
+    const [sortField, setSortField] = useState(null)
+    const [sortDirection, setSortDirection] = useState('desc')
     const [filters, setFilters] = useState({
         status: 'all'
-    });
-    const [originalData, setOriginalData] = useState([]);
+    })
+    const [originalData, setOriginalData] = useState([])
 
     const fetchData = async () => {
         const data = await dbService.getAll(
@@ -137,52 +137,52 @@ const Repair = () => {
     }, [repairRegisterData])
 
     const handleSort = (field) => {
-        let newDirection;
+        let newDirection
         if (field === sortField) {
             if (sortDirection === 'desc') {
-                newDirection = 'asc';
+                newDirection = 'asc'
             } else {
-                setSortField(null);
-                setSortDirection('desc');
-                return;
+                setSortField(null)
+                setSortDirection('desc')
+                return
             }
         } else {
-            newDirection = 'desc';
+            newDirection = 'desc'
         }
 
-        setSortField(field);
-        setSortDirection(newDirection);
+        setSortField(field)
+        setSortDirection(newDirection)
 
         const sorted = [...repairRegisterData].sort((a, b) => {
-            if (!a[field] || !b[field]) return 0;
+            if (!a[field] || !b[field]) return 0
 
             if (field === 'createdAt' || field === 'expectedCompletionDate') {
-                const dateA = new Date(a[field]);
-                const dateB = new Date(b[field]);
-                return newDirection === 'desc' ? dateB - dateA : dateA - dateB;
+                const dateA = new Date(a[field])
+                const dateB = new Date(b[field])
+                return newDirection === 'desc' ? dateB - dateA : dateA - dateB
             }
 
-            const valueA = String(a[field] || '').toLowerCase();
-            const valueB = String(b[field] || '').toLowerCase();
-            return newDirection === 'desc' 
+            const valueA = String(a[field] || '').toLowerCase()
+            const valueB = String(b[field] || '').toLowerCase()
+            return newDirection === 'desc'
                 ? valueB.localeCompare(valueA)
-                : valueA.localeCompare(valueB);
-        });
+                : valueA.localeCompare(valueB)
+        })
 
-        setRepairRegisterData(sorted);
-    };
+        setRepairRegisterData(sorted)
+    }
 
     const handleFilter = (type, value) => {
-        setFilters(prev => ({ ...prev, [type]: value }));
-        
+        setFilters((prev) => ({ ...prev, [type]: value }))
+
         if (value === 'all') {
-            setRepairRegisterData([...originalData]);
-            return;
+            setRepairRegisterData([...originalData])
+            return
         }
 
-        const filtered = originalData.filter(repair => repair.status === value);
-        setRepairRegisterData(filtered);
-    };
+        const filtered = originalData.filter((repair) => repair.status === value)
+        setRepairRegisterData(filtered)
+    }
 
     return (
         <div className="repair-page">
@@ -196,13 +196,18 @@ const Repair = () => {
                 <div className="repair-page__header-filter">
                     <div className="dropdown">
                         <button className={`page__header-button ${sortField ? 'active' : ''}`}>
-                            <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
+                            <FontAwesomeIcon
+                                icon={faArrowUpWideShort}
+                                className="page__header-icon"
+                            />
                             Sắp xếp{' '}
-                            {sortField && 
+                            {sortField &&
                                 `(${
-                                    sortField === 'id' ? 'Mã phiếu' : 
-                                    sortField === 'createdAt' ? 'Ngày tạo' : 
-                                    'Ngày hoàn thành'
+                                    sortField === 'id'
+                                        ? 'Mã phiếu'
+                                        : sortField === 'createdAt'
+                                          ? 'Ngày tạo'
+                                          : 'Ngày hoàn thành'
                                 } ${sortDirection === 'asc' ? '↑' : '↓'})`}
                             <FontAwesomeIcon icon={faCaretDown} className="page__header-icon" />
                         </button>
@@ -212,27 +217,27 @@ const Repair = () => {
                                 <button onClick={() => handleSort('id')}>
                                     Mã phiếu
                                     {sortField === 'id' && (
-                                        <FontAwesomeIcon 
-                                            icon={sortDirection === 'asc' ? faArrowUp : faArrowDown} 
-                                            className="sort-direction-icon" 
+                                        <FontAwesomeIcon
+                                            icon={sortDirection === 'asc' ? faArrowUp : faArrowDown}
+                                            className="sort-direction-icon"
                                         />
                                     )}
                                 </button>
                                 <button onClick={() => handleSort('createdAt')}>
                                     Ngày tạo phiếu
                                     {sortField === 'createdAt' && (
-                                        <FontAwesomeIcon 
-                                            icon={sortDirection === 'asc' ? faArrowUp : faArrowDown} 
-                                            className="sort-direction-icon" 
+                                        <FontAwesomeIcon
+                                            icon={sortDirection === 'asc' ? faArrowUp : faArrowDown}
+                                            className="sort-direction-icon"
                                         />
                                     )}
                                 </button>
                                 <button onClick={() => handleSort('expectedCompletionDate')}>
                                     Ngày hoàn thành
                                     {sortField === 'expectedCompletionDate' && (
-                                        <FontAwesomeIcon 
-                                            icon={sortDirection === 'asc' ? faArrowUp : faArrowDown} 
-                                            className="sort-direction-icon" 
+                                        <FontAwesomeIcon
+                                            icon={sortDirection === 'asc' ? faArrowUp : faArrowDown}
+                                            className="sort-direction-icon"
                                         />
                                     )}
                                 </button>
@@ -240,11 +245,11 @@ const Repair = () => {
                         </div>
                     </div>
                     <div className="dropdown">
-                        <button className={`page__header-button ${filters.status !== 'all' ? 'active' : ''}`}>
+                        <button
+                            className={`page__header-button ${filters.status !== 'all' ? 'active' : ''}`}
+                        >
                             <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
-                            Lọc{' '}
-                            {filters.status !== 'all' && 
-                                `(${filters.status})`}
+                            Lọc {filters.status !== 'all' && `(${filters.status})`}
                             <FontAwesomeIcon icon={faCaretDown} className="page__header-icon" />
                         </button>
                         <div className="dropdown-content">
@@ -360,17 +365,24 @@ const Repair = () => {
                                                     Chi tiết
                                                 </div>
 
-                                                <div
-                                                    className="table__action-item"
-                                                    onClick={async () => {
-                                                        await dbService.softDelete(
-                                                            'serviceregisters',
-                                                            repair.id
-                                                        )
-                                                    }}
-                                                >
-                                                    Xóa
-                                                </div>
+                                                {repair.status !== 'Đã hoàn thành' &&
+                                                    (JSON.parse(localStorage.getItem('currentUser'))
+                                                        ?.role == 'admin' ||
+                                                        JSON.parse(
+                                                            localStorage.getItem('currentUser')
+                                                        )?.role == 'Quản lý') && (
+                                                        <div
+                                                            className="table__action-item"
+                                                            onClick={async () => {
+                                                                await dbService.softDelete(
+                                                                    'serviceregisters',
+                                                                    repair.id
+                                                                )
+                                                            }}
+                                                        >
+                                                            Xóa
+                                                        </div>
+                                                    )}
                                                 {repair.status === 'Đã hoàn thành' && (
                                                     <div
                                                         className="table__action-item"

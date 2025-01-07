@@ -6,6 +6,7 @@ import { dbService } from '../../services/DatabaseService'
 import { format } from 'date-fns'
 import { addCustomer } from '../../controllers/customerController'
 import { addServiceRegister } from '../../controllers/serviceRegisterController'
+import Swal from 'sweetalert2'
 export default function ReceiveRepairModal({ onClose }) {
     const [serviceRegisterData, setServiceRegisterData] = useState({
         car: {
@@ -155,12 +156,20 @@ export default function ReceiveRepairModal({ onClose }) {
                 const car = await dbService.add('cars', { ...carData, customerId: customerId })
                 data.carId = car.id
             }
-
-            // await dbService.add('serviceregisters', data)
             await addServiceRegister(data)
+            await Swal.fire({
+                title: 'Thành công',
+                text: 'Tạo phiếu dịch vụ thành công',
+                icon: 'success'
+            })
             onClose()
         } catch (error) {
-            alert(error.message)
+            console.log(error)
+            Swal.fire({
+                title: 'Thất bại',
+                text: 'Có lỗi xảy ra, vui lòng thử lại sau',
+                icon: 'error'
+            })
         } finally {
             setIsLoading(false)
         }

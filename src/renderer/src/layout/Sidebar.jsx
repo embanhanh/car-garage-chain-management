@@ -11,7 +11,8 @@ import {
     faGear,
     faBuilding,
     faChartLine,
-    faFileContract
+    faFileContract,
+    faFileInvoice
 } from '@fortawesome/free-solid-svg-icons'
 import { useLocation } from 'react-router-dom'
 function Sidebar() {
@@ -101,6 +102,20 @@ function Sidebar() {
                                 icon={faScrewdriverWrench}
                             />
                             Sửa chữa
+                        </Link>
+                        <Link
+                            to="/dashboard/bill"
+                            className={`sidebar__menu-item ${
+                                location.pathname === '/dashboard/bill'
+                                    ? 'sidebar__menu-item--active'
+                                    : ''
+                            }`}
+                        >
+                            <FontAwesomeIcon
+                                className="sidebar__menu-item-icon"
+                                icon={faFileInvoice}
+                            />
+                            Hóa đơn
                         </Link>
                         <Link
                             to="/dashboard/component"

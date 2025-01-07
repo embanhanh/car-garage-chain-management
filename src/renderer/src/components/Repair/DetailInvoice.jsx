@@ -212,28 +212,55 @@ function DetailInvoiceModal({ onClose, data }) {
                         <thead>
                             <tr>
                                 <th>Thứ tự</th>
-                                <th>Tên dịch vụ sử dụng</th>
-                                <th>Đơn giá</th>
+                                {invoiceData?.type === 'repair' ? (
+                                    <>
+                                        <th>Tên dịch vụ sử dụng</th>
+                                        <th>Đơn giá</th>
+                                    </>
+                                ) : (
+                                    <>
+                                        <th>Tên phụ tùng</th>
+                                        <th>Số lượng</th>
+                                        <th>Đơn giá</th>
+                                        <th>Thành tiền</th>
+                                    </>
+                                )}
                             </tr>
                         </thead>
                         <tbody>
-                            {data?.repairRegisters.map((repairRegister, index) => (
-                                <tr key={index}>
-                                    <td>{index + 1}</td>
-                                    <td>{repairRegister.service.name}</td>
-                                    <td>
-                                        đ{' '}
-                                        {Number(repairRegister.service.price) +
-                                            repairRegister.repairRegisterComponents.reduce(
-                                                (sum, component) =>
-                                                    sum +
-                                                    Number(component.component.price) *
-                                                        Number(component.quantity),
-                                                0
-                                            )}
-                                    </td>
-                                </tr>
-                            ))}
+                            {invoiceData?.type === 'repair'
+                                ? data?.repairRegisters.map((repairRegister, index) => (
+                                      <tr key={index}>
+                                          <td>{index + 1}</td>
+                                          <td>{repairRegister.service.name}</td>
+                                          <td>
+                                              đ{' '}
+                                              {Number(repairRegister.service.price) +
+                                                  repairRegister.repairRegisterComponents.reduce(
+                                                      (sum, component) =>
+                                                          sum +
+                                                          Number(component.component.price) *
+                                                              Number(component.quantity),
+                                                      0
+                                                  )}
+                                          </td>
+                                      </tr>
+                                  ))
+                                : data?.repairRegisters[0]?.repairRegisterComponents?.map(
+                                      (component, index) => (
+                                          <tr key={index}>
+                                              <td>{index + 1}</td>
+                                              <td>{component.component.name}</td>
+                                              <td>{component.quantity}</td>
+                                              <td>đ {component.component.price}</td>
+                                              <td>
+                                                  đ{' '}
+                                                  {Number(component.component.price) *
+                                                      Number(component.quantity)}
+                                              </td>
+                                          </tr>
+                                      )
+                                  )}
                         </tbody>
                     </table>
                 </div>
