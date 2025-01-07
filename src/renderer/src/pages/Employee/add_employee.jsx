@@ -196,7 +196,7 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
                     </div>
 
                     <div className="repair-modal__input-item mb-3 col-6">
-                        <label htmlFor="componentCode">{'Vị trí làm việc'}</label>
+                        <label htmlFor="componentCode">{'Thời gian làm việc'}</label>
                         <ComboBox
                             height="70px"
                             options={[

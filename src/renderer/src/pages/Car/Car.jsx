@@ -273,7 +273,7 @@ const Car = () => {
                     <FontAwesomeIcon icon={faSearch} className="page__header-icon" />
                     <input
                         type="text"
-                        placeholder="Tìm kiếm theo biển số, mã xe, hãng xe, mẫu xe, năm SX, chủ xe..."
+                        placeholder="Tìm kiếm..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />

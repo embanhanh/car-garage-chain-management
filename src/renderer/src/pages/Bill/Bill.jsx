@@ -271,7 +271,7 @@ const Bill = () => {
                     <FontAwesomeIcon icon={faSearch} className="page__header-icon" />
                     <input
                         type="text"
-                        placeholder="Tìm kiếm theo mã hóa đơn, tên nhân viên, khách hàng..."
+                        placeholder="Tìm kiếm..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />

@@ -126,13 +126,9 @@ function DetailRepairModal({
                     </div>
                 </div>
                 <div className="detail-repair-modal__separate mr-3 ml-3"></div>
-                <div className="detail-repair-modal__repair-info pt-2 pb-2 pr-2">
-                    <div className="detail-repair-modal__register-type">
-                        <button className="register-type-tab active mr-3">Sửa chữa</button>
-                        <button className="register-type-tab">Bảo dưỡng</button>
-                    </div>
+                <div className="detail-repair-modal__repair-info pb-2 pr-2">
                     <div className="repair-modal__table-container">
-                        <h3 className="repair-modal__table-title mt-2">
+                        <h3 className="repair-modal__table-title">
                             Danh sách loại hình sửa chữa
                         </h3>
                         <div className="repair-modal__table-content">

@@ -382,7 +382,7 @@ function Employee() {
                         <FontAwesomeIcon icon={faSearch} className="page__header-icon" />
                         <input
                             type="text"
-                            placeholder="Tìm kiếm theo mã NV, tên, email, CCCD, vị trí..."
+                            placeholder="Tìm kiếm..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />

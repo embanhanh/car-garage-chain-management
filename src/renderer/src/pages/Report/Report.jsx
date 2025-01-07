@@ -93,7 +93,7 @@ const Report = () => {
                     locale={vi}
                     className="report-page__header-date w-auto form-control"
                 />
-                <button className="btn btn-primary" onClick={handleExport}>
+                <button className="primary-button" onClick={handleExport}>
                     Xuất Excel
                 </button>
             </div>

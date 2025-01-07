@@ -89,7 +89,7 @@ function GarageList() {
                             <FontAwesomeIcon icon={faSearch} className="page__header-icon" />
                             <input
                                 type="text"
-                                placeholder="Tìm kiếm theo tên, địa chỉ, số điện thoại..."
+                                placeholder="Tìm kiếm..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />

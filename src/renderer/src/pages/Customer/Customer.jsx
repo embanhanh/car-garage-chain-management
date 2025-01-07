@@ -415,7 +415,7 @@ function Customer() {
                         <FontAwesomeIcon icon={faSearch} className="page__header-icon" />
                         <input
                             type="text"
-                            placeholder="Tìm kiếm theo mã KH, tên, email, SĐT, CCCD..."
+                            placeholder="Tìm kiếm..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />

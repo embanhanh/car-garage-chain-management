@@ -292,7 +292,7 @@ const Repair = () => {
                         <FontAwesomeIcon icon={faSearch} className="page__header-icon" />
                         <input
                             type="text"
-                            placeholder="Tìm kiếm theo mã phiếu, tên khách hàng, biển số xe..."
+                            placeholder="Tìm kiếm..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
