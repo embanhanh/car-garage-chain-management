@@ -195,7 +195,7 @@ function AddComponentModal({ onClose }) {
                     </div>
                 </div>
                 <div className="page-btns end">
-                    <button className="page__header-button" onClick={() => onClose()}>
+                    <button className="main-cancel-button" onClick={() => onClose()}>
                         Hủy
                     </button>
                     <button
