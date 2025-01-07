@@ -73,7 +73,7 @@ function DetailImportModal({ data, onClose }) {
                     </table>
                 </div>
                 <div className="page-btns center">
-                    <button className="page__header-button" onClick={() => onClose()}>
+                    <button className="main-cancel-button" onClick={() => onClose()}>
                         Đóng
                     </button>
                 </div>

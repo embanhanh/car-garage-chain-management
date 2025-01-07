@@ -110,7 +110,7 @@ function DetailEmployee({ nv, onClose }) {
             </div>
             <div className="page-btns center">
                 <button
-                    className="repair-modal__button cancel-button"
+                    className="repair-modal__button confirm-button"
                     onClick={() => {
                         onClose()
                     }}

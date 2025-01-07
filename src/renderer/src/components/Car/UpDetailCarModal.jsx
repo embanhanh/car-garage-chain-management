@@ -224,7 +224,7 @@ export default function UpDetailCarModal({ onClose, data, type }) {
                     </div>
                 </div>
                 <div className={`page-btns ${type === 'detail' ? 'center' : 'end'}`}>
-                    <button className="page__header-button" onClick={() => onClose()}>
+                    <button className="main-cancel-button" onClick={() => onClose()}>
                         {type == 'detail' ? 'Đóng' : 'Hủy'}
                     </button>
                     {type !== 'detail' && (
