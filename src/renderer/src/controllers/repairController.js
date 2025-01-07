@@ -124,8 +124,8 @@ export const addStaffInCharge = async (employees, serviceId, openDetailRepairMod
     }
 }
 
-export const getRepairRegisterByDate = async (startDate, endDate) => {
-    const repairRegister = await dbService.getAll('repairregisters')
+export const getRepairRegisterByGarageId = async (garageId, startDate, endDate) => {
+    const repairRegister = await dbService.getAll('repairregisters', garageId)
 
     const parsedStartDate = new Date(startDate)
     const parsedEndDate = new Date(endDate)

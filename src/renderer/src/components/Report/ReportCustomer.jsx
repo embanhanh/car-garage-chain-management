@@ -11,7 +11,7 @@ import {
     ArcElement
 } from 'chart.js'
 
-import { getServiceRegisterByDate } from '../../controllers/serviceRegisterController'
+import { getServiceRegisterByGarageId } from '../../controllers/serviceRegisterController'
 import './Report.css'
 import { getDateRangeText } from '../../utils/StringUtil'
 import {
@@ -171,7 +171,11 @@ function ReportCustomer({ dateRange = 'week', selectedDate = new Date() }) {
                     endDate = endOfWeek(now, { weekStartsOn: 1 })
             }
 
-            const response = await getServiceRegisterByDate(startDate, endDate)
+            const response = await getServiceRegisterByGarageId(
+                JSON.parse(localStorage.getItem('currentGarage'))?.id,
+                startDate,
+                endDate
+            )
 
             if (Array.isArray(response)) {
                 processAndUpdateChartData(response)

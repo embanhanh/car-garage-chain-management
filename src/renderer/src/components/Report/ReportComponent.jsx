@@ -19,21 +19,13 @@ import {
     format,
     getWeek
 } from 'date-fns'
-import { getInputComponentRegisterByDate } from '../../controllers/inputComponentRegisterController'
+import { getInputComponentRegisterByGarageId } from '../../controllers/inputComponentRegisterController'
 import { getDateRangeText } from '../../utils/StringUtil'
+import { dbService } from '../../services/DatabaseService'
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
-function ReportStock({ dateRange = 'week', selectedDate = new Date() }) {
-    const [componentsData, setComponentsData] = useState([
-        {
-            componentName: '',
-            categoryName: '',
-            quantity: 0,
-            inputPrice: 0,
-            salePrice: 0,
-            totalPrice: 0
-        }
-    ])
+function ReportComponent({ dateRange = 'week', selectedDate = new Date() }) {
+    const [componentsData, setComponentsData] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const [chartData, setChartData] = useState({
         labels: [],
@@ -72,54 +64,50 @@ function ReportStock({ dateRange = 'week', selectedDate = new Date() }) {
                     endDate = endOfWeek(now, { weekStartsOn: 1 })
             }
 
-            const response = await getInputComponentRegisterByDate(startDate, endDate)
+            const inputComponentRegister = await getInputComponentRegisterByGarageId(
+                JSON.parse(localStorage.getItem('currentGarage'))?.id,
+                startDate,
+                endDate
+            )
 
-            if (!response || !Array.isArray(Object.values(response))) {
-                console.warn('Invalid response:', response)
+            if (!inputComponentRegister || !Array.isArray(inputComponentRegister)) {
+                console.warn('Invalid response:', inputComponentRegister)
                 return
             }
 
-            // Chuyển đổi object thành array
-            const responseArray = Object.values(response)
+            let components = []
 
-            // Tổng hợp dữ liệu theo componentId và inputPrice
-            const aggregatedData = responseArray.reduce((acc, register) => {
-                register.details?.forEach((detail) => {
+            inputComponentRegister.forEach((receipt) => {
+                receipt.details?.forEach((detail) => {
                     const componentId = detail.component?.id
-                    const key = `${componentId}-${detail.inputPrice}` // Tạo key duy nhất cho mỗi cặp component-price
+                    if (!componentId) return
 
-                    if (!acc[key]) {
-                        acc[key] = {
+                    const existingIndex = components.findIndex((v) => v.componentId === componentId)
+
+                    if (existingIndex === -1) {
+                        components.push({
                             componentId: componentId,
-                            componentName: detail.component?.name || 'Unknown',
-                            categoryName: detail.component?.category?.name || 'Unknown',
-                            quantity: 0,
-                            inputPrice: detail.inputPrice || 0,
-                            salePrice: detail.component?.price || 0,
-                            totalPrice: 0
-                        }
+                            componentName: detail.component?.name,
+                            quantity: detail.quantity,
+                            inputPrice: detail.inputPrice
+                        })
+                    } else {
+                        components[existingIndex].quantity += detail.quantity
                     }
-
-                    // Cộng dồn số lượng và tổng giá trị cho cùng component và cùng giá nhập
-                    acc[key].quantity += detail.quantity || 0
-                    acc[key].totalPrice += detail.quantity * detail.inputPrice || 0
                 })
-                return acc
-            }, {})
+            })
 
-            // Chuyển đổi từ object sang array
-            const result = Object.values(aggregatedData)
-            setComponentsData(result)
+            components.sort((a, b) => b.quantity - a.quantity)
 
-            // Sắp xếp dữ liệu theo số lượng giảm dần
-            const sortedData = [...result].sort((a, b) => b.quantity - a.quantity)
+            console.log('check result:', components)
+            setComponentsData(components)
 
             setChartData({
-                labels: sortedData.map((item) => item.componentName),
+                labels: components.map((item) => item.componentName),
                 datasets: [
                     {
                         label: 'Số lượng nhập',
-                        data: sortedData.map((item) => item.quantity),
+                        data: components.map((item) => item.quantity),
                         backgroundColor: 'rgba(53, 162, 235, 0.8)',
                         borderColor: 'rgba(53, 162, 235, 1)',
                         borderWidth: 1
@@ -147,7 +135,7 @@ function ReportStock({ dateRange = 'week', selectedDate = new Date() }) {
             },
             title: {
                 display: true,
-                text: `Thống kê số lượng nhập kho ${getDateRangeText()}`,
+                text: `Thống kê số lượng nhập kho ${getDateRangeText(dateRange, selectedDate)}`,
                 font: {
                     size: 16,
                     weight: 'bold'
@@ -233,4 +221,4 @@ function ReportStock({ dateRange = 'week', selectedDate = new Date() }) {
     )
 }
 
-export default ReportStock
+export default ReportComponent
