@@ -1,4 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSpinner } from '@fortawesome/free-solid-svg-icons'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 import logo from '../../assets/images/logo/logo.png'
 import { dbService } from '../../services/DatabaseService'
 import Swal from 'sweetalert2'
@@ -7,6 +11,9 @@ function DetailInvoiceModal({ onClose, data }) {
     const [isLoading, setIsLoading] = useState(true)
     const [invoiceData, setInvoiceData] = useState(null)
     const [isPaying, setIsPaying] = useState(false)
+
+    const invoiceRef = useRef(null)
+    const [isPrinting, setIsPrinting] = useState(false)
 
     const handlePay = async () => {
         if (!invoiceData) return
@@ -24,6 +31,51 @@ function DetailInvoiceModal({ onClose, data }) {
             console.error('Lỗi khi thanh toán:', error)
         } finally {
             setIsPaying(false)
+        }
+    }
+
+    const handlePrint = async () => {
+        try {
+            setIsPrinting(true)
+            const invoice = invoiceRef.current
+            const canvas = await html2canvas(invoice, {
+                scale: 2,
+                useCORS: true,
+                logging: false
+            })
+
+            const imgData = canvas.toDataURL('image/png')
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            })
+
+            const imgWidth = 210 // A4 width
+            const imgHeight = (canvas.height * imgWidth) / canvas.width
+
+            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight)
+
+            // Tạo tên file với mã hóa đơn
+            const fileName = `hoa-don-${invoiceData?.id || 'unknown'}.pdf`
+            pdf.save(fileName)
+
+            await Swal.fire({
+                title: 'Thành công',
+                text: 'Đã tạo file PDF hóa đơn',
+                icon: 'success',
+                confirmButtonText: 'Đóng'
+            })
+        } catch (error) {
+            console.error('Lỗi khi tạo PDF:', error)
+            await Swal.fire({
+                title: 'Lỗi',
+                text: 'Không thể tạo file PDF',
+                icon: 'error',
+                confirmButtonText: 'Đóng'
+            })
+        } finally {
+            setIsPrinting(false)
         }
     }
 
@@ -114,86 +166,104 @@ function DetailInvoiceModal({ onClose, data }) {
 
     return (
         <div className="detail-invoice-modal">
-            <div className="detail-invoice-modal__info">
-                <div className="detail-invoice-modal__info-img">
-                    <img src={logo} alt="logo" />
+            <div ref={invoiceRef} style={{ padding: '20px' }}>
+                <div className="detail-invoice-modal__info">
+                    <div className="detail-invoice-modal__info-img">
+                        <img src={logo} alt="logo" />
+                    </div>
+                    <div className="detail-invoice-modal__info-content">
+                        <h3 className="detail-invoice-modal__label">
+                            Địa chỉ: {JSON.parse(localStorage.getItem('currentGarage'))?.address}
+                        </h3>
+                        <h3 className="detail-invoice-modal__label">
+                            Hotline: {JSON.parse(localStorage.getItem('currentGarage'))?.phone}
+                        </h3>
+                        <h3 className="detail-invoice-modal__label">
+                            Website: https://www.carage.com
+                        </h3>
+                    </div>
                 </div>
-                <div className="detail-invoice-modal__info-content">
-                    <h3 className="detail-invoice-modal__label">
-                        Địa chỉ:{' '}
-                        {JSON.parse(localStorage.getItem('currentUser'))?.employee?.garage?.address}
-                    </h3>
-                    <h3 className="detail-invoice-modal__label">
-                        Hotline:{' '}
-                        {JSON.parse(localStorage.getItem('currentUser'))?.employee?.garage?.phone}
-                    </h3>
-                    <h3 className="detail-invoice-modal__label">Website: https://www.carage.com</h3>
-                </div>
-            </div>
-            <h2 className="detail-invoice-modal__title">HÓA ĐƠN THANH TOÁN</h2>
-            <div className="row">
-                <div className="col-6">
-                    <h3 className="detail-invoice-modal__label">Mã hóa đơn: {invoiceData?.id}</h3>
-                </div>
+                <h2 className="detail-invoice-modal__title">HÓA ĐƠN THANH TOÁN</h2>
+                <div className="row">
+                    <div className="col-6">
+                        <h3 className="detail-invoice-modal__label">
+                            Mã hóa đơn: {invoiceData?.id}
+                        </h3>
+                    </div>
 
-                <div className="col-6">
-                    <h3 className="detail-invoice-modal__label">
-                        Nhân viên: {invoiceData?.employee?.name || 'admin'}
-                    </h3>
+                    <div className="col-6">
+                        <h3 className="detail-invoice-modal__label">
+                            Nhân viên: {invoiceData?.employee?.name || 'admin'}
+                        </h3>
+                    </div>
+                    <div className="col-6">
+                        <h3 className="detail-invoice-modal__label">
+                            Ngày tiếp nhận: {new Date(data?.createdAt).toLocaleDateString('vi-VN')}
+                        </h3>
+                    </div>
+                    <div className="col-6">
+                        <h3 className="detail-invoice-modal__label">
+                            Ngày thanh toán: {new Date().toLocaleDateString('vi-VN')}
+                        </h3>
+                    </div>
                 </div>
-                <div className="col-6">
-                    <h3 className="detail-invoice-modal__label">
-                        Ngày tiếp nhận: {new Date(data?.createdAt).toLocaleDateString('vi-VN')}
-                    </h3>
-                </div>
-                <div className="col-6">
-                    <h3 className="detail-invoice-modal__label">
-                        Ngày thanh toán: {new Date().toLocaleDateString('vi-VN')}
-                    </h3>
-                </div>
-            </div>
-            <div className="detail-invoice-modal__table">
-                <table className="page-table">
-                    <thead>
-                        <tr>
-                            <th>Thứ tự</th>
-                            <th>Tên dịch vụ sử dụng</th>
-                            <th>Đơn giá</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data?.repairRegisters.map((repairRegister, index) => (
-                            <tr key={index}>
-                                <td>{index + 1}</td>
-                                <td>{repairRegister.service.name}</td>
-                                <td>
-                                    đ{' '}
-                                    {Number(repairRegister.service.price) +
-                                        repairRegister.repairRegisterComponents.reduce(
-                                            (sum, component) =>
-                                                sum +
-                                                Number(component.component.price) *
-                                                    Number(component.quantity),
-                                            0
-                                        )}
-                                </td>
+                <div className="detail-invoice-modal__table">
+                    <table className="page-table">
+                        <thead>
+                            <tr>
+                                <th>Thứ tự</th>
+                                <th>Tên dịch vụ sử dụng</th>
+                                <th>Đơn giá</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {data?.repairRegisters.map((repairRegister, index) => (
+                                <tr key={index}>
+                                    <td>{index + 1}</td>
+                                    <td>{repairRegister.service.name}</td>
+                                    <td>
+                                        đ{' '}
+                                        {Number(repairRegister.service.price) +
+                                            repairRegister.repairRegisterComponents.reduce(
+                                                (sum, component) =>
+                                                    sum +
+                                                    Number(component.component.price) *
+                                                        Number(component.quantity),
+                                                0
+                                            )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+                <div className="detail-invoice-modal__separate"></div>
+                <div className="detail-invoice-modal__total mt-3">
+                    <h3 className="detail-invoice-modal__label">Tổng tiền</h3>
+                    <h3 className="detail-invoice-modal__label">
+                        đ {invoiceData?.total?.toLocaleString()}
+                    </h3>
+                </div>
             </div>
-            <div className="detail-invoice-modal__separate"></div>
-            <div className="detail-invoice-modal__total">
-                <h3 className="detail-invoice-modal__label">Tổng tiền</h3>
-                <h3 className="detail-invoice-modal__label">
-                    đ {invoiceData?.total?.toLocaleString()}
-                </h3>
-            </div>
+
             <div className="page-btns end">
                 <button className="page__header-button" onClick={onClose}>
                     Đóng
                 </button>
-                <button className="primary-button shadow-none">In hóa đơn</button>
+                <button
+                    className="primary-button shadow-none"
+                    onClick={handlePrint}
+                    disabled={isPrinting}
+                >
+                    {isPrinting ? (
+                        <>
+                            <FontAwesomeIcon icon={faSpinner} spin />
+                            Đang tạo PDF...
+                        </>
+                    ) : (
+                        'In hóa đơn'
+                    )}
+                </button>
                 <button
                     className="primary-button shadow-none"
                     disabled={invoiceData?.status !== 'Chưa thanh toán' || isPaying}

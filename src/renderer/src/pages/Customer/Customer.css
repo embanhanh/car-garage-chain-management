@@ -267,15 +267,22 @@
     align-items: center;
     gap: 8px;
     transition: all 0.3s ease;
+    color: #333;
   }
   
   .dropdown-content button:hover {
-    background-color: var(--primary-color);
-    color: white;
+    background-color: #5030E5;
+    color: white !important;
   }
   
-  .dropdown-content button:hover svg {
-    color: white;
+  .dropdown-content button:hover * {
+    color: white !important;
+  }
+  
+  .dropdown-content button .sort-direction-icon,
+  .dropdown-content button .filter-icon {
+    color: #666;
+    transition: color 0.3s ease;
   }
   
   .dropdown:hover .dropdown-content {
@@ -295,12 +302,12 @@
   }
   
   .page__header-button:hover {
-    background-color: var(--primary-color);
-    color: white;
+    background-color: #5030E5 !important;
+    color: white !important;
   }
   
   .page__header-button:hover .page__header-icon {
-    color: white;
+    color: white !important;
   }
   
   .filter-section {
@@ -378,6 +385,85 @@
   
   .page__header-search .page__header-icon {
     color: #666;
+  }
+  
+  /* Thêm style cho nút sắp xếp khi active */
+  .page__header-button.active {
+    background-color: #5030E5;
+    color: white;
+  }
+  
+  /* Sửa style cho button trong dropdown */
+  .dropdown-content button {
+    width: 100%;
+    padding: 12px 16px;
+    text-align: left;
+    border: none;
+    background: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    color: #333;
+  }
+  
+  /* Sửa style cho hover state */
+  .dropdown-content button:hover {
+    background-color: #5030E5;
+    color: white !important;
+  }
+  
+  /* Sửa style cho selected text khi hover */
+  .dropdown-content button:hover .selected-text {
+    color: white !important;
+  }
+  
+  /* Sửa style cho icon khi hover */
+  .dropdown-content button:hover .sort-direction-icon,
+  .dropdown-content button:hover .filter-icon {
+    color: white !important;
+  }
+  
+  /* Thêm style cho page header button khi hover */
+  .page__header-button:hover {
+    background-color: #5030E5;
+    color: white !important;
+  }
+  
+  .page__header-button:hover .page__header-icon {
+    color: white !important;
+  }
+  
+  /* Style cho button đã được chọn trong dropdown */
+  .dropdown-content button.active,
+  .dropdown-content button[data-selected="true"] {
+    background-color: #5030E5;
+    color: white !important;
+  }
+  
+  /* Style cho icon trong button đã được chọn */
+  .dropdown-content button.active .sort-direction-icon,
+  .dropdown-content button.active .filter-icon,
+  .dropdown-content button[data-selected="true"] .sort-direction-icon,
+  .dropdown-content button[data-selected="true"] .filter-icon {
+    color: white !important;
+  }
+  
+  /* Style cho selected text trong button đã được chọn */
+  .dropdown-content button.active .selected-text,
+  .dropdown-content button[data-selected="true"] .selected-text {
+    color: white !important;
+  }
+  
+  /* Style cho page header button khi active */
+  .page__header-button.active {
+    background-color: #5030E5 !important;
+    color: white !important;
+  }
+  
+  .page__header-button.active .page__header-icon {
+    color: white !important;
   }
 
   

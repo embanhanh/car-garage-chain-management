@@ -1,0 +1,25 @@
+@media print {
+    .detail-invoice-modal {
+        padding: 0px;
+        background: white;
+    }
+
+    .page-btns {
+        display: none !important;
+    }
+}
+
+.detail-invoice-modal__info-img img {
+    max-width: 150px;
+    height: auto;
+}
+
+/* Thêm style cho nút đang loading */
+.primary-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.primary-button svg {
+    margin-right: 8px;
+}

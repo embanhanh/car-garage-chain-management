@@ -4,7 +4,10 @@ import {
     faArrowUpWideShort,
     faFilter,
     faSearch,
-    faEllipsisVertical
+    faEllipsisVertical,
+    faCaretDown,
+    faArrowUp,
+    faArrowDown
 } from '@fortawesome/free-solid-svg-icons'
 import { collection, increment, onSnapshot } from 'firebase/firestore'
 import Swal from 'sweetalert2'
@@ -39,6 +42,14 @@ function Component() {
     const [data, setData] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const itemsPerPage = 8
+    const [sortField, setSortField] = useState(null);
+    const [sortDirection, setSortDirection] = useState('desc');
+    const [filters, setFilters] = useState({
+        storagePosition: 'all',
+        category: 'all'
+    });
+    const [originalData, setOriginalData] = useState([]);
+    const [categories, setCategories] = useState([]);
 
     const fetchData = async () => {
         const data =
@@ -52,6 +63,7 @@ function Component() {
                       JSON.parse(localStorage.getItem('currentGarage'))?.id
                   )
         setData(data)
+        setOriginalData(data)
     }
 
     useEffect(() => {
@@ -105,6 +117,105 @@ function Component() {
         })
     }
 
+    const handleSort = (field) => {
+        let newDirection;
+        if (field === sortField) {
+            if (sortDirection === 'desc') {
+                newDirection = 'asc';
+            } else {
+                setSortField(null);
+                setSortDirection('desc');
+                setData([...originalData]);
+                return;
+            }
+        } else {
+            newDirection = 'desc';
+        }
+
+        setSortField(field);
+        setSortDirection(newDirection);
+
+        const sorted = [...data].sort((a, b) => {
+            if (!a[field] || !b[field]) return 0;
+
+            if (field === 'inventory' || field === 'price') {
+                const numA = parseFloat(a[field]) || 0;
+                const numB = parseFloat(b[field]) || 0;
+                return newDirection === 'desc' ? numB - numA : numA - numB;
+            }
+
+            const valueA = String(a[field] || '').toLowerCase();
+            const valueB = String(b[field] || '').toLowerCase();
+            return newDirection === 'desc' 
+                ? valueB.localeCompare(valueA)
+                : valueA.localeCompare(valueB);
+        });
+
+        setData(sorted);
+    };
+
+    const handleFilter = (type, value) => {
+        console.log("Filter type:", type);
+        console.log("Filter value:", value);
+        console.log("Current filters:", filters);
+        
+        setFilters(prev => ({ ...prev, [type]: value }));
+        
+        let filtered = [...originalData];
+        console.log("Data before filter:", filtered);
+
+        if (type === 'storagePosition') {
+            if (value !== 'all') {
+                filtered = filtered.filter(component => component.storagePosition === value);
+            }
+            // Giữ lại filter category nếu đang có
+            if (filters.category !== 'all') {
+                filtered = filtered.filter(component => {
+                    console.log("Component category:", component.category);
+                    return component.category?.id === filters.category;
+                });
+            }
+        }
+
+        if (type === 'category') {
+            if (value !== 'all') {
+                filtered = filtered.filter(component => {
+                    console.log("Component category:", component.category);
+                    return component.category?.id === value;
+                });
+            }
+            // Giữ lại filter storagePosition nếu đang có
+            if (filters.storagePosition !== 'all') {
+                filtered = filtered.filter(component => component.storagePosition === filters.storagePosition);
+            }
+        }
+
+        console.log("Filtered data:", filtered);
+        setData(filtered);
+    };
+
+    const fetchCategories = async () => {
+        try {
+            const categoriesData = await dbService.getAll(
+                'categories',
+                JSON.parse(localStorage.getItem('currentGarage'))?.id
+            );
+            setCategories(categoriesData);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
+    useEffect(() => {
+        console.log("Categories:", categories);
+        console.log("Original Data:", originalData);
+        console.log("Current Data:", data);
+    }, [categories, originalData, data]);
+
     return (
         <>
             <div className="main-container">
@@ -140,17 +251,106 @@ function Component() {
                     </div>
 
                     <div className="filter-area">
-                        <button className="page__header-button">
-                            <FontAwesomeIcon
-                                icon={faArrowUpWideShort}
-                                className="page__header-icon"
-                            />
-                            Sắp xếp
-                        </button>
-                        <button className="page__header-button">
-                            <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
-                            Lọc
-                        </button>
+                        <div className="dropdown">
+                            <button className={`page__header-button ${sortField ? 'active' : ''}`}>
+                                <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
+                                Sắp xếp{' '}
+                                {sortField && 
+                                    `(${
+                                        sortField === 'inventory' ? 'Số lượng' : 
+                                        sortField === 'price' ? 'Đơn giá' : 
+                                        'Mã phụ tùng'
+                                    } ${sortDirection === 'asc' ? '↑' : '↓'})`}
+                                <FontAwesomeIcon icon={faCaretDown} className="page__header-icon" />
+                            </button>
+                            <div className="dropdown-content">
+                                <div>
+                                    <h4 className="filter-title">Sắp xếp theo</h4>
+                                    <button onClick={() => handleSort('inventory')}>
+                                        Số lượng
+                                        {sortField === 'inventory' && (
+                                            <FontAwesomeIcon 
+                                                icon={sortDirection === 'asc' ? faArrowUp : faArrowDown} 
+                                                className="sort-direction-icon" 
+                                            />
+                                        )}
+                                    </button>
+                                    <button onClick={() => handleSort('price')}>
+                                        Đơn giá
+                                        {sortField === 'price' && (
+                                            <FontAwesomeIcon 
+                                                icon={sortDirection === 'asc' ? faArrowUp : faArrowDown} 
+                                                className="sort-direction-icon" 
+                                            />
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="dropdown">
+                            <button className={`page__header-button ${
+                                filters.storagePosition !== 'all' || filters.category !== 'all' ? 'active' : ''
+                            }`}>
+                                <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
+                                Lọc{' '}
+                                {(filters.storagePosition !== 'all' || filters.category !== 'all') && 
+                                    `(${[
+                                        filters.storagePosition !== 'all' ? filters.storagePosition : '',
+                                        filters.category !== 'all' ? categories.find(c => c.id === filters.category)?.name : ''
+                                    ].filter(Boolean).join(', ')})`
+                                }
+                                <FontAwesomeIcon icon={faCaretDown} className="page__header-icon" />
+                            </button>
+                            <div className="dropdown-content">
+                                <div className="filter-section">
+                                    <h4 className="filter-title">Kho hàng</h4>
+                                    <button onClick={() => handleFilter('storagePosition', 'all')}>
+                                        Tất cả
+                                        {filters.storagePosition === 'all' && (
+                                            <FontAwesomeIcon icon={faFilter} className="filter-icon" />
+                                        )}
+                                    </button>
+                                    <button onClick={() => handleFilter('storagePosition', 'B1')}>
+                                        Kho B1
+                                        {filters.storagePosition === 'B1' && (
+                                            <FontAwesomeIcon icon={faFilter} className="filter-icon" />
+                                        )}
+                                    </button>
+                                    <button onClick={() => handleFilter('storagePosition', 'B2')}>
+                                        Kho B2
+                                        {filters.storagePosition === 'B2' && (
+                                            <FontAwesomeIcon icon={faFilter} className="filter-icon" />
+                                        )}
+                                    </button>
+                                    <button onClick={() => handleFilter('storagePosition', 'B3')}>
+                                        Kho B3
+                                        {filters.storagePosition === 'B3' && (
+                                            <FontAwesomeIcon icon={faFilter} className="filter-icon" />
+                                        )}
+                                    </button>
+                                </div>
+                                <div className="filter-section">
+                                    <h4 className="filter-title">Loại phụ tùng</h4>
+                                    <button onClick={() => handleFilter('category', 'all')}>
+                                        Tất cả
+                                        {filters.category === 'all' && (
+                                            <FontAwesomeIcon icon={faFilter} className="filter-icon" />
+                                        )}
+                                    </button>
+                                    {categories.map(category => (
+                                        <button 
+                                            key={category.id} 
+                                            onClick={() => handleFilter('category', category.id)}
+                                        >
+                                            {category.name}
+                                            {filters.category === category.id && (
+                                                <FontAwesomeIcon icon={faFilter} className="filter-icon" />
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div className="employee-table">

@@ -9,6 +9,8 @@
     height: calc(100vh - var(--header-height));
     display: flex;
     flex-direction: column;
+    overflow: hidden; /* Ngăn scroll ngang */
+    position: relative;
   }
   
   /* Header Section */
@@ -49,6 +51,7 @@
     display: flex;
     align-items: center;
     gap: 10px; /* Khoảng cách giữa các phần tử trong filter-area */
+    position: relative;
   }
   
   /* Search Input */
@@ -78,6 +81,7 @@
     display: flex;
     flex-direction: column;
     margin-top: 15px;
+    overflow-y: auto;
   }
   
   /* Z-Table Container */
@@ -238,5 +242,25 @@
     margin-top: auto; 
     padding-top: 10px;
     margin-bottom: 10px;
+  }
+  
+  /* Sửa lại CSS cho dropdown */
+  .dropdown {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0; /* Đặt menu về phía bên phải */
+    background-color: #f9f9f9;
+    min-width: 200px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1000;
+    border-radius: 4px;
+    overflow-y: auto; /* Cho phép scroll trong dropdown nếu cần */
+    max-height: 400px; /* Giới hạn chiều cao tối đa */
   }
   

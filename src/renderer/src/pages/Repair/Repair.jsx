@@ -3,7 +3,10 @@ import {
     faArrowUpWideShort,
     faFilter,
     faSearch,
-    faEllipsisVertical
+    faEllipsisVertical,
+    faCaretDown,
+    faArrowUp,
+    faArrowDown
 } from '@fortawesome/free-solid-svg-icons'
 import { faCalendar } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -39,6 +42,12 @@ const Repair = () => {
     const [isLoading, setIsLoading] = useState(false)
     const itemsPerPage = 8
     const [searchTerm, setSearchTerm] = useState('')
+    const [sortField, setSortField] = useState(null);
+    const [sortDirection, setSortDirection] = useState('desc');
+    const [filters, setFilters] = useState({
+        status: 'all'
+    });
+    const [originalData, setOriginalData] = useState([]);
 
     const fetchData = async () => {
         const data = await dbService.getAll(
@@ -46,6 +55,7 @@ const Repair = () => {
             JSON.parse(localStorage.getItem('currentGarage'))?.id
         )
         setRepairRegisterData(data)
+        setOriginalData(data)
     }
 
     useEffect(() => {
@@ -126,6 +136,54 @@ const Repair = () => {
         }
     }, [repairRegisterData])
 
+    const handleSort = (field) => {
+        let newDirection;
+        if (field === sortField) {
+            if (sortDirection === 'desc') {
+                newDirection = 'asc';
+            } else {
+                setSortField(null);
+                setSortDirection('desc');
+                return;
+            }
+        } else {
+            newDirection = 'desc';
+        }
+
+        setSortField(field);
+        setSortDirection(newDirection);
+
+        const sorted = [...repairRegisterData].sort((a, b) => {
+            if (!a[field] || !b[field]) return 0;
+
+            if (field === 'createdAt' || field === 'expectedCompletionDate') {
+                const dateA = new Date(a[field]);
+                const dateB = new Date(b[field]);
+                return newDirection === 'desc' ? dateB - dateA : dateA - dateB;
+            }
+
+            const valueA = String(a[field] || '').toLowerCase();
+            const valueB = String(b[field] || '').toLowerCase();
+            return newDirection === 'desc' 
+                ? valueB.localeCompare(valueA)
+                : valueA.localeCompare(valueB);
+        });
+
+        setRepairRegisterData(sorted);
+    };
+
+    const handleFilter = (type, value) => {
+        setFilters(prev => ({ ...prev, [type]: value }));
+        
+        if (value === 'all') {
+            setRepairRegisterData([...originalData]);
+            return;
+        }
+
+        const filtered = originalData.filter(repair => repair.status === value);
+        setRepairRegisterData(filtered);
+    };
+
     return (
         <div className="repair-page">
             <div className="repair-page__header">
@@ -136,14 +194,95 @@ const Repair = () => {
                     <p>Tiếp nhận sửa chữa</p>
                 </button>
                 <div className="repair-page__header-filter">
-                    <button className="page__header-button">
-                        <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
-                        Sắp xếp
-                    </button>
-                    <button className="page__header-button">
-                        <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
-                        Lọc
-                    </button>
+                    <div className="dropdown">
+                        <button className={`page__header-button ${sortField ? 'active' : ''}`}>
+                            <FontAwesomeIcon icon={faArrowUpWideShort} className="page__header-icon" />
+                            Sắp xếp{' '}
+                            {sortField && 
+                                `(${
+                                    sortField === 'id' ? 'Mã phiếu' : 
+                                    sortField === 'createdAt' ? 'Ngày tạo' : 
+                                    'Ngày hoàn thành'
+                                } ${sortDirection === 'asc' ? '↑' : '↓'})`}
+                            <FontAwesomeIcon icon={faCaretDown} className="page__header-icon" />
+                        </button>
+                        <div className="dropdown-content">
+                            <div>
+                                <h4 className="filter-title">Sắp xếp theo</h4>
+                                <button onClick={() => handleSort('id')}>
+                                    Mã phiếu
+                                    {sortField === 'id' && (
+                                        <FontAwesomeIcon 
+                                            icon={sortDirection === 'asc' ? faArrowUp : faArrowDown} 
+                                            className="sort-direction-icon" 
+                                        />
+                                    )}
+                                </button>
+                                <button onClick={() => handleSort('createdAt')}>
+                                    Ngày tạo phiếu
+                                    {sortField === 'createdAt' && (
+                                        <FontAwesomeIcon 
+                                            icon={sortDirection === 'asc' ? faArrowUp : faArrowDown} 
+                                            className="sort-direction-icon" 
+                                        />
+                                    )}
+                                </button>
+                                <button onClick={() => handleSort('expectedCompletionDate')}>
+                                    Ngày hoàn thành
+                                    {sortField === 'expectedCompletionDate' && (
+                                        <FontAwesomeIcon 
+                                            icon={sortDirection === 'asc' ? faArrowUp : faArrowDown} 
+                                            className="sort-direction-icon" 
+                                        />
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="dropdown">
+                        <button className={`page__header-button ${filters.status !== 'all' ? 'active' : ''}`}>
+                            <FontAwesomeIcon icon={faFilter} className="page__header-icon" />
+                            Lọc{' '}
+                            {filters.status !== 'all' && 
+                                `(${filters.status})`}
+                            <FontAwesomeIcon icon={faCaretDown} className="page__header-icon" />
+                        </button>
+                        <div className="dropdown-content">
+                            <div className="filter-section">
+                                <h4 className="filter-title">Trạng thái</h4>
+                                <button onClick={() => handleFilter('status', 'all')}>
+                                    Tất cả
+                                    {filters.status === 'all' && (
+                                        <FontAwesomeIcon icon={faFilter} className="filter-icon" />
+                                    )}
+                                </button>
+                                <button onClick={() => handleFilter('status', 'Chờ xử lý')}>
+                                    Chờ xử lý
+                                    {filters.status === 'Chờ xử lý' && (
+                                        <FontAwesomeIcon icon={faFilter} className="filter-icon" />
+                                    )}
+                                </button>
+                                <button onClick={() => handleFilter('status', 'Đang sửa chữa')}>
+                                    Đang sửa chữa
+                                    {filters.status === 'Đang sửa chữa' && (
+                                        <FontAwesomeIcon icon={faFilter} className="filter-icon" />
+                                    )}
+                                </button>
+                                <button onClick={() => handleFilter('status', 'Đã hoàn thành')}>
+                                    Đã hoàn thành
+                                    {filters.status === 'Đã hoàn thành' && (
+                                        <FontAwesomeIcon icon={faFilter} className="filter-icon" />
+                                    )}
+                                </button>
+                                <button onClick={() => handleFilter('status', 'Đã hủy')}>
+                                    Đã hủy
+                                    {filters.status === 'Đã hủy' && (
+                                        <FontAwesomeIcon icon={faFilter} className="filter-icon" />
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <div className="page__header-search">
                         <FontAwesomeIcon icon={faSearch} className="page__header-icon" />
                         <input
