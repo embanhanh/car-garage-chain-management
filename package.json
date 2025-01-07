@@ -39,7 +39,8 @@
         "react-datepicker": "^7.5.0",
         "react-router-dom": "^6.26.2",
         "sweetalert2": "^11.15.3",
-        "swiper": "^11.1.14"
+        "swiper": "^11.1.14",
+        "xlsx": "^0.18.5"
     },
     "devDependencies": {
         "@electron-toolkit/eslint-config": "^1.0.2",

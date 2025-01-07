@@ -1,49 +1,30 @@
-import React, { useEffect, useState } from 'react'
-import { Bar } from 'react-chartjs-2'
+import React, { forwardRef, useImperativeHandle, useState, useEffect } from 'react'
+import { Line } from 'react-chartjs-2'
+import * as XLSX from 'xlsx'
 import {
     Chart as ChartJS,
     CategoryScale,
     LinearScale,
-    BarElement,
+    PointElement,
+    LineElement,
     Title,
     Tooltip,
     Legend
 } from 'chart.js'
-import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns'
-import { getBillsByDate } from '../../controllers/billController'
-import { getDateRangeText } from '../../utils/StringUtil'
+import { startOfYear, endOfYear } from 'date-fns'
+import { getBillsByGarageId } from '../../controllers/billController'
+import { getInputComponentRegisterByGarageId } from '../../controllers/inputComponentRegisterController'
+import { format } from 'date-fns'
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
-function ReportRevenue({ dateRange = 'week', selectedDate = new Date() }) {
-    const [revenueData, setRevenueData] = useState([
+const ReportRevenue = forwardRef(({ selectedDate = new Date() }, ref) => {
+    const garageId = JSON.parse(localStorage.getItem('currentGarage'))?.id
+    const [data, setData] = useState([
         {
-            serviceName: 'Rửa xe cơ bản',
-            customerName: 'Khách lẻ',
-            totalRevenue: 2500000,
-            totalCost: 1200000,
-            profit: 1300000
-        },
-        {
-            serviceName: 'Thay nhớt',
-            customerName: 'Công ty ABC',
-            totalRevenue: 4800000,
-            totalCost: 3200000,
-            profit: 1600000
-        },
-        {
-            serviceName: 'Bảo dưỡng định kỳ',
-            customerName: 'Khách VIP',
-            totalRevenue: 8500000,
-            totalCost: 5500000,
-            profit: 3000000
-        },
-        {
-            serviceName: 'Sửa chữa động cơ',
-            customerName: 'Công ty XYZ',
-            totalRevenue: 12000000,
-            totalCost: 7000000,
-            profit: 5000000
+            revenue: 0,
+            cost: 0,
+            profit: 0
         }
     ])
     const [isLoading, setIsLoading] = useState(false)
@@ -53,106 +34,145 @@ function ReportRevenue({ dateRange = 'week', selectedDate = new Date() }) {
             {
                 label: 'Doanh thu',
                 data: [],
-                backgroundColor: 'rgba(53, 162, 235, 0.8)',
-                stack: 'Stack 0'
+                borderColor: 'rgb(53, 162, 235)',
+                backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                tension: 0.3
             },
             {
                 label: 'Chi phí',
                 data: [],
-                backgroundColor: 'rgba(255, 99, 132, 0.8)',
-                stack: 'Stack 1'
+                borderColor: 'rgb(255, 99, 132)',
+                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                tension: 0.3
+            },
+            {
+                label: 'Lợi nhuận',
+                data: [],
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                tension: 0.3
             }
         ]
     })
+
+    const processDataByMonth = async (startDate, endDate) => {
+        try {
+            const [bills, inputComponents] = await Promise.all([
+                getBillsByGarageId(garageId, startDate, endDate),
+                getInputComponentRegisterByGarageId(garageId, startDate, endDate)
+            ])
+
+            // Khởi tạo mảng dữ liệu cho 12 tháng
+            const monthlyData = Array(12)
+                .fill(0)
+                .map(() => ({
+                    revenue: 0,
+                    cost: 0,
+                    profit: 0
+                }))
+
+            // Xử lý doanh thu từ bills
+            if (bills && Array.isArray(bills)) {
+                bills.forEach((bill) => {
+                    if (bill.createdAt) {
+                        const month = new Date(bill.createdAt).getMonth()
+                        monthlyData[month].revenue += bill.total || 0
+                    }
+                })
+            }
+
+            // Xử lý chi phí từ inputComponents
+            if (inputComponents && Array.isArray(inputComponents)) {
+                inputComponents.forEach((input) => {
+                    if (input.createdAt && input.details) {
+                        const month = new Date(input.createdAt).getMonth()
+                        const totalCost = input.details.reduce(
+                            (sum, detail) => sum + detail.quantity * detail.inputPrice,
+                            0
+                        )
+                        monthlyData[month].cost += totalCost
+                    }
+                })
+            }
+
+            // Tính lợi nhuận cho từng tháng
+            monthlyData.forEach((data) => {
+                data.profit = data.revenue - data.cost
+            })
+
+            return monthlyData
+        } catch (error) {
+            console.error('Error processing data:', error)
+            throw error
+        }
+    }
 
     const fetchDataByDateRange = async () => {
         setIsLoading(true)
         try {
             const now = selectedDate || new Date()
-            let startDate, endDate
+            const startDate = startOfYear(now)
+            const endDate = endOfYear(now)
 
-            switch (dateRange) {
-                case 'week':
-                    startDate = startOfWeek(now, { weekStartsOn: 1 })
-                    endDate = endOfWeek(now, { weekStartsOn: 1 })
-                    break
-                case 'month':
-                    startDate = startOfMonth(now)
-                    endDate = endOfMonth(now)
-                    break
-                case 'year':
-                    startDate = startOfYear(now)
-                    endDate = endOfYear(now)
-                    break
-                default:
-                    startDate = startOfWeek(now, { weekStartsOn: 1 })
-                    endDate = endOfWeek(now, { weekStartsOn: 1 })
-            }
+            const monthlyData = await processDataByMonth(startDate, endDate)
 
-            const response = await getBillsByDate(startDate, endDate)
+            // Cập nhật data state với dữ liệu theo tháng
+            setData(monthlyData)
 
-            if (!response || !Array.isArray(Object.values(response))) {
-                console.warn('Invalid response:', response)
-                return
-            }
-
-            // Chuyển đổi object thành array
-            const responseArray = Object.values(response)
-
-            // Tổng hợp dữ liệu theo dịch vụ
-            const aggregatedData = responseArray.reduce((acc, bill) => {
-                bill.services?.forEach((service) => {
-                    const serviceId = service.id
-                    if (!acc[serviceId]) {
-                        acc[serviceId] = {
-                            serviceName: service.name || 'Unknown',
-                            customerName: bill.customer?.name || 'Unknown',
-                            totalRevenue: 0,
-                            totalCost: 0,
-                            profit: 0
-                        }
-                    }
-
-                    // Tính toán doanh thu và chi phí
-                    const revenue = service.price || 0
-                    const cost =
-                        service.components?.reduce(
-                            (total, comp) => total + (comp.quantity || 0) * (comp.inputPrice || 0),
-                            0
-                        ) || 0
-
-                    acc[serviceId].totalRevenue += revenue
-                    acc[serviceId].totalCost += cost
-                    acc[serviceId].profit += revenue - cost
-                })
-                return acc
-            }, {})
-
-            // Chuyển đổi từ object sang array
-            const result = Object.values(aggregatedData)
-            setRevenueData(result)
-
-            // Cập nhật dữ liệu biểu đồ
+            // Cập nhật chart data
             setChartData({
-                labels: result.map((item) => item.serviceName),
+                labels: [
+                    'Tháng 1',
+                    'Tháng 2',
+                    'Tháng 3',
+                    'Tháng 4',
+                    'Tháng 5',
+                    'Tháng 6',
+                    'Tháng 7',
+                    'Tháng 8',
+                    'Tháng 9',
+                    'Tháng 10',
+                    'Tháng 11',
+                    'Tháng 12'
+                ],
                 datasets: [
                     {
                         label: 'Doanh thu',
-                        data: result.map((item) => item.totalRevenue),
-                        backgroundColor: 'rgba(53, 162, 235, 0.8)',
-                        stack: 'Stack 0'
+                        data: monthlyData.map((data) => data.revenue),
+                        borderColor: 'rgb(53, 162, 235)',
+                        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                        tension: 0.3
                     },
                     {
                         label: 'Chi phí',
-                        data: result.map((item) => item.totalCost),
-                        backgroundColor: 'rgba(255, 99, 132, 0.8)',
-                        stack: 'Stack 1'
+                        data: monthlyData.map((data) => data.cost),
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Lợi nhuận',
+                        data: monthlyData.map((data) => data.profit),
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        tension: 0.3
                     }
                 ]
             })
         } catch (error) {
             console.error('Error fetching data:', error)
-            setRevenueData([])
+            // Reset data về mảng với một phần tử mặc định
+            setData([
+                {
+                    revenue: 0,
+                    cost: 0,
+                    profit: 0
+                }
+            ])
+            setChartData({
+                labels: [],
+                datasets: []
+            })
         } finally {
             setIsLoading(false)
         }
@@ -160,7 +180,11 @@ function ReportRevenue({ dateRange = 'week', selectedDate = new Date() }) {
 
     useEffect(() => {
         fetchDataByDateRange()
-    }, [dateRange, selectedDate])
+    }, [selectedDate])
+
+    useEffect(() => {
+        console.log('data:', data)
+    }, [data])
 
     const options = {
         responsive: true,
@@ -171,7 +195,7 @@ function ReportRevenue({ dateRange = 'week', selectedDate = new Date() }) {
             },
             title: {
                 display: true,
-                text: `Thống kê doanh thu ${getDateRangeText(dateRange, selectedDate)}`,
+                text: `Thống kê doanh thu năm ${format(selectedDate, 'yyyy')}`,
                 font: {
                     size: 16,
                     weight: 'bold'
@@ -211,106 +235,158 @@ function ReportRevenue({ dateRange = 'week', selectedDate = new Date() }) {
         }
     }
 
+    useImperativeHandle(ref, () => ({
+        exportToExcel: () => {
+            try {
+                const wb = XLSX.utils.book_new()
+
+                // 1. Tạo worksheet tổng quan theo tháng
+                const monthlyData = chartData.labels.map((month, index) => ({
+                    Tháng: month,
+                    'Doanh thu': chartData.datasets[0].data[index],
+                    'Chi phí': chartData.datasets[1].data[index],
+                    'Lợi nhuận': chartData.datasets[2].data[index]
+                }))
+
+                // Tính tổng
+                const totals = monthlyData.reduce(
+                    (acc, curr) => ({
+                        Tháng: 'Tổng cộng',
+                        'Doanh thu': acc['Doanh thu'] + curr['Doanh thu'],
+                        'Chi phí': acc['Chi phí'] + curr['Chi phí'],
+                        'Lợi nhuận': acc['Lợi nhuận'] + curr['Lợi nhuận']
+                    }),
+                    { 'Doanh thu': 0, 'Chi phí': 0, 'Lợi nhuận': 0 }
+                )
+
+                monthlyData.push(totals)
+
+                // 2. Tạo worksheet chi tiết doanh thu
+                const detailedRevenueData = data.map((item, index) => ({
+                    Tháng: chartData.labels[index],
+                    'Doanh thu': item.revenue,
+                    'Chi phí nhập hàng': item.cost,
+                    'Lợi nhuận': item.profit,
+                    'Tỷ suất lợi nhuận (%)': item.revenue
+                        ? ((item.profit / item.revenue) * 100).toFixed(2)
+                        : 0
+                }))
+
+                const wsSummary = XLSX.utils.json_to_sheet(monthlyData)
+                const wsDetailed = XLSX.utils.json_to_sheet(detailedRevenueData)
+
+                // Định dạng độ rộng cột
+                const colWidths = [
+                    { wch: 15 }, // Tháng
+                    { wch: 20 }, // Doanh thu
+                    { wch: 20 }, // Chi phí
+                    { wch: 20 }, // Lợi nhuận
+                    { wch: 20 } // Tỷ suất lợi nhuận
+                ]
+
+                wsSummary['!cols'] = colWidths
+                wsDetailed['!cols'] = colWidths
+
+                // Định dạng tiền tệ
+                const formatCurrency = (value) => {
+                    return new Intl.NumberFormat('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND'
+                    }).format(value)
+                }
+
+                // Áp dụng định dạng tiền tệ cho cả hai worksheet
+                ;[wsSummary, wsDetailed].forEach((ws) => {
+                    const range = XLSX.utils.decode_range(ws['!ref'])
+                    for (let row = 2; row <= range.e.r + 1; row++) {
+                        // Định dạng cột doanh thu, chi phí, lợi nhuận
+                        ;['B', 'C', 'D'].forEach((col) => {
+                            const cell = ws[`${col}${row}`]
+                            if (cell && typeof cell.v === 'number') {
+                                cell.v = formatCurrency(cell.v)
+                                cell.t = 's'
+                            }
+                        })
+
+                        // Định dạng cột tỷ suất lợi nhuận (nếu có)
+                        const percentCell = ws[`E${row}`]
+                        if (percentCell && typeof percentCell.v === 'number') {
+                            percentCell.v = `${percentCell.v}%`
+                            percentCell.t = 's'
+                        }
+                    }
+                })
+
+                // Thêm style cho header
+                const headerStyle = {
+                    font: { bold: true },
+                    fill: { fgColor: { rgb: 'CCCCCC' } },
+                    alignment: { horizontal: 'center' }
+                }
+
+                // Áp dụng style cho header của cả hai worksheet
+                ;[wsSummary, wsDetailed].forEach((ws) => {
+                    const range = XLSX.utils.decode_range(ws['!ref'])
+                    for (let C = range.s.c; C <= range.e.c; ++C) {
+                        const address = XLSX.utils.encode_cell({ r: 0, c: C })
+                        if (!ws[address]) continue
+                        ws[address].s = headerStyle
+                    }
+                })
+
+                // Thêm các worksheet vào workbook
+                XLSX.utils.book_append_sheet(wb, wsSummary, 'Tổng quan')
+                XLSX.utils.book_append_sheet(wb, wsDetailed, 'Chi tiết doanh thu')
+
+                // Xuất file dưới dạng blob và tải xuống
+                const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+                const blob = new Blob([wbout], {
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                })
+
+                // Tạo URL cho blob
+                const url = window.URL.createObjectURL(blob)
+
+                // Tạo tên file với năm
+                const fileName = `Bao_cao_doanh_thu_${format(selectedDate, 'yyyy')}.xlsx`
+
+                // Tạo thẻ a ẩn và kích hoạt
+                const a = document.createElement('a')
+                a.href = url
+                a.download = fileName
+                document.body.appendChild(a)
+                a.click()
+
+                // Cleanup
+                window.URL.revokeObjectURL(url)
+                document.body.removeChild(a)
+            } catch (error) {
+                console.error('Error exporting to Excel:', error)
+                alert('Có lỗi khi xuất file Excel')
+            }
+        }
+    }))
+
     return (
         <div className="report-revenue">
-            <div className="report-revenue__table-container">
-                <p className="report__table-title">
-                    Thống kê doanh thu {getDateRangeText(dateRange, selectedDate)}
-                </p>
-                {isLoading ? (
-                    <div
-                        className="d-flex justify-content-center align-items-center"
-                        style={{ minHeight: '200px' }}
-                    >
-                        <div className="spinner-border text-primary" role="status">
-                            <span className="visually-hidden">Đang tải...</span>
-                        </div>
-                    </div>
-                ) : revenueData.length === 0 ? (
-                    <div
-                        className="d-flex justify-content-center align-items-center"
-                        style={{ minHeight: '200px' }}
-                    >
-                        <p>Không có dữ liệu</p>
-                    </div>
-                ) : (
-                    <table className="page-table">
-                        <thead>
-                            <tr>
-                                <th>STT</th>
-                                <th>Tên dịch vụ</th>
-                                <th>Khách hàng</th>
-                                <th>Doanh thu</th>
-                                <th>Chi phí</th>
-                                <th>Lợi nhuận</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {revenueData.map((item, index) => (
-                                <tr key={index}>
-                                    <td>{index + 1}</td>
-                                    <td>{item.serviceName}</td>
-                                    <td>{item.customerName}</td>
-                                    <td>{item.totalRevenue.toLocaleString('vi-VN')}đ</td>
-                                    <td>{item.totalCost.toLocaleString('vi-VN')}đ</td>
-                                    <td>{item.profit.toLocaleString('vi-VN')}đ</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colSpan="3" style={{ textAlign: 'right', fontWeight: 'bold' }}>
-                                    Tổng cộng:
-                                </td>
-                                <td style={{ fontWeight: 'bold' }}>
-                                    {revenueData
-                                        .reduce((sum, item) => sum + item.totalRevenue, 0)
-                                        .toLocaleString('vi-VN')}
-                                    đ
-                                </td>
-                                <td style={{ fontWeight: 'bold' }}>
-                                    {revenueData
-                                        .reduce((sum, item) => sum + item.totalCost, 0)
-                                        .toLocaleString('vi-VN')}
-                                    đ
-                                </td>
-                                <td style={{ fontWeight: 'bold' }}>
-                                    {revenueData
-                                        .reduce((sum, item) => sum + item.profit, 0)
-                                        .toLocaleString('vi-VN')}
-                                    đ
-                                </td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                )}
-            </div>
-
             <div className="report-revenue__charts">
                 <div className="report-revenue__chart-container" style={{ height: '400px' }}>
                     {isLoading ? (
                         <div
                             className="d-flex justify-content-center align-items-center"
-                            style={{ minHeight: '200px' }}
+                            style={{ height: '100%' }}
                         >
                             <div className="spinner-border text-primary" role="status">
                                 <span className="visually-hidden">Đang tải...</span>
                             </div>
                         </div>
-                    ) : revenueData.length === 0 ? (
-                        <div
-                            className="d-flex justify-content-center align-items-center"
-                            style={{ minHeight: '200px' }}
-                        >
-                            <p>Không có dữ liệu</p>
-                        </div>
                     ) : (
-                        <Bar options={options} data={chartData} />
+                        <Line options={options} data={chartData} />
                     )}
                 </div>
             </div>
         </div>
     )
-}
+})
 
 export default ReportRevenue

@@ -5,8 +5,8 @@ export const getBills = async () => {
     return bills
 }
 
-export const getBillsByDate = async (startDate, endDate) => {
-    const bills = await dbService.getAll('bills')
+export const getBillsByGarageId = async (garageId, startDate, endDate) => {
+    const bills = await dbService.getAll('bills', garageId)
     const parsedStartDate = new Date(startDate)
     const parsedEndDate = new Date(endDate)
     const filteredBills = bills.filter((bill) => {
