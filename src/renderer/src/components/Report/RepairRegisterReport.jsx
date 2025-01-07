@@ -11,7 +11,7 @@ import {
     format,
     getWeek
 } from 'date-fns'
-import { getRepairRegisterByDate } from '../../controllers/repairController'
+import { getServiceRegisterByGarageId } from '../../controllers/serviceRegisterController'
 import './Report.css'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
@@ -130,7 +130,11 @@ function ReportRepair({ dateRange = 'week', selectedDate = new Date() }) {
                     endDate = endOfWeek(now, { weekStartsOn: 1 })
             }
 
-            const response = await getRepairRegisterByDate(startDate, endDate)
+            const response = await getServiceRegisterByGarageId(
+                JSON.parse(localStorage.getItem('currentGarage'))?.id,
+                startDate,
+                endDate
+            )
 
             if (Array.isArray(response)) {
                 setRepairData(response)

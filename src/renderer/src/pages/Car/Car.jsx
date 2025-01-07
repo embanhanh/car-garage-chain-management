@@ -373,7 +373,14 @@ const Car = () => {
             <Modal
                 isOpen={carDetail.show}
                 onClose={() => setCarDetail({ show: false, data: null })}
-                showHeader={false}
+                showHeader={true}
+                title={
+                    carDetail.type === 'detail'
+                        ? 'Chi tiết xe'
+                        : carDetail.type === 'update'
+                          ? 'Cập nhật xe'
+                          : 'Thêm xe'
+                }
                 width="520px"
             >
                 <UpDetailCarModal

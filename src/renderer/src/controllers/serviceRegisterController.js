@@ -6,9 +6,9 @@ export const getServiceRegister = async () => {
     return serviceRegister
 }
 
-export const getServiceRegisterByDate = async (startDate, endDate) => {
+export const getServiceRegisterByGarageId = async (garageId, startDate, endDate) => {
     try {
-        const serviceRegisters = await dbService.getAll('serviceregisters')
+        const serviceRegisters = await dbService.getAll('serviceregisters', garageId)
 
         if (!Array.isArray(serviceRegisters)) {
             console.warn('Không có dữ liệu từ cơ sở dữ liệu.')

@@ -384,7 +384,14 @@ function Component() {
                                                 <td>{component.name}</td>
                                                 <td>{component.category?.name}</td>
                                                 <td>{component.inventory}</td>
-                                                <td>{component.price}</td>
+                                                <td>
+                                                    {component.price
+                                                        ? component.price.toLocaleString('vi-VN', {
+                                                              style: 'currency',
+                                                              currency: 'VND'
+                                                          })
+                                                        : ''}
+                                                </td>
                                                 <td>{component.storagePosition}</td>
 
                                                 <td className="overflow-visible">
@@ -471,12 +478,17 @@ function Component() {
                                                     )}
                                                 </td>
                                                 <td>
-                                                    {register?.details?.reduce(
-                                                        (total, detail) =>
-                                                            total +
-                                                            detail.quantity * detail.inputPrice,
-                                                        0
-                                                    )}
+                                                    {register?.details
+                                                        ?.reduce(
+                                                            (total, detail) =>
+                                                                total +
+                                                                detail.quantity * detail.inputPrice,
+                                                            0
+                                                        )
+                                                        .toLocaleString('vi-VN', {
+                                                            style: 'currency',
+                                                            currency: 'VND'
+                                                        })}
                                                 </td>
                                                 <td>{register.supplier?.name}</td>
                                                 <td className="overflow-visible">

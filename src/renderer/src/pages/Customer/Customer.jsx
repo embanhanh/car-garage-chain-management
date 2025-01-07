@@ -450,7 +450,8 @@ function Customer() {
             <Modal
                 isOpen={isOpenEdit}
                 onClose={() => setIsOpenEdit(false)}
-                showHeader={false}
+                showHeader={true}
+                title="Cập nhật khách hàng"
                 width="680px"
             >
                 <AddCustomer
@@ -462,7 +463,8 @@ function Customer() {
             <Modal
                 isOpen={isOpenDetail}
                 onClose={() => setIsOpenDetail(false)}
-                showHeader={false}
+                showHeader={true}
+                title="Chi tiết khách hàng"
                 width="680px"
             >
                 <DetailCustomer

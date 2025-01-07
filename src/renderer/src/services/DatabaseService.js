@@ -27,6 +27,7 @@ import { ServiceRegister } from '../models/serviceregister'
 import { ServiceType } from '../models/servicetype'
 import { TrackingRegister } from '../models/trackingregister'
 import { Notification } from '../models/notification'
+import { Parameter } from '../models/paramater'
 
 class DatabaseService {
     static instance = null
@@ -102,6 +103,10 @@ class DatabaseService {
             notifications: {
                 name: 'notifications',
                 model: Notification
+            },
+            parameters: {
+                name: 'parameters',
+                model: Parameter
             }
         }
     }

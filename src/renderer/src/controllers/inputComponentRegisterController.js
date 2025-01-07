@@ -6,15 +6,16 @@ export const getInputComponentRegister = async () => {
     return inputComponentRegister
 }
 
-export const getInputComponentRegisterByDate = async (startDate, endDate) => {
+export const getInputComponentRegisterByGarageId = async (garageId, startDate, endDate) => {
     try {
-        const inputComponentRegister = await dbService.getAll('inputcomponentregisters')
+        const inputComponentRegister = await dbService.getAll('inputcomponentregisters', garageId)
 
         if (!Array.isArray(inputComponentRegister)) {
             console.warn('Không có dữ liệu từ cơ sở dữ liệu.')
             return []
         }
 
+        console.log('check inputComponentRegister:', startDate, endDate)
         const parsedStartDate = new Date(startDate)
         const parsedEndDate = new Date(endDate)
 

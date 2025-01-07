@@ -8,12 +8,12 @@ import './Report.css'
 import ReportRevenue from '../../components/Report/ReportRevenue'
 import ReportCost from '../../components/Report/ReportCost'
 import ReportProfit from '../../components/Report/ReportProfit'
-import ReportStock from '../../components/Report/ReportStock'
+import ReportComponent from '../../components/Report/ReportComponent'
 import ReportCustomer from '../../components/Report/ReportCustomer'
 import RepairRegisterReport from '../../components/Report/RepairRegisterReport'
 
 const Report = () => {
-    const [tab, setTab] = useState('stock')
+    const [tab, setTab] = useState('component')
     const [dateRange, setDateRange] = useState('week')
     const [selectedDate, setSelectedDate] = useState(new Date())
 
@@ -27,6 +27,11 @@ const Report = () => {
         console.log(tab)
     }, [tab])
 
+    useEffect(() => {
+        console.log('check dateRange:', dateRange)
+        console.log('check selectedDate:', selectedDate)
+    }, [dateRange, selectedDate])
+
     return (
         <div className="report-page">
             <div className="report-page__header">
@@ -36,23 +41,11 @@ const Report = () => {
                 >
                     Doanh thu
                 </button>
-                {/* <button
-                    className={`report-page__header-button ${tab === 'cost' ? 'active' : ''}`}
-                    onClick={() => setTab('cost')}
-                >
-                    Chi phí
-                </button>
                 <button
-                    className={`report-page__header-button ${tab === 'profit' ? 'active' : ''}`}
-                    onClick={() => setTab('profit')}
+                    className={`tab-btn ${tab === 'component' ? 'active' : ''}`}
+                    onClick={() => setTab('component')}
                 >
-                    Lợi nhuận
-                </button> */}
-                <button
-                    className={`tab-btn ${tab === 'stock' ? 'active' : ''}`}
-                    onClick={() => setTab('stock')}
-                >
-                    Nhập kho
+                    Phụ tùng
                 </button>
                 <button
                     className={`tab-btn ${tab === 'customer' ? 'active' : ''}`}
@@ -95,13 +88,16 @@ const Report = () => {
                     locale={vi}
                     className="report-page__header-date w-auto"
                 />
+                <button className="btn btn-primary">Xuất Excel</button>
             </div>
             {tab === 'revenue' && (
                 <ReportRevenue dateRange={dateRange} selectedDate={selectedDate} />
             )}
             {tab === 'cost' && <ReportCost dateRange={dateRange} selectedDate={selectedDate} />}
             {tab === 'profit' && <ReportProfit dateRange={dateRange} selectedDate={selectedDate} />}
-            {tab === 'stock' && <ReportStock dateRange={dateRange} selectedDate={selectedDate} />}
+            {tab === 'component' && (
+                <ReportComponent dateRange={dateRange} selectedDate={selectedDate} />
+            )}
             {tab === 'customer' && (
                 <ReportCustomer dateRange={dateRange} selectedDate={selectedDate} />
             )}
