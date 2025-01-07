@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCalendarPlus } from '@fortawesome/free-solid-svg-icons'
 import { getRecentRepairRegisters } from '../../controllers/repairController'
 import { getRecentServiceRegisters } from '../../controllers/serviceRegisterController'
-import { getBillsByDate } from '../../controllers/billController'
+import { getBillsByGarageId } from '../../controllers/billController'
 import { onSnapshot, collection } from 'firebase/firestore'
 import Modal from '../../components/Modal'
 import { db } from '../../firebase.config'
@@ -146,7 +146,11 @@ function Home() {
             try {
                 // Lấy doanh thu hôm nay
                 const today = new Date()
-                const bills = await getBillsByDate(today, today)
+                const bills = await getBillsByGarageId(
+                    JSON.parse(localStorage.getItem('currentGarage'))?.id,
+                    today,
+                    today
+                )
                 const todayRevenue = bills.reduce(
                     (total, bill) => total + (bill.totalAmount || 0),
                     0

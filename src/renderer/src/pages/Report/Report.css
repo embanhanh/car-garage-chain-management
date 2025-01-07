@@ -298,6 +298,11 @@
     gap: 10px;
 }
 
+.report-page__body-label {
+    font-size: 1.6rem;
+    font-weight: 500;
+}
+
 .report-page__body-select {
     height: 40px;
     border-radius: 8px;
