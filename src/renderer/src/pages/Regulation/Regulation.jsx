@@ -80,7 +80,7 @@ function Regulation() {
                         className={`tab-btn ${tab === 'param' ? 'active' : ''}`}
                         onClick={() => setTab('param')}
                     >
-                        Param
+                        Tham số
                     </button>
                 </div>
                 {JSON.parse(localStorage.getItem('currentUser'))?.role === 'admin' && tab !== 'param' && (
