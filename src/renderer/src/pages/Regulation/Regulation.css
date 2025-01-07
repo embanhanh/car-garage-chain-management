@@ -306,26 +306,34 @@
 
 .regulation-table th,
 .regulation-table td {
+    text-align: left !important;
     padding: 12px;
-    text-align: left;
     border-bottom: 1px solid #eee;
 }
 
-.regulation-table th:nth-child(1),
-.regulation-table td:nth-child(1) {
+.regulation-table th:first-child,
+.regulation-table td:first-child {
+    text-align: center !important;
     width: 80px;
-    text-align: center;
 }
 
+.regulation-table td:nth-child(3),
 .regulation-table th:nth-child(3),
-.regulation-table td:nth-child(3) {
-    text-align: right;
+.regulation-table td:nth-child(4),
+.regulation-table th:nth-child(4),
+.regulation-table td:nth-child(6),
+.regulation-table th:nth-child(6),
+.regulation-table td:nth-child(7),
+.regulation-table th:nth-child(7),
+.regulation-table td:nth-child(8),
+.regulation-table th:nth-child(8) {
+    text-align: left !important;
 }
 
-.regulation-table th:nth-child(4),
-.regulation-table td:nth-child(4) {
+.regulation-table th:last-child,
+.regulation-table td:last-child {
     width: 100px;
-    text-align: center;
+    text-align: center !important;
 }
 
 .tab-btn {

@@ -7,6 +7,7 @@ import Swal from 'sweetalert2'
 import { getBrands } from '../../controllers/brandController'
 import AddBrandModal from '../../components/Brand/AddBrandModal'
 import { db } from '../../firebase.config'
+import { getParameters } from '../../controllers/parameterController'
 
 import { useState, useEffect } from 'react'
 
@@ -16,6 +17,7 @@ function Regulation() {
     const [isAddBrandModalOpen, setIsAddBrandModalOpen] = useState(false)
     const [services, setServices] = useState([])
     const [brands, setBrands] = useState([])
+    const [parameters, setParameters] = useState([])
 
     const fetchServices = async () => {
         const services = await getService()
@@ -27,9 +29,15 @@ function Regulation() {
         setBrands(brands)
     }
 
+    const fetchParameters = async () => {
+        const params = await getParameters()
+        setParameters(params)
+    }
+
     useEffect(() => {
         fetchServices()
         fetchBrands()
+        fetchParameters()
     }, [])
 
     const handleAddService = () => {
@@ -68,8 +76,14 @@ function Regulation() {
                     >
                         Hãng xe
                     </button>
+                    <button
+                        className={`tab-btn ${tab === 'param' ? 'active' : ''}`}
+                        onClick={() => setTab('param')}
+                    >
+                        Param
+                    </button>
                 </div>
-                {JSON.parse(localStorage.getItem('currentUser'))?.role === 'admin' && (
+                {JSON.parse(localStorage.getItem('currentUser'))?.role === 'admin' && tab !== 'param' && (
                     <div className="z-btn-center">
                         <button
                             className="primary-button"
@@ -82,75 +96,109 @@ function Regulation() {
             </div>
 
             <div className="regulation-page__content">
-                {tab === 'service' ? (
-                    <table className="regulation-table page-table">
-                        <thead>
-                            <tr>
-                                <th>STT</th>
-                                <th>Tên dịch vụ</th>
-                                <th>Loại dịch vụ</th>
-                                <th>Thời gian thực hiện</th>
-                                <th>Giá</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {services.map((service, index) => (
-                                <tr key={service.id}>
-                                    <td>{index + 1}</td>
-                                    <td>{service.name}</td>
-                                    <td>{service.serviceType?.name || ''}</td>
-                                    <td>{service.duration}</td>
-                                    <td>{service.price?.toLocaleString('vi-VN')}đ</td>
-                                    <td className="overflow-visible">
-                                        <div className="table__actions">
-                                            <FontAwesomeIcon
-                                                icon={faEllipsisVertical}
-                                                className="table__action-icon"
-                                            />
-                                            <div className="table__action-menu">
-                                                <div className="table__action-item">Cập nhật</div>
-                                                <div className="table__action-item">Xóa</div>
-                                            </div>
-                                        </div>
-                                    </td>
+                <div className="table-container">
+                    {tab === 'service' ? (
+                        <table className="regulation-table page-table table-scrollable">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Tên dịch vụ</th>
+                                    <th>Loại dịch vụ</th>
+                                    <th>Thời gian thực hiện</th>
+                                    <th>Giá</th>
+                                    <th>Thao tác</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                ) : (
-                    <table className="regulation-table page-table">
-                        <thead>
-                            <tr>
-                                <th>STT</th>
-                                <th>Tên hãng xe</th>
-                                <th>Model</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {brands.map((brand, index) => (
-                                <tr key={brand.id}>
-                                    <td>{index + 1}</td>
-                                    <td>{brand.name}</td>
-                                    <td>{brand.model}</td>
-                                    <td className="overflow-visible">
-                                        <div className="table__actions">
-                                            <FontAwesomeIcon
-                                                icon={faEllipsisVertical}
-                                                className="table__action-icon"
-                                            />
-                                            <div className="table__action-menu">
-                                                <div className="table__action-item">Cập nhật</div>
-                                                <div className="table__action-item">Xóa</div>
+                            </thead>
+                            <tbody>
+                                {services.map((service, index) => (
+                                    <tr key={service.id}>
+                                        <td>{index + 1}</td>
+                                        <td>{service.name}</td>
+                                        <td>{service.serviceType?.name || ''}</td>
+                                        <td>{service.duration}</td>
+                                        <td>{service.price?.toLocaleString('vi-VN')}đ</td>
+                                        <td className="overflow-visible">
+                                            <div className="table__actions">
+                                                <FontAwesomeIcon
+                                                    icon={faEllipsisVertical}
+                                                    className="table__action-icon"
+                                                />
+                                                <div className="table__action-menu">
+                                                    <div className="table__action-item">Cập nhật</div>
+                                                    <div className="table__action-item">Xóa</div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    ) : tab === 'brand' ? (
+                        <table className="regulation-table page-table table-scrollable">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Tên hãng xe</th>
+                                    <th>Model</th>
+                                    <th>Thao tác</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                )}
+                            </thead>
+                            <tbody>
+                                {brands.map((brand, index) => (
+                                    <tr key={brand.id}>
+                                        <td>{index + 1}</td>
+                                        <td>{brand.name}</td>
+                                        <td>{brand.model}</td>
+                                        <td className="overflow-visible">
+                                            <div className="table__actions">
+                                                <FontAwesomeIcon
+                                                    icon={faEllipsisVertical}
+                                                    className="table__action-icon"
+                                                />
+                                                <div className="table__action-menu">
+                                                    <div className="table__action-item">Cập nhật</div>
+                                                    <div className="table__action-item">Xóa</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <table className="regulation-table page-table table-scrollable">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Tên param</th>
+                                    <th>Giá trị</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {parameters.map((param, index) => (
+                                    <tr key={param.id}>
+                                        <td>{index + 1}</td>
+                                        <td>{param.name}</td>
+                                        <td>{param.value}</td>
+                                        <td className="overflow-visible">
+                                            <div className="table__actions">
+                                                <FontAwesomeIcon
+                                                    icon={faEllipsisVertical}
+                                                    className="table__action-icon"
+                                                />
+                                                <div className="table__action-menu">
+                                                    <div className="table__action-item">Cập nhật</div>
+                                                    <div className="table__action-item">Xóa</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
             </div>
 
             <AddServiceModal
