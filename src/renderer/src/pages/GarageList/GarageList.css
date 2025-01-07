@@ -12,20 +12,40 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     position: relative;
     cursor: pointer;
+    background-image: url('../../assets/garage-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-.garage-card:hover {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.garage-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 8px;
+}
+
+.garage-card h2,
+.garage-card p {
+    position: relative;
+    z-index: 1;
+    color: white;
 }
 
 .garage-card h2 {
     margin: 0 0 15px 0;
-    color: #333;
 }
 
 .garage-card p {
     margin: 8px 0;
-    color: #666;
 }
 
 .garage-card-actions {

@@ -14,6 +14,10 @@ import './GarageList.css'
 import Sidebar from '../../layout/sidebar.jsx'
 import Header from '../../layout/Header.jsx'
 import { useNavigate } from 'react-router-dom'
+import bg1 from '../../assets/images/background/bg_1.jpg'
+import bg2 from '../../assets/images/background/bg_2.jpg'
+import bg3 from '../../assets/images/background/bg_3.jpg'
+import bg4 from '../../assets/images/background/bg_4.jpg'
 
 function GarageList() {
     const navigate = useNavigate()
@@ -21,6 +25,13 @@ function GarageList() {
     const [garageData, setGarageData] = useState([])
     const [searchTerm, setSearchTerm] = useState('')
     const itemsPerPage = 8
+
+    const backgroundImages = [bg1, bg2, bg3, bg4]
+    
+    const getRandomBackground = useCallback(() => {
+        const randomIndex = Math.floor(Math.random() * backgroundImages.length)
+        return backgroundImages[randomIndex]
+    }, [])
 
     const fetchData = async () => {
         const data = await dbService.getAll('garages')
@@ -91,6 +102,7 @@ function GarageList() {
                                 key={garage.id}
                                 className="garage-card"
                                 onClick={() => handleGarageClick(garage)}
+                                style={{ backgroundImage: `url(${getRandomBackground()})` }}
                             >
                                 <h2>{garage.name}</h2>
                                 <p>
