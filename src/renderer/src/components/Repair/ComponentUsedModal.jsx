@@ -6,8 +6,10 @@ import UpdateComponent from './UpdateComponent'
 import Modal from '../Modal'
 import { dbService } from '../../services/DatabaseService'
 import Dropdown from '../Dropdown'
+import { useParameters } from '../../contexts/ParameterContext'
 
 const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
+    const { parameters, isLoading: parametersLoading } = useParameters()
     const [openUpdateComponentModal, setOpenUpdateComponentModal] = useState({
         show: false,
         data: null
@@ -81,6 +83,8 @@ const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
             })
         }
     }
+
+    const profitRate = parameters[0]?.value || 1.25
 
     return (
         <>
@@ -198,8 +202,8 @@ const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
                                         <td>{item.component.id}</td>
                                         <td>{item.component.name}</td>
                                         <td>{item.quantity}</td>
-                                        <td>{item.component.price}</td>
-                                        <td>{item.quantity * item.component.price}</td>
+                                        <td>{item.component.price * profitRate}</td>
+                                        <td>{item.quantity * item.component.price * profitRate}</td>
                                         <td>
                                             <div className="table__actions">
                                                 <FontAwesomeIcon

@@ -197,22 +197,26 @@ class DatabaseService {
         }
     }
 
-    async getAll(collectionName, garageId = null) {
+    async getAll(collectionName, garageId = null, isAll = false) {
         try {
             const ModelClass = this.collections[collectionName].model
 
             // Nếu có trường isDeleted, thêm điều kiện vào truy vấn
-            const q = query(
-                collection(db, this.collections[collectionName].name),
-                where('isDeleted', '!=', true)
-            )
+            let q
+            if (isAll) {
+                q = query(collection(db, this.collections[collectionName].name))
+            } else {
+                q = query(
+                    collection(db, this.collections[collectionName].name),
+                    where('isDeleted', '!=', true)
+                )
+            }
             const querySnapshot = await getDocs(q)
             const docs = querySnapshot.docs
                 .map((doc) => ({
                     id: doc.id,
                     ...doc.data()
-                }))
-                .filter((doc) => !doc.isDeleted) // Lọc isDeleted
+                })) // Lọc isDeleted
                 .filter((doc) => !garageId || doc.garageId === garageId) // Lọc theo garageId nếu có
                 .map((doc) => ModelClass.fromFirestore(doc))
 

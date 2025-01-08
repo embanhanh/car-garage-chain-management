@@ -1,4 +1,5 @@
 import { HashRouter, Route, Routes } from 'react-router-dom'
+import { ParameterProvider } from './contexts/ParameterContext'
 import Home from './pages/Home/Home'
 import Report from './pages/Report/Report'
 import Auth from './pages/Auth/Auth'
@@ -13,7 +14,7 @@ import GarageList from './pages/GarageList/GarageList'
 import Bill from './pages/Bill/Bill'
 function App() {
     return (
-        <>
+        <ParameterProvider>
             <HashRouter>
                 <Routes>
                     <Route path="/" element={<Auth />} />
@@ -31,7 +32,7 @@ function App() {
                     </Route>
                 </Routes>
             </HashRouter>
-        </>
+        </ParameterProvider>
     )
 }
 

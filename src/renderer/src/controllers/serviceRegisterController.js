@@ -48,12 +48,12 @@ export const getServiceRegisterByGarageId = async (garageId, startDate, endDate)
 export const addServiceRegister = async (serviceRegisterData) => {
     try {
         // Lấy tất cả service registers để đếm số lượng
-        const registers = await dbService.getAll('serviceregisters')
+        const registers = await dbService.getAll('serviceregisters', null, true)
 
         // Tạo ID mới với format SR000N
         const nextNumber = registers.length + 1
         const registerId = `SR${nextNumber.toString().padStart(4, '0')}`
-        console.log('check registerId:', registerId)
+        console.log('check registerId:', registerId, registers.length)
 
         // Thêm các trường cần thiết
         const dataToAdd = {

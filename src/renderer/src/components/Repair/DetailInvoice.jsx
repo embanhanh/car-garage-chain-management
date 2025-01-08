@@ -6,8 +6,11 @@ import jsPDF from 'jspdf'
 import logo from '../../assets/images/logo/logo.png'
 import { dbService } from '../../services/DatabaseService'
 import Swal from 'sweetalert2'
+import { useParameters } from '../../contexts/ParameterContext'
 
 function DetailInvoiceModal({ onClose, data }) {
+    const { parameters } = useParameters()
+    const profitRate = parameters[0]?.value || 1.25
     const [isLoading, setIsLoading] = useState(true)
     const [invoiceData, setInvoiceData] = useState(null)
     const [isPaying, setIsPaying] = useState(false)
@@ -113,7 +116,9 @@ function DetailInvoiceModal({ onClose, data }) {
                             item.repairRegisterComponents.reduce(
                                 (sum, component) =>
                                     sum +
-                                    Number(component.component.price) * Number(component.quantity),
+                                    Number(component.component.price) *
+                                        Number(component.quantity) *
+                                        profitRate,
                                 0
                             ),
                         0
@@ -145,11 +150,7 @@ function DetailInvoiceModal({ onClose, data }) {
         return () => {
             isMounted = false
         }
-    }, [data])
-
-    useEffect(() => {
-        console.log(invoiceData)
-    }, [invoiceData])
+    }, [data, profitRate])
 
     if (isLoading) {
         return (
@@ -241,6 +242,7 @@ function DetailInvoiceModal({ onClose, data }) {
                                                       (sum, component) =>
                                                           sum +
                                                           Number(component.component.price) *
+                                                              profitRate *
                                                               Number(component.quantity),
                                                       0
                                                   )
@@ -256,15 +258,16 @@ function DetailInvoiceModal({ onClose, data }) {
                                               <td>{component.quantity}</td>
                                               <td>
                                                   đ{' '}
-                                                  {component.component.price.toLocaleString(
-                                                      'vi-VN'
-                                                  )}
+                                                  {(
+                                                      component.component.price * profitRate
+                                                  ).toLocaleString('vi-VN')}
                                               </td>
                                               <td>
                                                   đ{' '}
                                                   {(
                                                       Number(component.component.price) *
-                                                      Number(component.quantity)
+                                                      Number(component.quantity) *
+                                                      profitRate
                                                   ).toLocaleString('vi-VN')}
                                               </td>
                                           </tr>

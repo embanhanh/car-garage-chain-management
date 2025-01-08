@@ -22,6 +22,7 @@ import DetailImportModal from '../../components/Component/DetailImportModal'
 import ComponentUsedModal from '../../components/Repair/ComponentUsedModal'
 import { addInputComponentRegister } from '../../controllers/inputComponentRegisterController'
 import DetailInvoiceModal from '../../components/Repair/DetailInvoice'
+import { useParameters } from '../../contexts/ParameterContext'
 
 function Component() {
     const [currentPage, setCurrentPage] = useState(1)
@@ -55,6 +56,8 @@ function Component() {
         show: false,
         data: null
     })
+    const { parameters } = useParameters()
+    const profitRate = parameters[0]?.value || 1.25
 
     const fetchData = async () => {
         const data =
@@ -222,6 +225,59 @@ function Component() {
         console.log('Original Data:', originalData)
         console.log('Current Data:', data)
     }, [categories, originalData, data])
+
+    const handlePurchase = async (data) => {
+        if (data.length > 0) {
+            const total = data.reduce((total, item) => {
+                return total + Number(item.component.price) * Number(item.quantity) * profitRate
+            }, 0)
+
+            const repairRegister = {
+                status: 'Đã hoàn thành',
+                serviceId: 'WJu9TV0IyIwaLcVlIVLc',
+                employeeIds: [],
+                repairRegisterComponents: data.map((item) => ({
+                    componentId: item.component.id,
+                    quantity: item.quantity
+                }))
+            }
+            const newRepairRegister = await dbService.add('repairregisters', repairRegister)
+            const serviceRegister = {
+                employeeId: JSON.parse(localStorage.getItem('currentUser')).employee?.id || 'admin',
+                carId: null,
+                status: 'Đã hoàn thành',
+                expectedCompletionDate: new Date().toISOString(),
+                repairRegisterIds: [newRepairRegister.id],
+                garageId: JSON.parse(localStorage.getItem('currentGarage'))?.id
+            }
+            const newServiceRegister = await dbService.add('serviceregisters', serviceRegister)
+            data.forEach(async (item) => {
+                await dbService.update('components', item.component.id, {
+                    inventory: increment(Number(item.quantity) * -1)
+                })
+            })
+            const newBill = await dbService.add('bills', {
+                employeeId: JSON.parse(localStorage.getItem('currentUser')).employee?.id,
+                customerId: null,
+                total: total,
+                serviceRegisterId: newServiceRegister.id,
+                status: 'Chưa thanh toán',
+                type: 'purchase',
+                garageId: JSON.parse(localStorage.getItem('currentGarage'))?.id
+            })
+            const newBillData = await dbService.getById('bills', newBill.id)
+            await Swal.fire({
+                title: 'Thành công',
+                text: 'Tạo phiếu mua hàng thành công',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            })
+            setShowInvoice({
+                show: true,
+                data: newBillData?.serviceRegister
+            })
+        }
+    }
 
     return (
         <>
@@ -679,67 +735,7 @@ function Component() {
             >
                 <ComponentUsedModal
                     onClose={() => setOpenPurchase(false)}
-                    onAddComponentUsed={async (data) => {
-                        if (data.length > 0) {
-                            const repairRegister = {
-                                status: 'Đã hoàn thành',
-                                serviceId: 'WJu9TV0IyIwaLcVlIVLc',
-                                employeeIds: [],
-                                repairRegisterComponents: data.map((item) => ({
-                                    componentId: item.component.id,
-                                    quantity: item.quantity
-                                }))
-                            }
-                            const newRepairRegister = await dbService.add(
-                                'repairregisters',
-                                repairRegister
-                            )
-                            const serviceRegister = {
-                                employeeId:
-                                    JSON.parse(localStorage.getItem('currentUser')).employee?.id ||
-                                    'admin',
-                                carId: null,
-                                status: 'Đã hoàn thành',
-                                expectedCompletionDate: new Date().toISOString(),
-                                repairRegisterIds: [newRepairRegister.id],
-                                garageId: JSON.parse(localStorage.getItem('currentGarage'))?.id
-                            }
-                            const newServiceRegister = await dbService.add(
-                                'serviceregisters',
-                                serviceRegister
-                            )
-                            data.forEach(async (item) => {
-                                await dbService.update('components', item.component.id, {
-                                    inventory: increment(Number(item.quantity) * -1)
-                                })
-                            })
-                            const newBill = await dbService.add('bills', {
-                                employeeId: JSON.parse(localStorage.getItem('currentUser')).employee
-                                    ?.id,
-                                customerId: null,
-                                total: data.reduce((total, item) => {
-                                    return (
-                                        total + Number(item.component.price) * Number(item.quantity)
-                                    )
-                                }, 0),
-                                serviceRegisterId: newServiceRegister.id,
-                                status: 'Chưa thanh toán',
-                                type: 'purchase',
-                                garageId: JSON.parse(localStorage.getItem('currentGarage'))?.id
-                            })
-                            const newBillData = await dbService.getById('bills', newBill.id)
-                            await Swal.fire({
-                                title: 'Thành công',
-                                text: 'Tạo phiếu mua hàng thành công',
-                                icon: 'success',
-                                confirmButtonText: 'OK'
-                            })
-                            setShowInvoice({
-                                show: true,
-                                data: newBillData?.serviceRegister
-                            })
-                        }
-                    }}
+                    onAddComponentUsed={handlePurchase}
                     data={null}
                 />
             </Modal>
