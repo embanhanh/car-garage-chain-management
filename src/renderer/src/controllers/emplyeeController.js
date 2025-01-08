@@ -76,5 +76,15 @@ export const addEmployee = async (employeeData) => {
 
 export const updateEmployee = async (employeeId, employeeData) => {
     const updatedEmployee = await dbService.update('employees', employeeId, employeeData)
+    const findUser = await dbService.findBy('users', [
+        {
+            field: 'employeeId',
+            operator: '==',
+            value: employeeId
+        }
+    ])
+    await dbService.update('users', findUser[0].id, {
+        role: employeeData.position
+    })
     return updatedEmployee
 }

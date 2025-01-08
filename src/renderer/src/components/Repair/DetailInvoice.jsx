@@ -235,14 +235,16 @@ function DetailInvoiceModal({ onClose, data }) {
                                           <td>{repairRegister.service.name}</td>
                                           <td>
                                               đ{' '}
-                                              {Number(repairRegister.service.price) +
+                                              {(
+                                                  Number(repairRegister.service.price) +
                                                   repairRegister.repairRegisterComponents.reduce(
                                                       (sum, component) =>
                                                           sum +
                                                           Number(component.component.price) *
                                                               Number(component.quantity),
                                                       0
-                                                  )}
+                                                  )
+                                              ).toLocaleString('vi-VN')}
                                           </td>
                                       </tr>
                                   ))
@@ -252,11 +254,18 @@ function DetailInvoiceModal({ onClose, data }) {
                                               <td>{index + 1}</td>
                                               <td>{component.component.name}</td>
                                               <td>{component.quantity}</td>
-                                              <td>đ {component.component.price}</td>
                                               <td>
                                                   đ{' '}
-                                                  {Number(component.component.price) *
-                                                      Number(component.quantity)}
+                                                  {component.component.price.toLocaleString(
+                                                      'vi-VN'
+                                                  )}
+                                              </td>
+                                              <td>
+                                                  đ{' '}
+                                                  {(
+                                                      Number(component.component.price) *
+                                                      Number(component.quantity)
+                                                  ).toLocaleString('vi-VN')}
                                               </td>
                                           </tr>
                                       )
@@ -268,15 +277,12 @@ function DetailInvoiceModal({ onClose, data }) {
                 <div className="detail-invoice-modal__total mt-3">
                     <h3 className="detail-invoice-modal__label">Tổng tiền</h3>
                     <h3 className="detail-invoice-modal__label">
-                        đ {invoiceData?.total?.toLocaleString()}
+                        đ {invoiceData?.total?.toLocaleString('vi-VN')}
                     </h3>
                 </div>
             </div>
 
             <div className="page-btns end">
-                <button className="page__header-button" onClick={onClose}>
-                    Đóng
-                </button>
                 <button
                     className="primary-button shadow-none"
                     onClick={handlePrint}

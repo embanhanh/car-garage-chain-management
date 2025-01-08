@@ -242,7 +242,7 @@ const ComponentUsedModal = ({ onClose, data, onAddComponentUsed }) => {
                             </tbody>
                         </table>
                     </div>
-                    <div className="repair-modal__btn-container">
+                    <div className="page-btns end">
                         <button
                             className="primary-button mt-3"
                             onClick={async () => {

@@ -132,7 +132,7 @@ function AddEmployee({ onClose, nv = {}, isEdit = false }) {
                             options={[
                                 { value: 'Nam', label: 'Nam' },
                                 { value: 'Nữ', label: 'Nữ' },
-                                { value: 'Bê đê', label: 'Bê đê' }
+                                { value: 'Khác', label: 'Khác' }
                             ]}
                             className="col-6"
                             placeholder="Chọn giới tính"

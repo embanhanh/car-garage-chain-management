@@ -113,24 +113,44 @@ function DetailRepairModal({
                         <div className="input-form">
                             <input
                                 className="w-100"
-                                type="text"
+                                type="date"
                                 id="expectedCompletionDate"
                                 placeholder="12/12/2024"
-                                disabled
-                                value={new Date(
+                                // disabled
+                                value={
                                     repairData?.expectedCompletionDate
-                                ).toLocaleDateString('en-GB')}
+                                        ? new Date(repairData.expectedCompletionDate)
+                                              .toISOString()
+                                              .split('T')[0]
+                                        : ''
+                                }
+                                onChange={(e) => {
+                                    const date = new Date(e.target.value)
+                                    setRepairData((prev) => ({
+                                        ...prev,
+                                        expectedCompletionDate: date.toISOString()
+                                    }))
+                                }}
                             />
-                            <FontAwesomeIcon icon={faCalendar} className="input-form__icon" />
+                            {/* <FontAwesomeIcon icon={faCalendar} className="input-form__icon" /> */}
                         </div>
                     </div>
                 </div>
                 <div className="detail-repair-modal__separate mr-3 ml-3"></div>
                 <div className="detail-repair-modal__repair-info pb-2 pr-2">
                     <div className="repair-modal__table-container">
-                        <h3 className="repair-modal__table-title">
-                            Danh sách loại hình sửa chữa
-                        </h3>
+                        <div className="repair-modal__btn-container">
+                            <h3 className="repair-modal__table-title">
+                                Danh sách loại hình sửa chữa
+                            </h3>
+                            <button
+                                className="repair-modal__button confirm-button"
+                                onClick={() => setOpenAddRepairRegisterModal(true)}
+                                disabled={isPaid}
+                            >
+                                Thêm
+                            </button>
+                        </div>
                         <div className="repair-modal__table-content">
                             <table className="page-table detail-repair-table table-scrollable">
                                 <thead>
@@ -160,17 +180,20 @@ function DetailRepairModal({
                                                         className="table__action-icon"
                                                     />
                                                     <div className={`table__action-menu `}>
-                                                        <div
-                                                            className="table__action-item"
-                                                            onClick={() =>
-                                                                setOpenStaffInChargeModal({
-                                                                    show: true,
-                                                                    data: register
-                                                                })
-                                                            }
-                                                        >
-                                                            Chi tiết nhân viên
-                                                        </div>
+                                                        {register.service.name !==
+                                                            'Mua phụ tùng' && (
+                                                            <div
+                                                                className="table__action-item"
+                                                                onClick={() =>
+                                                                    setOpenStaffInChargeModal({
+                                                                        show: true,
+                                                                        data: register
+                                                                    })
+                                                                }
+                                                            >
+                                                                Chi tiết nhân viên
+                                                            </div>
+                                                        )}
                                                         <div
                                                             className="table__action-item"
                                                             onClick={() =>
@@ -214,15 +237,6 @@ function DetailRepairModal({
                                     ))}
                                 </tbody>
                             </table>
-                        </div>
-                        <div className="repair-modal__btn-container">
-                            <button
-                                className="repair-modal__button confirm-button"
-                                onClick={() => setOpenAddRepairRegisterModal(true)}
-                                disabled={isPaid}
-                            >
-                                Thêm
-                            </button>
                         </div>
                     </div>
                 </div>

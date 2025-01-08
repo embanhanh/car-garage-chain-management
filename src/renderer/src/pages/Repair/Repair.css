@@ -129,7 +129,7 @@
 .repair-modal__table-content {
     flex: 1;
     min-height: 0;
-    max-height: 300px;
+    max-height: 350px;
     overflow-y: auto;
 }
 
@@ -143,7 +143,8 @@
 
 .repair-modal__btn-container {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
 }
 
 /* Detail Repair Modal */
@@ -300,7 +301,7 @@
     position: absolute;
     background-color: #f9f9f9;
     min-width: 200px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     z-index: 1;
     border-radius: 4px;
 }
@@ -324,7 +325,7 @@
 
 .page__header-button:hover,
 .page__header-button.active {
-    background-color: #5030E5;
+    background-color: #5030e5;
     color: white !important;
 }
 
@@ -350,7 +351,7 @@
 
 .dropdown-content button:hover,
 .dropdown-content button.active {
-    background-color: #5030E5;
+    background-color: #5030e5;
     color: white !important;
 }
 

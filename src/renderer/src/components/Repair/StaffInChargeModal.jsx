@@ -53,18 +53,6 @@ const StaffInChargeModal = ({ onClose, data, onAddStaffInCharge }) => {
         <div className="staff-in-charge-modal">
             <div className="staff-in-charge-modal__add-staff">
                 <div className="repair-modal__input-item mb-3">
-                    <label htmlFor="staffCode">Mã nhân viên</label>
-                    <div className="input-form">
-                        <input
-                            className="w-100"
-                            type="text"
-                            id="staffCode"
-                            placeholder="NV008"
-                            value={selectedStaff?.id || ''}
-                        />
-                    </div>
-                </div>
-                <div className="repair-modal__input-item mb-3">
                     <label htmlFor="staffName">Tên nhân viên</label>
                     <Dropdown
                         value={staffName}
@@ -86,6 +74,19 @@ const StaffInChargeModal = ({ onClose, data, onAddStaffInCharge }) => {
                         )}
                         placeholder="Nhập tên nhân viên..."
                     />
+                </div>
+                <div className="repair-modal__input-item mb-3">
+                    <label htmlFor="staffCode">Mã nhân viên</label>
+                    <div className="input-form">
+                        <input
+                            className="w-100"
+                            type="text"
+                            id="staffCode"
+                            placeholder="NV008"
+                            value={selectedStaff?.id || ''}
+                            disabled
+                        />
+                    </div>
                 </div>
                 <div className="repair-modal__input-item mb-3">
                     <label htmlFor="staffPhone">Số điện thoại</label>
@@ -167,7 +168,7 @@ const StaffInChargeModal = ({ onClose, data, onAddStaffInCharge }) => {
                         </tbody>
                     </table>
                 </div>
-                <div className="repair-modal__btn-container">
+                <div className="page-btns end">
                     <button
                         className="primary-button mt-3"
                         onClick={async () => {

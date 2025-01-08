@@ -298,11 +298,12 @@ export default function ReceiveRepairModal({ onClose }) {
                         onAddComponentUsed={onAddComponentUsed}
                         onCompleteService={onCompleteService}
                         isOpen={showDetailService}
+                        onClose={() => setShowDetailService(false)}
                         showHeader={true}
                         title="Chi tiết phiếu dịch vụ"
                         type="add"
                     />
-                    <div className="page-btns center">
+                    <div className="page-btns end">
                         <button
                             className="repair-modal__button cancel-button"
                             onClick={() => {
@@ -314,7 +315,9 @@ export default function ReceiveRepairModal({ onClose }) {
                         <button
                             className="repair-modal__button confirm-button"
                             onClick={createServiceRegister}
-                            disabled={isLoading}
+                            disabled={
+                                isLoading || serviceRegisterData?.repairRegisters.length === 0
+                            }
                         >
                             Xác nhận
                         </button>
